@@ -142,11 +142,15 @@ process:
 YAML file's columns are mapped to the `area.csv` data file columns by the column name. 
 The following column parameters are supported:
 
-- __type:__ column's SQL type
-- __primary_key:__ is the column part of table's primary key (true|false)?
-- __foreign_keys:__ all other database table columns that are referenced from a column in <table>.<column> format
-- __nullable:__ does column allow null values (true|false)?
-- __index:__ is column indexed (true|false)?
-- __unique:__ does column store unique values (true|false)?
-\n\n
-aaaaaa
+* __type:__ column's SQL type
+* __primary_key:__ is the column part of table's primary key (true|false)?
+* __foreign_keys:__ all other database table columns that are referenced from a column in <table>.<column> format
+* __nullable:__ does column allow null values (true|false)?
+* __index:__ is column indexed (true|false)?
+* __unique:__ does column store unique values (true|false)?
+
+### Process section
+The `process` section specifies the following processing options:
+
+* __materialization:__ specifies whether DBD creates a physical `table` or a `view` when processing a SQL file.
+* __mode:__ specifies how DBD works with a table. You can specify values `drop`, `truncate`, or `keep`. The  __mode__ option is ignored for views.
