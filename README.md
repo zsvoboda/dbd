@@ -148,6 +148,7 @@ The following column parameters are supported:
 * __nullable:__ does column allow null values (true|false)?
 * __index:__ is column indexed (true|false)?
 * __unique:__ does column store unique values (true|false)?
+  
 
 ### Process section
 The `process` section specifies the following processing options:
