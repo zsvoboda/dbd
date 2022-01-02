@@ -38,7 +38,7 @@ poetry install
 ``` 
 
 ## Generate a new DBD project
-You can generate an initial layout of your DBD project using the `init` command:
+You can generate initial layout of your DBD project using the `init` command:
 
 ```shell
 dbd init <new-project-name>
