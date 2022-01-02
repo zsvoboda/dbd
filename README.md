@@ -110,10 +110,10 @@ and `us_counties` in `schema2`. Both tables are populated with the data from the
 
 The following file types are supported:
 
-- __DATA files:__ `.csv`, `.json`, `.xls`, `.xlsx`, `.parquet` files are loaded to the database as tables
-- __SQL files:__ with SQL SELECT statements are executed using insert-from-select SQL construct. The INSERT command is generated (the SQL file only contains the SQL SELECT statement)
-- __DDL files:__ contain a sequence of SQL statements separated by semicolon. The DDL files can be named `prolog.ddl` and `epilog.ddl`. The `prolog.ddl` is executed before all other files in a specific schema. The `epilog.ddl` is executed last. The `prolog.ddl` and `epilog.ddl` in the top-level model directory are executed as the very first and tne very last files in the model. 
-- __YAML files:__ specify additional configuration to the __DATA__ and __SQL__ files. 
+* __DATA files:__ `.csv`, `.json`, `.xls`, `.xlsx`, `.parquet` files are loaded to the database as tables
+* __SQL files:__ with SQL SELECT statements are executed using insert-from-select SQL construct. The INSERT command is generated (the SQL file only contains the SQL SELECT statement)
+* __DDL files:__ contain a sequence of SQL statements separated by semicolon. The DDL files can be named `prolog.ddl` and `epilog.ddl`. The `prolog.ddl` is executed before all other files in a specific schema. The `epilog.ddl` is executed last. The `prolog.ddl` and `epilog.ddl` in the top-level model directory are executed as the very first and tne very last files in the model. 
+* __YAML files:__ specify additional configuration to the __DATA__ and __SQL__ files. 
 
 ## YAML model files
 YAML file specify additional configuration for a corresponding __DATA__ or __SQL__ file with the same base file name.
@@ -142,20 +142,18 @@ process:
 YAML file's columns are mapped to the `area.csv` data file columns by the column name. 
 The following column parameters are supported:
 
-- __type:__ column's SQL type
-- __primary_key:__ is the column part of table's primary key (true|false)?
-- __foreign_keys:__ all other database table columns that are referenced from a column in <table>.<column> format
-- __nullable:__ does column allow null values (true|false)?
-- __index:__ is column indexed (true|false)?
-- __unique:__ does column store unique values (true|false)?
-
-
+* __type:__ column's SQL type
+* __primary_key:__ is the column part of table's primary key (true|false)?
+* __foreign_keys:__ all other database table columns that are referenced from a column in <table>.<column> format
+* __nullable:__ does column allow null values (true|false)?
+* __index:__ is column indexed (true|false)?
+* __unique:__ does column store unique values (true|false)?
 
 ### Process section
 The `process` section specifies the following processing options:
 
-- __materialization:__ specifies whether DBD creates a physical `table` or a `view` when processing a SQL file.
-- __mode:__ specifies how DBD works with a table. You can specify values `drop`, `truncate`, or `keep`. The  __mode__ option is ignored for views.
+* __materialization:__ specifies whether DBD creates a physical `table` or a `view` when processing a SQL file.
+* __mode:__ specifies how DBD works with a table. You can specify values `drop`, `truncate`, or `keep`. The  __mode__ option is ignored for views.
 
 
 
