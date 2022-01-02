@@ -138,7 +138,7 @@ process:
   mode: drop
 ```
 
-## Table section
+### Table section
 YAML file's columns are mapped to the `area.csv` data file columns by the column name. 
 The following column parameters are supported:
 
@@ -147,8 +147,11 @@ The following column parameters are supported:
 - __foreign_keys:__ all other database table columns that are referenced from a column in <table>.<column> format
 - __nullable:__ does column allow null values (true|false)?
 - __index:__ is column indexed (true|false)?
-- __unique:__ does column store unique values (true|false)?
-## Process section
+- __unique:__ does column store unique values (true|false)?- 
+
+[//]
+
+### Process section
 The `process` section specifies the following processing options:
 
 * __materialization:__ specifies whether DBD creates a physical `table` or a `view` when processing a SQL file.
