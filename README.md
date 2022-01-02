@@ -12,7 +12,7 @@ files stored in your DBD project files.
 5. `dbd run .`
 6. Connect to the newly created `my-sqllite.db` database and review `area`, `population`, and `state` tables that have been created from the files in the `model` directory.   
 
-## Generate a new dbd project
+## Generate a new DBD project
 You can generate an initial layout of your DBD project using the `init` command:
 
 ```shell
