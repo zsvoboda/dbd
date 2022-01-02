@@ -149,7 +149,7 @@ The following column parameters are supported:
 * __index:__ is column indexed (true|false)?
 * __unique:__ does column store unique values (true|false).
 
-### Process section
+## Process section
 The `process` section specifies the following processing options:
 
 * __materialization:__ specifies whether DBD creates a physical `table` or a `view` when processing a SQL file.
