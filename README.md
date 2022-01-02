@@ -115,7 +115,7 @@ The following file types are supported:
 - __DDL files:__ contain a sequence of SQL statements separated by semicolon. The DDL files can be named `prolog.ddl` and `epilog.ddl`. The `prolog.ddl` is executed before all other files in a specific schema. The `epilog.ddl` is executed last. The `prolog.ddl` and `epilog.ddl` in the top-level model directory are executed as the very first and tne very last files in the model. 
 - __YAML files:__ specify additional configuration to the __DATA__ and __SQL__ files. 
 
-### YAML model files
+## YAML model files
 YAML file specify additional configuration for a corresponding __DATA__ or __SQL__ file with the same base file name.
 here is an `area.csv` YAML configuration example:
 
@@ -138,6 +138,7 @@ process:
   mode: drop
 ```
 
+### Table section
 YAML file's columns are mapped to the `area.csv` data file columns by the column name. 
 The following column parameters are supported:
 
@@ -148,7 +149,7 @@ The following column parameters are supported:
 - __index:__ is column indexed (true|false)?
 - __unique:__ does column store unique values (true|false)?
 
-
+### Process section
 The `process` section specifies the following processing options:
 
 - __materialization:__ specifies whether DBD creates a physical `table` or a `view` when processing a SQL file.
