@@ -1,6 +1,32 @@
-# DBD - framework for declarative database definition
-This framework allows tou to define your database schema and content 
+# dbd - framework for declarative database definition
+DBD framework allows you to define your database schema and content 
 declaratively. Database is represented by a hierarchy of directories and
-files.
+files stored in your DBD project files. 
+
+## TLDR
+
+1. `dbd init my-first-project`
+2. `cd my-first-project`
+3. `echo "databases:\n  states:\n    db.url: 'sqlite:///my-sqllite.db'" > .dbd.profile`
+4. `dbd validate .`
+5. `dbd run .`
+6. Connect to the newly created `my-sqllite.db` database and review `area`, `population`, and `state` tables that have been created from the files in the `model` directory.   
+
+## Generate a new dbd project
+You can generate an initial layout of your dbd project using the `init` command:
+
+```shell
+dbd init <new-project-name>
+```
+
+The `init` command generates a new dbd project directory with the following content: 
+
+- `model` directory that contains the content files. dbd supports files with `.sql`, `.ddl`, `.csv`, `.json`, `.xlsx` and other extensions.  
+- `dbd.project` project configuration file 
+
+dbd also requires another `.dbd.profile` configuration file that contains connections to your databases. 
+This file is located in the current directory or in your home directory.   
+
+
 
 
