@@ -12,6 +12,31 @@ files stored in your DBD project files.
 5. `dbd run .`
 6. Connect to the newly created `my-sqllite.db` database and review `area`, `population`, and `state` tables that have been created from the files in the `model` directory.   
 
+## Install DBD
+DBD requires Python 3.7.1 or higher. 
+
+### PyPI
+
+```shell
+pip3 install dbd
+```
+
+OR
+
+```shell
+git clone https://github.com/zsvoboda/dbd.git
+cd dbd
+pip3 install .
+```
+
+### Poetry
+
+```shell
+git clone https://github.com/zsvoboda/dbd.git
+cd dbd
+poetry install
+``` 
+
 ## Generate a new DBD project
 You can generate an initial layout of your DBD project using the `init` command:
 
