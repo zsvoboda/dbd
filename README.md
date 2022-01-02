@@ -142,16 +142,12 @@ process:
 YAML file's columns are mapped to the `area.csv` data file columns by the column name. 
 The following column parameters are supported:
 
-* __type__ column's SQL type
-* __primary_key__ is the column part of table's primary key (true|false)?
-* __foreign_keys__ all other database table columns that are referenced from a column in <table>.<column> format
-* __nullable__ does column allow null values (true|false)?
-* __index__ is column indexed (true|false)?
-* __unique__ does column store unique values (true|false)?
-
-
-
-
+* __type:__ column's SQL type.
+* __primary_key:__ is the column part of table's primary key (true|false)?
+* __foreign_keys:__ all other database table columns that are referenced from a column in <table>.<column> format
+* __nullable:__ does column allow null values (true|false)?
+* __index:__ is column indexed (true|false)?
+* __unique:__ does column store unique values (true|false)?
 
 
 ### Process section
