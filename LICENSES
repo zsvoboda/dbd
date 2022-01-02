@@ -165,7 +165,7 @@
                                                                                   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS                                                              
                                                                                   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                                                    
                                                                                                                                                                                                                   
- cramjam          2.5.0      MIT                                                  UNKNOWN                                                                                                                         
+ cramjam          2.5.0      MIT
  et-xmlfile       1.1.0      MIT License                                          This software is under the MIT Licence                                                                                          
                                                                                   ======================================                                                                                          
                                                                                                                                                                                                                   
@@ -3681,7 +3681,7 @@
                                                                                   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE                                                   
                                                                                   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                                            
                                                                                                                                                                                                                   
- thrift           0.15.0     Apache License 2.0                                   UNKNOWN                                                                                                                         
+ thrift           0.15.0     Apache License 2.0
  toml             0.10.2     MIT License                                          The MIT License                                                                                                                 
                                                                                                                                                                                                                   
                                                                                   Copyright 2013-2019 William Pearson                                                                                             
