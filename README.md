@@ -147,9 +147,7 @@ The following column parameters are supported:
 * __foreign_keys:__ all other database table columns that are referenced from a column in <table>.<column> format
 * __nullable:__ does column allow null values (true|false)?
 * __index:__ is column indexed (true|false)?
-* __unique:__ does column store unique values (true|false)?
-  
-fuck 
+* __unique:__ does column store unique values (true|false).
 
 ### Process section
 The `process` section specifies the following processing options:
