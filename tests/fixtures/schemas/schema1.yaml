@@ -1,0 +1,26 @@
+---
+tables:
+  test_user:
+    columns:
+      id:
+        type: INTEGER
+        primary_key: true
+        nullable: false
+      user_name:
+        type: VARCHAR(16)
+        nullable: false
+      password:
+        type: VARCHAR(40)
+        nullable: false
+      display_name:
+        type: VARCHAR(255)
+        nullable: false
+      created:
+        type: TIMESTAMP
+    constraints:
+      - type: primaryKeyConstraint
+        columns:
+          - id
+      - type: uniqueConstraint
+        columns:
+          - id

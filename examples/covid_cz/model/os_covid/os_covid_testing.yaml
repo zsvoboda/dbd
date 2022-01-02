@@ -1,0 +1,13 @@
+---
+table:
+  columns:
+    country_id:
+      foreign_keys:
+        - os_country.country_id
+      index: true
+    covid_testing_id:
+      nullable: false
+      primary_key: true
+process:
+  materialization: table
+  mode: drop

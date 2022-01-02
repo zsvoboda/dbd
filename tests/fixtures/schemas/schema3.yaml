@@ -1,0 +1,31 @@
+---
+tables:
+  test_user:
+    columns:
+      id:
+        type: INTEGER
+        primary_key: true
+        nullable: false
+      user_name:
+        type: VARCHAR(16)
+        nullable: false
+      password:
+        type: VARCHAR(40)
+        nullables: false
+      display_name:
+        type: VARCHAR(255)
+        nullable: false
+      department_id:
+        type: INTEGER
+        nullable: false
+        foreign_key:
+          - department.department_id
+      created:
+        type: TIMESTAMP
+    constraints:
+      - type: primaryKeyConstraints
+        columns:
+          - id
+      - type: uniqueConstraints
+        columns:
+          - id

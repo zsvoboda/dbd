@@ -1,0 +1,72 @@
+{% macro column(c) -%}
+{
+"type": "{{ c.type }}"{% if c.primary_key %},
+"primary_key": true{% endif %}{% if not c.nullable %},
+"nullable": false{% endif %}{% if c.default %},
+"default": "{{ c.default.arg }}"{% endif %}{% if c.index%},
+"index": true{% endif %}{% if c.unique %},
+"unique": true{% endif %}
+}
+{%- endmacro %}
+
+
+{% macro table_foreign_key_constraint(c) -%}
+{
+"type": "foreignKeyConstraint",
+"columns": [{% for k in c.columns -%}"{{ k.name }}"{{ ", " if not loop.last else "" }}{% endfor %}],
+"references": [{% for e in c.elements -%}"{{ e.column }}"{{ ", " if not loop.last else "" }}{% endfor %}]
+}
+{%- endmacro %}
+
+{% macro table_unique_constraint(c) -%}
+{
+"type": "uniqueConstraint",
+"columns": [{% for k in c.columns -%}"{{ k.name }}"{{ ", " if not loop.last else "" }}{% endfor %}]
+}
+{%- endmacro %}
+
+{% macro table_primary_key_constraint(c) -%}
+{
+"type": "primaryKeyConstraint",
+"columns": [{% for k in c.columns -%}"{{ k.name }}"{{ ", " if not loop.last else "" }}{% endfor %}]
+}
+{%- endmacro %}
+
+{% macro table_check_constraint(c) -%}
+{
+"type": "checkConstraint",
+"sqltext": "{{ c.sqltext }}"
+}
+{%- endmacro %}
+
+{% macro table_constraints(tc) -%}
+[
+{% for c in tc -%}{% if isinstance(c, ForeignKeyConstraint) %}{{ table_foreign_key_constraint(c) }}{% endif %}{% if isinstance(c, PrimaryKeyConstraint) %}{{ table_primary_key_constraint(c) }}{% endif %}{% if isinstance(c, CheckConstraint) %}{{ table_check_constraint(c) }}{% endif %}{% if isinstance(c, UniqueConstraint) %}{{ table_unique_constraint(c) }}{% endif %}{{ ", " if not loop.last else "" }}{% endfor %}
+]
+{%- endmacro %}
+
+{% macro table_index(i) -%}
+{
+"columns": [{% for k in i.columns -%}"{{ k.name }}"{{ ", " if not loop.last else "" }}{% endfor %}]{% if i.unique %},
+"unique": true{% endif %}{% if i.name %},
+"name": "{{ i.name }}"{% endif %}
+}
+{%- endmacro %}
+
+{% macro table_indexes(ti) -%}
+[
+{% for i in ti -%}{{ table_index(i) }}{{ ", " if not loop.last else "" }}{% endfor %}
+]
+{%- endmacro %}
+
+{% macro table(t) -%}
+{
+"columns": { {% for c in t.columns -%}"{{ c.name }}": {{ column(c) }}{{ ", " if not loop.last else "" }}{% endfor %} }{% if len(t.constraints)>0 %},
+"constraints": {{ table_constraints(t.constraints) }}{% endif %}{% if len(t.indexes)>0 %},
+"indexes": {{ table_indexes(t.indexes) }}{% endif %}
+}
+{%- endmacro %}}
+
+{% macro schema(ts) -%}
+{% for t in ts -%}"{{t.name}}": {{ table(t) }}{{ ", " if not loop.last else "" }}{% endfor %}
+{%- endmacro %}

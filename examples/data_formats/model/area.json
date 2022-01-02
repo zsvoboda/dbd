@@ -1,0 +1,210 @@
+[
+  {
+    "state_name": "Alabama",
+    "area_sq_mi": 52423
+  },
+  {
+    "state_name": "Alaska",
+    "area_sq_mi": 656425
+  },
+  {
+    "state_name": "Arizona",
+    "area_sq_mi": 114006
+  },
+  {
+    "state_name": "Arkansas",
+    "area_sq_mi": 53182
+  },
+  {
+    "state_name": "California",
+    "area_sq_mi": 163707
+  },
+  {
+    "state_name": "Colorado",
+    "area_sq_mi": 104100
+  },
+  {
+    "state_name": "Connecticut",
+    "area_sq_mi": 5544
+  },
+  {
+    "state_name": "Delaware",
+    "area_sq_mi": 1954
+  },
+  {
+    "state_name": "Florida",
+    "area_sq_mi": 65758
+  },
+  {
+    "state_name": "Georgia",
+    "area_sq_mi": 59441
+  },
+  {
+    "state_name": "Hawaii",
+    "area_sq_mi": 10932
+  },
+  {
+    "state_name": "Idaho",
+    "area_sq_mi": 83574
+  },
+  {
+    "state_name": "Illinois",
+    "area_sq_mi": 57918
+  },
+  {
+    "state_name": "Indiana",
+    "area_sq_mi": 36420
+  },
+  {
+    "state_name": "Iowa",
+    "area_sq_mi": 56276
+  },
+  {
+    "state_name": "Kansas",
+    "area_sq_mi": 82282
+  },
+  {
+    "state_name": "Kentucky",
+    "area_sq_mi": 40411
+  },
+  {
+    "state_name": "Louisiana",
+    "area_sq_mi": 51843
+  },
+  {
+    "state_name": "Maine",
+    "area_sq_mi": 35387
+  },
+  {
+    "state_name": "Maryland",
+    "area_sq_mi": 12407
+  },
+  {
+    "state_name": "Massachusetts",
+    "area_sq_mi": 10555
+  },
+  {
+    "state_name": "Michigan",
+    "area_sq_mi": 96810
+  },
+  {
+    "state_name": "Minnesota",
+    "area_sq_mi": 86943
+  },
+  {
+    "state_name": "Mississippi",
+    "area_sq_mi": 48434
+  },
+  {
+    "state_name": "Missouri",
+    "area_sq_mi": 69709
+  },
+  {
+    "state_name": "Montana",
+    "area_sq_mi": 147046
+  },
+  {
+    "state_name": "Nebraska",
+    "area_sq_mi": 77358
+  },
+  {
+    "state_name": "Nevada",
+    "area_sq_mi": 110567
+  },
+  {
+    "state_name": "New Hampshire",
+    "area_sq_mi": 9351
+  },
+  {
+    "state_name": "New Jersey",
+    "area_sq_mi": 8722
+  },
+  {
+    "state_name": "New Mexico",
+    "area_sq_mi": 121593
+  },
+  {
+    "state_name": "New York",
+    "area_sq_mi": 54475
+  },
+  {
+    "state_name": "North Carolina",
+    "area_sq_mi": 53821
+  },
+  {
+    "state_name": "North Dakota",
+    "area_sq_mi": 70704
+  },
+  {
+    "state_name": "Ohio",
+    "area_sq_mi": 44828
+  },
+  {
+    "state_name": "Oklahoma",
+    "area_sq_mi": 69903
+  },
+  {
+    "state_name": "Oregon",
+    "area_sq_mi": 98386
+  },
+  {
+    "state_name": "Pennsylvania",
+    "area_sq_mi": 46058
+  },
+  {
+    "state_name": "Rhode Island",
+    "area_sq_mi": 1545
+  },
+  {
+    "state_name": "South Carolina",
+    "area_sq_mi": 32007
+  },
+  {
+    "state_name": "South Dakota",
+    "area_sq_mi": 77121
+  },
+  {
+    "state_name": "Tennessee",
+    "area_sq_mi": 42146
+  },
+  {
+    "state_name": "Texas",
+    "area_sq_mi": 268601
+  },
+  {
+    "state_name": "Utah",
+    "area_sq_mi": 84904
+  },
+  {
+    "state_name": "Vermont",
+    "area_sq_mi": 9615
+  },
+  {
+    "state_name": "Virginia",
+    "area_sq_mi": 42769
+  },
+  {
+    "state_name": "Washington",
+    "area_sq_mi": 71303
+  },
+  {
+    "state_name": "West Virginia",
+    "area_sq_mi": 24231
+  },
+  {
+    "state_name": "Wisconsin",
+    "area_sq_mi": 65503
+  },
+  {
+    "state_name": "Wyoming",
+    "area_sq_mi": 97818
+  },
+  {
+    "state_name": "District of Columbia",
+    "area_sq_mi": 68
+  },
+  {
+    "state_name": "Puerto Rico",
+    "area_sq_mi": 3515
+  }
+]

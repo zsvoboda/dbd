@@ -1,0 +1,65 @@
+[tool.poetry]
+name = "dbd"
+version = "0.5.0"
+description = "Framework for declarative database creation and management."
+authors = ["zsvoboda <zsvoboda@gmail.com>"]
+license = "BSD-3-Clause"
+packages = [{ include = "dbd/**/*.py" }]
+include = ["dbd/**/*.j2", "dbd/**/*.profile", "dbd/**/*.project", "dbd/**/*.csv", "dbd/**/*.ddl"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Database",
+    "Topic :: Software Development",
+    "Typing :: Typed"]
+keywords = [
+    "metadata",
+    "postgresql",
+    "database"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pandas = "^1.3.5"
+pyarrow = "^6.0.0"
+jinja2 = "^3.0.3"
+sqlalchemy = "^1.4.29"
+sqlparse = "^0.4.2"
+sql-metadata = "^2.3.0"
+networkx = "^2.6.3"
+psycopg2 = "^2.9.3"
+pyyaml = "^6.0"
+click = "^8.0.3"
+cerberus = "^1.3.4"
+openpyxl = "^3.0.9"
+fastparquet = "^0.7.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+pylic = "^2.2"
+
+[tool.poetry.scripts]
+dbd = 'dbd.cli.dbdcli:cli'
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pylic]
+safe_licenses = [
+    "Apache Software License",
+    "Apache License 2.0",
+    "MIT License",
+    "BSD License",
+    "MIT",
+    "Python Software Foundation License",
+    "Mozilla Public License 2.0 (MPL 2.0)",
+    "ISC License (ISCL)"
+]
+unsafe_packages = [
+    "unlicensedPackage",
+]

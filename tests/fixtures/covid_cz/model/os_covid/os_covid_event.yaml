@@ -1,0 +1,27 @@
+---
+table:
+  columns:
+    covid_event_cnt:
+      default: 1
+    covid_event_date:
+      index: true
+      nullable: false
+      type: DATE
+    covid_event_id:
+      nullable: false
+      primary_key: true
+    covid_event_type:
+      index: true
+      nullable: false
+    district_id:
+      foreign_keys:
+        - os_district.district_id
+      index: true
+  constraints:
+    - sqltext: (covid_event_type = 'I') OR (covid_event_type = 'R') OR (covid_event_type = 'D')
+      type: checkConstraint
+    - sqltext: (covid_event_person_gender = 'M') OR (covid_event_person_gender = 'F')
+      type: checkConstraint
+process:
+  materialization: table
+  mode: drop

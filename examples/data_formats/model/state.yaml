@@ -1,0 +1,14 @@
+---
+table:
+  columns:
+    state_code:
+      nullable: false
+      primary_key: true
+      type: CHAR(2)
+    state_name:
+      nullable: false
+      unique: true
+      type: VARCHAR(50)
+process:
+  materialization: table
+  mode: drop

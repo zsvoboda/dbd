@@ -1,0 +1,5 @@
+{% import 'macros.j2' as macros %}
+{
+{% if sn %}"name": "{{ sn }}",{% endif %}
+"tables": { {{ macros.schema(ts) }} }
+}

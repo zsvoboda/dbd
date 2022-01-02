@@ -1,0 +1,15 @@
+select id,
+       den,
+       datum::date,
+       orp_kod,
+       orp_nazev,
+       incidence_7::integer,
+       incidence_65_7::integer,
+       incidence_75_7::integer,
+       prevalence::integer,
+       prevalence_65::integer,
+       prevalence_75::integer,
+       aktualni_pocet_hospitalizovanych_osob::integer,
+       nove_hosp_7::integer,
+       testy_7::integer
+from is_covid.is_mista_covid_orp

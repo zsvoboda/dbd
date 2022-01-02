@@ -1,0 +1,17 @@
+---
+table:
+  columns:
+    country_id:
+      foreign_keys:
+        - os_country.country_id
+      index: true
+    covid_hospitalisation_date:
+      index: true
+      nullable: false
+      type: DATE
+    covid_hospitalisation_id:
+      nullable: false
+      primary_key: true
+process:
+  materialization: table
+  mode: drop
