@@ -1,5 +1,11 @@
 from setuptools import setup
 
+from pathlib import Path
+
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
+
 packages = \
     ['dbd',
      'dbd.cli',
@@ -38,7 +44,8 @@ setup_kwargs = {
     'name': 'dbd',
     'version': '0.5.0',
     'description': 'Framework for declarative database creation and management.',
-    'long_description': None,
+    'long_description':long_description,
+    'long_description_content_type':'text/markdown',
     'author': 'zsvoboda',
     'author_email': 'zsvoboda@gmail.com',
     'maintainer': None,
@@ -48,7 +55,7 @@ setup_kwargs = {
     'package_data': package_data,
     'install_requires': install_requires,
     'entry_points': entry_points,
-    'python_requires': '>=3.7,<4.0',
+    'python_requires': '>=3.7,<4.0'
 }
 
 setup(**setup_kwargs)
