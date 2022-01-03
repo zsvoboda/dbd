@@ -101,7 +101,7 @@ def run(dbd, dest):
 @cli.command(help='Validates project.')
 @click.argument('dest', required=False, default='.')
 @click.pass_obj
-def validate(dbd, profile, project, dest):
+def validate(dbd, dest):
     prf = DbdProfile.load(os.path.join('.', dbd.profile()))
     prj = DbdProject.load(prf, os.path.join(dest, dbd.project()))
     model = ModelExecutor(prj)
