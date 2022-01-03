@@ -22,12 +22,14 @@ class Dbd(object):
     Top level CLI object
     """
 
-    def __init__(self, debug: bool = False):
+    def __init__(self, debug: bool = False, profile: str = 'dbd.profile', project: str = 'dbd.project'):
         """
         Constructor
         :param bool debug: debug flag
         """
         self.__debug = debug
+        self.__profile = profile
+        self.__project = project
 
     def debug(self) -> bool:
         """
@@ -37,28 +39,41 @@ class Dbd(object):
         """
         return self.__debug
 
+    def profile(self) -> str:
+        """
+        Profile getter
+        :return: profile
+        :rtype: str
+        """
+        return self.__profile
 
-def print_version(ctx, param, value):
+    def project(self) -> str:
+        """
+        Project getter
+        :return: project
+        :rtype: str
+        """
+        return self.__project
+
+
+def print_version():
     """
     Prints DBD version
     """
     click.echo(f"You're using DBD version {importlib.metadata.version('dbd')}.")
-    ctx.exit(0)
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.option('--debug/--no-debug', envvar='DBD_DEBUG', default=False, help='Sets debugging on/off')
-@click.option(
-    '--version',
-    help="Print the DBD version and exit.",
-    is_flag=True,
-    expose_value=False,
-    is_eager=True,
-    callback=print_version
-)
+@click.option('--version', help="Print the DBD version and exit.", is_flag=True, is_eager=True)
+@click.option('--profile', envvar='DBD_PROFILE', default='dbd.profile', help='Profile configuration file')
+@click.option('--project', envvar='DBD_PROJECT', default='dbd.project', help='Project configuration file')
 @click.pass_context
-def cli(ctx, debug, version):
-    ctx.obj = Dbd(debug)
+def cli(ctx, debug, version, profile, project):
+    if version:
+        print_version()
+        ctx.exit(0)
+    ctx.obj = Dbd(debug, profile, project)
 
 
 @cli.command(help='Initializes a new DBD project.')
@@ -74,12 +89,10 @@ def init(dbd, dest):
 
 @cli.command(help='Executes project.')
 @click.argument('dest', required=False, default='.')
-@click.option('--profile', envvar='DBD_PROFILE', default='dbd.profile', help='Profile configuration file')
-@click.option('--project', envvar='DBD_PROJECT', default='dbd.project', help='Project configuration file')
 @click.pass_obj
-def run(dbd, profile, project, dest):
-    prf = DbdProfile.load(os.path.join('.', profile))
-    prj = DbdProject.load(prf, os.path.join(dest, project))
+def run(dbd, dest):
+    prf = DbdProfile.load(os.path.join('.', dbd.profile()))
+    prj = DbdProject.load(prf, os.path.join(dest, dbd.project()))
     model = ModelExecutor(prj)
     engine = prj.alchemy_engine_from_project()
     model.execute(engine)
@@ -87,12 +100,10 @@ def run(dbd, profile, project, dest):
 
 @cli.command(help='Validates project.')
 @click.argument('dest', required=False, default='.')
-@click.option('--profile', envvar='DBD_PROFILE', default='dbd.profile', help='Profile configuration file')
-@click.option('--project', envvar='DBD_PROJECT', default='dbd.project', help='Project configuration file')
 @click.pass_obj
 def validate(dbd, profile, project, dest):
-    prf = DbdProfile.load(os.path.join('.', profile))
-    prj = DbdProject.load(prf, os.path.join(dest, project))
+    prf = DbdProfile.load(os.path.join('.', dbd.profile()))
+    prj = DbdProject.load(prf, os.path.join(dest, dbd.project()))
     model = ModelExecutor(prj)
     engine = prj.alchemy_engine_from_project()
     try:
