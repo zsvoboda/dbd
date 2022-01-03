@@ -35,7 +35,7 @@ class DbdProfile:
         self.__config = config
 
     @classmethod
-    def load(cls, profile_file_name='.dbd.profile') -> DbdProfileType:
+    def load(cls, profile_file_name='dbd.profile') -> DbdProfileType:
         """
         Loads profile config file
         :param str profile_file_name: Profile file name
@@ -43,7 +43,7 @@ class DbdProfile:
         :rtype: DbdProfile
         """
         for profile_profile_file_name in [os.path.join('.', profile_file_name),
-                                          os.path.join(str(Path.home()), '.dbd.profile')]:
+                                          os.path.join(str(Path.home()), 'dbd.profile')]:
             if exists(profile_file_name):
                 processed_yaml = apply_template(profile_file_name, ENV_VARS)
                 return DbdProfile(os.path.normpath(profile_file_name), yaml.safe_load(processed_yaml))

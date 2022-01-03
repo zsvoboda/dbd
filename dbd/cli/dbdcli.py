@@ -52,11 +52,12 @@ def init(dbd, dest):
     if os.path.exists(dest):
         raise DbdException(f"Can't overwrite directory '{dest}'")
     shutil.copytree(src, dest)
+    click.echo(f"New project {dest} generated. Do cd {dest}; dbd run .")
 
 
 @cli.command(help='Executes project.')
 @click.argument('dest', required=False, default='.')
-@click.option('--profile', envvar='DBD_PROFILE', default='.dbd.profile', help='Profile configuration file')
+@click.option('--profile', envvar='DBD_PROFILE', default='dbd.profile', help='Profile configuration file')
 @click.option('--project', envvar='DBD_PROJECT', default='dbd.project', help='Project configuration file')
 @click.pass_obj
 def run(dbd, profile, project, dest):
@@ -69,7 +70,7 @@ def run(dbd, profile, project, dest):
 
 @cli.command(help='Validates project.')
 @click.argument('dest', required=False, default='.')
-@click.option('--profile', envvar='DBD_PROFILE', default='.dbd.profile', help='Profile configuration file')
+@click.option('--profile', envvar='DBD_PROFILE', default='dbd.profile', help='Profile configuration file')
 @click.option('--project', envvar='DBD_PROJECT', default='dbd.project', help='Project configuration file')
 @click.pass_obj
 def validate(dbd, profile, project, dest):

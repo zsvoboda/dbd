@@ -7,10 +7,9 @@ files stored in your DBD project files.
 
 1. `dbd init my-first-project`
 2. `cd my-first-project`
-3. `echo "databases:\n  states:\n    db.url: 'sqlite:///my-sqllite.db'" > .dbd.profile`
-4. `dbd validate .`
-5. `dbd run .`
-6. Connect to the newly created `my-sqllite.db` database and review `area`, `population`, and `state` tables that have been created from the files in the `model` directory.
+3. `dbd validate .`
+4. `dbd run .`
+5. Connect to the newly created `states.db` database and review `area`, `population`, and `state` tables that have been created from the files in the `model` directory.
 
 Now you can delete the example files from the `model` directory, copy your Excel, JSON, or CSV files there instead. 
 Then execute `dbd run .` and your files should get loaded into the database.
@@ -57,11 +56,11 @@ The `init` command generates a new DBD project directory with the following cont
 - `model` directory that contains the content files. dbd supports files with `.sql`, `.ddl`, `.csv`, `.json`, `.xlsx` and other extensions.  
 - `dbd.project` project configuration file 
 
-DBD also requires `.dbd.profile` configuration file that contains connections to your databases. 
+DBD also requires `dbd.profile` configuration file that contains connections to your databases. 
 This file is located in the current directory or in your home directory.  
 
 ## DBD profile configuration file
-DBD stores database connections in a profile configuration file. It searches for `.dbd.profile` file in the current or in 
+DBD stores database connections in a profile configuration file. It searches for `dbd.profile` file in the current or in 
 your home directory. You can always specify a custom profile file location using the `--profile` option of the `dbd` command. 
 
 The profile file is YAML file with the following structure:

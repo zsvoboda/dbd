@@ -5,7 +5,7 @@ from dbd.executors.model_executor import ModelExecutor
 
 
 def test_basic_model():
-    profile = DbdProfile.load('./tests/fixtures/.dbd.profile')
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
     project = DbdProject.load(profile, './tests/fixtures/basic/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
@@ -139,7 +139,7 @@ def test_basic_model():
 
 
 def test_covid_cz():
-    profile = DbdProfile.load('./tests/fixtures/.dbd.profile')
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
     project = DbdProject.load(profile, './tests/fixtures/covid_cz/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
@@ -434,7 +434,7 @@ def test_covid_cz():
 
 
 def test_validate_basic():
-    profile = DbdProfile.load('./tests/fixtures/.dbd.profile')
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
     project = DbdProject.load(profile, './tests/fixtures/basic/dbd.project')
     model = ModelExecutor(project)
     validation_result, validation_errors = model.validate()
@@ -442,7 +442,7 @@ def test_validate_basic():
 
 
 def test_validate_covid():
-    profile = DbdProfile.load('./tests/fixtures/.dbd.profile')
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
     project = DbdProject.load(profile, './tests/fixtures/covid_cz/dbd.project')
     model = ModelExecutor(project)
     validation_result, validation_errors = model.validate()
