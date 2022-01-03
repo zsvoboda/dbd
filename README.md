@@ -1,23 +1,24 @@
 # DBD - framework for declarative database definition
 DBD framework allows you to define your database schema and content 
 declaratively. Database is represented by a hierarchy of directories and
-files stored in your DBD project files. 
+files stored in DBD model directory. 
 
 ## TLDR: Whetting Your Appetite
 
 1. `dbd init test`
 2. `cd test`
-3. `dbd validate .`
-4. `dbd run .`
-5. Connect to the newly created `states.db` database and review `area`, `population`, and `state` tables that have been created from the files in the `model` directory.
+3. Check out the `model` directory.  
+4. `dbd validate .` 
+5. `dbd run .`
+6. Connect to the newly created `states.db` database and review `area`, `population`, and `state` tables that have been created from the files in the `model` directory.
 
 Now you can delete the example files from the `model` directory, copy your Excel, JSON, or CSV files there instead. 
-Then execute `dbd run .` again. Your files should get loaded into the database.
+Then execute `dbd run .` again. Your files should be loaded in the `states.db` database.
 
-You can create a YAML configuration files for your Excel, JSON, or CSV files to specify individual column's
+You can create a YAML configuration files for your data (Excel, JSON, or CSV) files to specify individual column's
 data types, indexes or constraints (e.g. primary key, foreign key, or check). See below for more details. 
 
-Then you can also create an SQL file that performs SQL insert-from-select to transform the loaded data.
+You can also add an SQL file that performs insert-from-select SQL statement to create database tables with transformed data.
 
 ## Install DBD
 DBD requires Python 3.7.1 or higher. 
@@ -45,7 +46,7 @@ poetry install
 ``` 
 
 ## Generate a new DBD project
-You can generate initial layout of your DBD project using the `init` command:
+You can generate DBD project initial layout by executing `init` command:
 
 ```shell
 dbd init <new-project-name>
@@ -54,13 +55,11 @@ dbd init <new-project-name>
 The `init` command generates a new DBD project directory with the following content: 
 
 - `model` directory that contains the content files. dbd supports files with `.sql`, `.ddl`, `.csv`, `.json`, `.xlsx` and other extensions.  
-- `dbd.project` project configuration file 
-
-DBD also requires `dbd.profile` configuration file that contains connections to your databases. 
-This file is located in the current directory or in your home directory.  
+- `dbd.profile` configuration file that specifies database connections 
+- `dbd.project` project configuration file
 
 ## DBD profile configuration file
-DBD stores database connections in a profile configuration file. It searches for `dbd.profile` file in the current or in 
+DBD stores database connections in the `dbd.profile` configuration file. DBD searches for `dbd.profile` file in current or in 
 your home directory. You can always specify a custom profile file location using the `--profile` option of the `dbd` command. 
 
 The profile file is YAML file with the following structure:
@@ -74,11 +73,11 @@ databases:
 Read more about [SQL Alchemy database URLs here](https://docs.sqlalchemy.org/en/14/core/engines.html). 
 
 The profile file can contain Jinja2 macros that substitute your environment variables. For example, you can reference 
-database password stored in a `$SQLITE_PASSWORD` environment variable via `{{ SQLITE_PASSWORD }}` in your DBD profile.
+database password stored in a `SQLITE_PASSWORD` environment variable via `{{ SQLITE_PASSWORD }}` in your DBD profile.
 
 ## DBD project configuration file
 DBD stores project configuration in a project configuration file that is usually stored in your DBD project directory. 
-DBD searches for `dbd.project` file in the current directory. You can also use the `--project` option pf the `dbd` 
+DBD searches for `dbd.project` file in your project's directory root. You can also use the `--project` option of the `dbd` 
 command to specify a custom project configuration file. 
 
 The project configuration file also uses YAML format and references the DBD model directory with the `.sql`, `.csv` 
@@ -89,11 +88,11 @@ model: model
 database: states
 ```
 
-Similarly like the profile file, you can use the environment variables substitution in the procet config file too 
+Similarly like the profile file, you can use the environment variables substitution in the project config file too 
 (e.g. `{{ SQLITE_DB_NAME }}`).
 
 ## Model directory
-The model directory contains directories and DBD files. Each subdirectory of the model directory represents 
+Model directory contains directories and DBD files. Each subdirectory of the model directory represents 
 a database schema. For example, this model directory structure
 
 ```text
@@ -107,7 +106,7 @@ dbd-project-directory
 creates two database schemas: `schema1` and `schema2` and creates two database tables: `us_states` in `schema1` 
 and `us_counties` in `schema2`. Both tables are populated with the data from the CSV files.  
 
-The following file types are supported:
+DBD supports following files located in the `model` directory:
 
 * __DATA files:__ `.csv`, `.json`, `.xls`, `.xlsx`, `.parquet` files are loaded to the database as tables
 * __SQL files:__ with SQL SELECT statements are executed using insert-from-select SQL construct. The INSERT command is generated (the SQL file only contains the SQL SELECT statement)
@@ -116,7 +115,7 @@ The following file types are supported:
 
 ## YAML model files
 YAML file specify additional configuration for a corresponding __DATA__ or __SQL__ file with the same base file name.
-here is an `area.csv` YAML configuration example:
+Here is an `area.csv` YAML configuration example:
 
 ```yaml
 table:
@@ -137,6 +136,17 @@ process:
   mode: drop
 ```
 
+### Table section
+YAML file's columns are mapped to the `area.csv` data file columns by column names. 
+The following column parameters are supported:
+
+* __type:__ column's SQL type.
+* __primary_key:__ is the column part of table's primary key (true|false)?
+* __foreign_keys:__ all other database table columns that are referenced from a column in table.column format
+* __nullable:__ does column allow null values (true|false)?
+* __index:__ is column indexed (true|false)?
+* __unique:__ does column store unique values (true|false)?
+
 ### Process section
 The `process` section specifies the following processing options:
 
@@ -144,12 +154,22 @@ The `process` section specifies the following processing options:
 * __mode:__ specifies how DBD works with a table. You can specify values `drop`, `truncate`, or `keep`. The  __mode__ option is ignored for views.
 
 ### Table section
-YAML file's columns are mapped to the `area.csv` data file columns by the column name. 
+YAML file's columns are mapped to the `area.csv` data file columns by column names. 
 The following column parameters are supported:
 
 * __type:__ column's SQL type.
 * __primary_key:__ is the column part of table's primary key (true|false)?
-* __foreign_keys:__ all other database table columns that are referenced from a column in <table>.<column> format
+* __foreign_keys:__ all other database table columns that are referenced from a column in table.column format
 * __nullable:__ does column allow null values (true|false)?
 * __index:__ is column indexed (true|false)?
 * __unique:__ does column store unique values (true|false)?
+
+## License
+DBD code is open-sourced under BSD 3-clause license. 
+
+## Resources and References
+- [DBD github repo](https://github.com/zsvoboda/dbd)
+- [DBD PyPi](https://pypi.org/project/dbd/)
+- [Submit issue](https://github.com/zsvoboda/dbd/issues)
+
+
