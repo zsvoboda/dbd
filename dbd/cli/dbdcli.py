@@ -2,6 +2,8 @@ import os
 import shutil
 from typing import Dict, Any, List
 
+import importlib.metadata
+
 import click
 from sqlalchemy import text
 
@@ -39,8 +41,11 @@ class Dbd(object):
 
 @click.group()
 @click.option('--debug/--no-debug', envvar='DBD_DEBUG', default=False, help='Sets debugging on/off')
+@click.option('--version', is_flag=True, help='Prints DBD version')
 @click.pass_context
-def cli(ctx, debug):
+def cli(ctx, debug, version):
+    if version:
+        click.echo(importlib.metadata.version("dbd"))
     ctx.obj = Dbd(debug)
 
 

@@ -49,7 +49,7 @@ pylic = "^2.2"
 dbd = 'dbd.cli.dbdcli:cli'
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.0.0", "setuptools"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pylic]
@@ -62,7 +62,4 @@ safe_licenses = [
     "Python Software Foundation License",
     "Mozilla Public License 2.0 (MPL 2.0)",
     "ISC License (ISCL)"
-]
-unsafe_packages = [
-    "unlicensedPackage",
 ]

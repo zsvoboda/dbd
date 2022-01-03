@@ -3,21 +3,21 @@ DBD framework allows you to define your database schema and content
 declaratively. Database is represented by a hierarchy of directories and
 files stored in your DBD project files. 
 
-## TLDR
+## TLDR: Whetting Your Appetite
 
-1. `dbd init my-first-project`
-2. `cd my-first-project`
+1. `dbd init test`
+2. `cd test`
 3. `dbd validate .`
 4. `dbd run .`
 5. Connect to the newly created `states.db` database and review `area`, `population`, and `state` tables that have been created from the files in the `model` directory.
 
 Now you can delete the example files from the `model` directory, copy your Excel, JSON, or CSV files there instead. 
-Then execute `dbd run .` and your files should get loaded into the database.
+Then execute `dbd run .` again. Your files should get loaded into the database.
 
-You can also create a YAML configuration files for your Excel, JSON, or CSV files for specifying individual column's
-data type, index or constraint (e.g. primary key, foreign key, or check).
+You can create a YAML configuration files for your Excel, JSON, or CSV files to specify individual column's
+data types, indexes or constraints (e.g. primary key, foreign key, or check). See below for more details. 
 
-Later you can create an SQL file that performs SQL insert-from-select to transform the loaded data.
+Then you can also create an SQL file that performs SQL insert-from-select to transform the loaded data.
 
 ## Install DBD
 DBD requires Python 3.7.1 or higher. 

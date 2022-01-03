@@ -1,3 +1,3 @@
 databases:
   states:
-    db.url: sqlite://states.db
+    db.url: sqlite:///states.db

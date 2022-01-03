@@ -4,6 +4,7 @@ import re
 from os.path import exists
 from typing import List, Dict, Any
 
+import click
 import networkx as nx
 import sqlalchemy.engine
 import yaml
@@ -91,6 +92,7 @@ class ModelExecutor:
         self.reflect_metadata_cache(alchemy_engine)
         for task in reversed(ordered_tasks):
             schema = task.target_schema() if task.target_schema() is not None else Task.TOP_LEVEL_SCHEMA_NAME
+            click.echo(f"Executing task: '{task.task_id()}'.")
             log.debug(f"Executing task: '{task.task_id()}'.")
             task.create(self.__metadata_cache[schema], alchemy_engine)
             log.debug(f"Task execution finished: '{task.task_id()}'.")
