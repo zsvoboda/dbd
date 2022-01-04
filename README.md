@@ -2,7 +2,7 @@
 DBD tool allows you to define your database schema and content declaratively. Database is represented by a 
 hierarchy of directories and files stored in a model directory. 
 
-![How DBD works](img/dbd.infographic.png)
+![How DBD works](https://raw.githubusercontent.com/zsvoboda/dbd/master/img/dbd.infographic.png)
 
 DBD is great for declarative creation of any database. It is particularly designed for ELT (Extract/Load/Transform) 
 data pipelines used in data analytics and data warehousing. 
