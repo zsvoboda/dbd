@@ -5,6 +5,7 @@ files stored in DBD model directory.
 
 ## TLDR: Whetting Your Appetite
 
+![How DBD works](img/dbd.infographic.png)
 1. `dbd init test`
 2. `cd test`
 3. Check out the `model` directory.  
@@ -156,6 +157,11 @@ process:
   materialization: table
   mode: drop
 ```
+
+Note that we re-type the `state_population` and the `state_area_sq_mi` columns to INTEGER, disallow
+NULL values in all columns, and specify that the `state_code` column is table's primary key.
+
+The table is dropped and data re-loaded in full everytime the dbd executes this model. 
 
 ### Table section
 YAML file's columns are mapped to a columns of the table that DBD creates from a corresponding DATA or SQL file. 
