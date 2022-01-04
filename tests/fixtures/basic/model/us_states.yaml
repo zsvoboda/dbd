@@ -1,0 +1,20 @@
+---
+table:
+  columns:
+    state_code:
+      nullable: false
+      primary_key: true
+      type: CHAR(2)
+    state_name:
+      nullable: false
+      index: true
+      type: VARCHAR(50)
+    state_population:
+      nullable: false
+      type: INTEGER
+    state_area_sq_mi:
+      nullable: false
+      type: INTEGER
+process:
+  materialization: table
+  mode: drop

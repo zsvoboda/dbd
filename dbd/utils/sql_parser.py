@@ -1,9 +1,13 @@
+import logging
 import re
 import sys
+import sqlalchemy.dialects.postgresql
 from typing import List
 
 import sqlalchemy
 from sql_metadata import Parser
+
+log = logging.getLogger(__name__)
 
 
 class SQlParserException(Exception):
@@ -79,7 +83,11 @@ class SqlParser:
         try:
             datatype_class = getattr(sys.modules['sqlalchemy.sql.sqltypes'], core_data_type)
         except AttributeError:
-            datatype_class = getattr(sys.modules['sqlalchemy.dialects.postgresql'], core_data_type)
+            try:
+                datatype_class = getattr(sys.modules['sqlalchemy.dialects.postgresql'], core_data_type)
+            except AttributeError:
+                log.debug(f"Unsupported data type {core_data_type}.")
+                raise SQlParserException(f"Unsupported data type {core_data_type}.")
 
         if core_data_type in ('CHAR', 'VARCHAR'):
             return datatype_class(length=length)
@@ -89,6 +97,7 @@ class SqlParser:
                                 'DOUBLE_PRECISION', 'REAL'):
             return datatype_class()
         else:
+            log.debug(f"Unsupported data type {core_data_type}.")
             raise SQlParserException(f"Unsupported data type {core_data_type}.")
 
     @classmethod

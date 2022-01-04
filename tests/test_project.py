@@ -6,8 +6,8 @@ from dbd.config.dbd_project import DbdProject
 
 def test_basic_project():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')
-    project = DbdProject.load(profile, './tests/fixtures/basic/dbd.project')
-    assert project.model_directory_from_project() == os.path.normpath('./tests/fixtures/basic/model')
+    project = DbdProject.load(profile, 'tests/fixtures/basic/dbd.project')
+    assert project.model_directory_from_project() == os.path.normpath('tests/fixtures/basic/model')
     assert str(project.alchemy_engine_from_project().url) == profile.db_connections().get('states').get('db.url')
 
 

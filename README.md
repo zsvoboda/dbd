@@ -111,25 +111,46 @@ DBD supports following files located in the `model` directory:
 * __DATA files:__ `.csv`, `.json`, `.xls`, `.xlsx`, `.parquet` files are loaded to the database as tables
 * __SQL files:__ with SQL SELECT statements are executed using insert-from-select SQL construct. The INSERT command is generated (the SQL file only contains the SQL SELECT statement)
 * __DDL files:__ contain a sequence of SQL statements separated by semicolon. The DDL files can be named `prolog.ddl` and `epilog.ddl`. The `prolog.ddl` is executed before all other files in a specific schema. The `epilog.ddl` is executed last. The `prolog.ddl` and `epilog.ddl` in the top-level model directory are executed as the very first and tne very last files in the model. 
-* __YAML files:__ specify additional configuration to the __DATA__ and __SQL__ files. 
+* __YAML files:__ specify additional configuration to the __DATA__ and __SQL__ files.
 
-## YAML model files
+## SQL files 
+SQL file performs SQL transformation within your database. It contains a SQL SELECT statement that DBD wraps in 
+insert-from-select statement, executes it, and stores the result into a table or view that inherits its name from the 
+SQL file name.
+
+Here is an example of `us_states.sql` file that creates a new `us_states` database table.
+
+```sqlite
+SELECT
+        state.abbrev AS state_code,
+        state.state AS state_name,
+        population.population AS state_population,
+        area.area_sq_mi  AS state_area_sq_mi
+    FROM state
+        JOIN population ON population.state = state.abbrev
+        JOIN area on area.state_name = state.state
+```
+
+## YAML files
 YAML file specify additional configuration for a corresponding __DATA__ or __SQL__ file with the same base file name.
-Here is an `area.csv` YAML configuration example:
+Here is a YAML configuration example for the `us_states.sql` file above:
 
 ```yaml
 table:
   columns:
+    state_code:
+      nullable: false
+      primary_key: true
+      type: CHAR(2)
     state_name:
       nullable: false
       index: true
-      primary_key: true
-      foreign_keys:
-        - state.state_name
       type: VARCHAR(50)
-    area_sq_mi:
+    state_population:
       nullable: false
-      index: true
+      type: INTEGER
+    state_area_sq_mi:
+      nullable: false
       type: INTEGER
 process:
   materialization: table
@@ -137,8 +158,8 @@ process:
 ```
 
 ### Table section
-YAML file's columns are mapped to the `area.csv` data file columns by column names. 
-The following column parameters are supported:
+YAML file's columns are mapped to a columns of the table that DBD creates from a corresponding DATA or SQL file. 
+For example, a CSV header or SQL SELECT column `AS` clause. You can specify the following column's parameters:
 
 * __type:__ column's SQL type.
 * __primary_key:__ is the column part of table's primary key (true|false)?
@@ -152,17 +173,6 @@ The `process` section specifies the following processing options:
 
 * __materialization:__ specifies whether DBD creates a physical `table` or a `view` when processing a SQL file.
 * __mode:__ specifies how DBD works with a table. You can specify values `drop`, `truncate`, or `keep`. The  __mode__ option is ignored for views.
-
-### Table section
-YAML file's columns are mapped to the `area.csv` data file columns by column names. 
-The following column parameters are supported:
-
-* __type:__ column's SQL type.
-* __primary_key:__ is the column part of table's primary key (true|false)?
-* __foreign_keys:__ all other database table columns that are referenced from a column in table.column format
-* __nullable:__ does column allow null values (true|false)?
-* __index:__ is column indexed (true|false)?
-* __unique:__ does column store unique values (true|false)?
 
 ## License
 DBD code is open-sourced under BSD 3-clause license. 

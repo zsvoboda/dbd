@@ -6,7 +6,84 @@ from dbd.executors.model_executor import ModelExecutor
 
 def test_basic_model():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')
-    project = DbdProject.load(profile, './tests/fixtures/basic/dbd.project')
+    project = DbdProject.load(profile, 'tests/fixtures/basic/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+
+    schema = DbSchema.from_alchemy_engine(None, engine)
+
+    assert len(schema.tables()) == 4
+    table_names = [t.name() for t in schema.tables()]
+    assert 'area' in table_names
+
+    area_column_names = [c.name() for c in schema.table('area').columns()]
+
+    assert 'state_name' in area_column_names
+    assert str(schema.table('area').column(
+        'state_name').alchemy_column().type) == "TEXT"
+
+    assert 'area_sq_mi' in area_column_names
+    assert str(schema.table('area').column(
+        'area_sq_mi').alchemy_column().type) == "TEXT"
+
+    assert 'population' in table_names
+
+    population_column_names = [c.name() for c in schema.table('population').columns()]
+
+    assert 'state' in population_column_names
+    assert str(schema.table('population').column(
+        'state').alchemy_column().type) == "TEXT"
+
+    assert 'population' in population_column_names
+    assert str(schema.table('population').column(
+        'population').alchemy_column().type) == "TEXT"
+
+    assert 'state' in table_names
+
+    state_column_names = [c.name() for c in schema.table('state').columns()]
+
+    assert 'state' in state_column_names
+    assert str(schema.table('state').column(
+        'state').alchemy_column().type) == "TEXT"
+
+    assert 'abbrev' in state_column_names
+    assert str(schema.table('state').column(
+        'abbrev').alchemy_column().type) == "TEXT"
+
+    assert 'us_states' in table_names
+
+    us_states_column_names = [c.name() for c in schema.table('us_states').columns()]
+
+    assert 'state_code' in us_states_column_names
+    assert str(schema.table('us_states').column(
+        'state_code').alchemy_column().type) == "CHAR(2)"
+    assert schema.table('us_states').column(
+        'state_code').alchemy_column().primary_key
+    assert not schema.table('us_states').column(
+        'state_code').alchemy_column().nullable
+
+    assert 'state_name' in us_states_column_names
+    assert str(schema.table('us_states').column(
+        'state_name').alchemy_column().type) == "VARCHAR(50)"
+    assert not schema.table('us_states').column(
+        'state_name').alchemy_column().nullable
+
+    assert 'state_population' in us_states_column_names
+    assert str(schema.table('us_states').column(
+        'state_population').alchemy_column().type) == "INTEGER"
+    assert not schema.table('us_states').column(
+        'state_population').alchemy_column().nullable
+
+    assert 'state_area_sq_mi' in us_states_column_names
+    assert str(schema.table('us_states').column(
+        'state_area_sq_mi').alchemy_column().type) == "INTEGER"
+    assert not schema.table('us_states').column(
+        'state_area_sq_mi').alchemy_column().nullable
+
+def test_data_formats_model():
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/data_formats/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
     model.execute(engine)
@@ -143,7 +220,7 @@ def test_covid_cz():
     project = DbdProject.load(profile, './tests/fixtures/covid_cz/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
-    model.execute(engine)
+    #model.execute(engine)
 
     schema = DbSchema.from_alchemy_engine('os_covid', engine)
 
@@ -435,7 +512,7 @@ def test_covid_cz():
 
 def test_validate_basic():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')
-    project = DbdProject.load(profile, './tests/fixtures/basic/dbd.project')
+    project = DbdProject.load(profile, 'tests/fixtures/data_formats/dbd.project')
     model = ModelExecutor(project)
     validation_result, validation_errors = model.validate()
     assert validation_result
