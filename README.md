@@ -1,17 +1,20 @@
-# DBD - framework for declarative database definition
-DBD framework allows you to define your database schema and content 
-declaratively. Database is represented by a hierarchy of directories and
-files stored in DBD model directory. 
+# DBD - tool for declarative database definition
+DBD tool allows you to define your database schema and content declaratively. Database is represented by a 
+hierarchy of directories and files stored in a model directory. 
+
+![How DBD works](img/dbd.infographic.png)
+
+DBD is great for declarative creation of any database. It is particularly designed for ELT (Extract/Load/Transform) 
+data pipelines used in data analytics and data warehousing. 
 
 ## TLDR: Whetting Your Appetite
 
-![How DBD works](img/dbd.infographic.png)
 1. `dbd init test`
 2. `cd test`
-3. Check out the `model` directory.  
+3. Check out files in the `model` directory.  
 4. `dbd validate .` 
 5. `dbd run .`
-6. Connect to the newly created `states.db` database and review `area`, `population`, and `state` tables that have been created from the files in the `model` directory.
+6. Connect to the newly created `states.db` sqlite database and review `area`, `population`, and `state` tables that have been created from the files in the `model` directory.
 
 Now you can delete the example files from the `model` directory, copy your Excel, JSON, or CSV files there instead. 
 Then execute `dbd run .` again. Your files should be loaded in the `states.db` database.
@@ -181,11 +184,9 @@ The `process` section specifies the following processing options:
 * __mode:__ specifies how DBD works with a table. You can specify values `drop`, `truncate`, or `keep`. The  __mode__ option is ignored for views.
 
 ## License
-DBD code is open-sourced under BSD 3-clause license. 
+DBD code is open-sourced under [BSD 3-clause license](LICENSE). 
 
 ## Resources and References
 - [DBD github repo](https://github.com/zsvoboda/dbd)
 - [DBD PyPi](https://pypi.org/project/dbd/)
 - [Submit issue](https://github.com/zsvoboda/dbd/issues)
-
-
