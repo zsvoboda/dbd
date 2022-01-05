@@ -13,7 +13,6 @@ from dbd.config.dbd_project import DbdProject
 from dbd.executors.model_executor import ModelExecutor
 from dbd.log.dbd_logger import setup_logging
 
-setup_logging()
 log = logging.getLogger(__name__)
 
 this_script_dir = os.path.dirname(__file__)
@@ -24,12 +23,17 @@ class Dbd(object):
     Top level CLI object
     """
 
-    def __init__(self, debug: bool = False, profile: str = 'dbd.profile', project: str = 'dbd.project'):
+    def __init__(self, debug: bool = False, logfile: str = 'dbd.log', profile: str = 'dbd.profile',
+                 project: str = 'dbd.project'):
         """
         Constructor
         :param bool debug: debug flag
+        :param str logfile: log file
+        :param str profile: profile file
+        :param str project: project file
         """
         self.__debug = debug
+        self.__logfile = logfile
         self.__profile = profile
         self.__project = project
 
@@ -40,6 +44,14 @@ class Dbd(object):
         :rtype: bool
         """
         return self.__debug
+
+    def logfile(self) -> str:
+        """
+        Logfile getter
+        :return: logfile
+        :rtype: str
+        """
+        return self.__logfile
 
     def profile(self) -> str:
         """
@@ -68,14 +80,18 @@ def print_version():
 @click.group(invoke_without_command=True)
 @click.option('--debug/--no-debug', envvar='DBD_DEBUG', default=False, help='Sets debugging on/off')
 @click.option('--version', help="Print the DBD version and exit.", is_flag=True, is_eager=True)
+@click.option('--logfile', envvar='DBD_LOG_FILE', default='dbd.log', help='Log file location')
 @click.option('--profile', envvar='DBD_PROFILE', default='dbd.profile', help='Profile configuration file')
 @click.option('--project', envvar='DBD_PROJECT', default='dbd.project', help='Project configuration file')
 @click.pass_context
-def cli(ctx, debug, version, profile, project):
+def cli(ctx, debug, logfile, version, profile, project):
+    if debug:
+        click.echo(f"Logging DEBUG info to '{logfile}'")
+        setup_logging(logging.DEBUG, logfile)
     if version:
         print_version()
         ctx.exit(0)
-    ctx.obj = Dbd(debug, profile, project)
+    ctx.obj = Dbd(debug, logfile, profile, project)
 
 
 @cli.command(help='Initializes a new DBD project.')

@@ -222,7 +222,7 @@ def test_covid_cz():
     project = DbdProject.load(profile, './tests/fixtures/covid_cz/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
-    # model.execute(engine)
+    #model.execute(engine)
 
     schema = DbSchema.from_alchemy_engine('os_covid', engine)
 
