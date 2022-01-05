@@ -1,7 +1,8 @@
 from distutils.core import setup
 
 REQUIRES = ["jinja2", "sqlalchemy", "sqlparse", "sql-metadata", "networkx", "psycopg2", "pyyaml", "pandas",
-            "click", "cerberus", "openpyxl", "pyarrow"]
+            "click", "cerberus", "openpyxl", "pyarrow", "snowflake-sqlalchemy", "sqlalchemy-bigquery",
+            "sqlalchemy-redshift"]
 
 setup(
     name="dbd",

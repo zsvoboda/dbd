@@ -118,6 +118,7 @@ def run(dbd, dest):
         prj = DbdProject.load(prf, os.path.join(dest, dbd.project()))
         model = ModelExecutor(prj)
         engine = prj.alchemy_engine_from_project()
+        #engine.execution_options(supports_statement_cache=False)
         model.execute(engine)
     except DbdException as d:
         click.echo(f"ERROR: '{d}'")
@@ -132,6 +133,7 @@ def validate(dbd, dest):
         prj = DbdProject.load(prf, os.path.join(dest, dbd.project()))
         model = ModelExecutor(prj)
         engine = prj.alchemy_engine_from_project()
+        #engine.execution_options(supports_statement_cache=False)
         try:
             engine.execute(text("SELECT 1"))
         except Exception:
