@@ -1,4 +1,5 @@
 import importlib.metadata
+import logging
 import os
 import shutil
 from typing import Dict, Any, List
@@ -10,6 +11,8 @@ from dbd import DbdException
 from dbd.config.dbd_profile import DbdProfile
 from dbd.config.dbd_project import DbdProject
 from dbd.executors.model_executor import ModelExecutor
+
+log = logging.getLogger(__name__)
 
 this_script_dir = os.path.dirname(__file__)
 
@@ -77,44 +80,54 @@ def cli(ctx, debug, version, profile, project):
 @click.argument('dest', required=False, default='my_new_dbd_project')
 @click.pass_obj
 def init(dbd, dest):
-    src = os.path.join(this_script_dir, '..', 'resources', 'template')
-    if os.path.exists(dest):
-        raise DbdException(f"Can't overwrite directory '{dest}'")
-    shutil.copytree(src, dest)
-    click.echo(f"New project {dest} generated. Do cd {dest}; dbd run .")
+    try:
+        src = os.path.join(this_script_dir, '..', 'resources', 'template')
+        if os.path.exists(dest):
+            log.error(f"Can't overwrite directory '{dest}'")
+            raise DbdException(f"Can't overwrite directory '{dest}'")
+        shutil.copytree(src, dest)
+        click.echo(f"New project {dest} generated. Do cd {dest}; dbd run .")
+    except DbdException as d:
+        click.echo(f"ERROR: '{d}'")
 
 
 @cli.command(help='Executes project.')
 @click.argument('dest', required=False, default='.')
 @click.pass_obj
 def run(dbd, dest):
-    prf = DbdProfile.load(os.path.join('.', dbd.profile()))
-    prj = DbdProject.load(prf, os.path.join(dest, dbd.project()))
-    model = ModelExecutor(prj)
-    engine = prj.alchemy_engine_from_project()
-    model.execute(engine)
+    try:
+        prf = DbdProfile.load(os.path.join('.', dbd.profile()))
+        prj = DbdProject.load(prf, os.path.join(dest, dbd.project()))
+        model = ModelExecutor(prj)
+        engine = prj.alchemy_engine_from_project()
+        model.execute(engine)
+    except DbdException as d:
+        click.echo(f"ERROR: '{d}'")
 
 
 @cli.command(help='Validates project.')
 @click.argument('dest', required=False, default='.')
 @click.pass_obj
 def validate(dbd, dest):
-    prf = DbdProfile.load(os.path.join('.', dbd.profile()))
-    prj = DbdProject.load(prf, os.path.join(dest, dbd.project()))
-    model = ModelExecutor(prj)
-    engine = prj.alchemy_engine_from_project()
     try:
-        engine.execute(text("SELECT 1"))
-    except Exception:
-        click.echo(
-            f"Can't connect to the target database. Check profile configuration in "
-            f"'{os.path.normpath(os.path.join(dest, dbd.profile()))}'.")
-    validation_result, validation_errors = model.validate()
-    if validation_result:
-        click.echo("No errors found. Model is valid.")
-    else:
-        click.echo("Model isn't valid. Please fix the following errors:")
-        __echo_validation_errors(validation_errors)
+        prf = DbdProfile.load(os.path.join('.', dbd.profile()))
+        prj = DbdProject.load(prf, os.path.join(dest, dbd.project()))
+        model = ModelExecutor(prj)
+        engine = prj.alchemy_engine_from_project()
+        try:
+            engine.execute(text("SELECT 1"))
+        except Exception:
+            click.echo(
+                f"Can't connect to the target database. Check profile configuration in "
+                f"'{os.path.normpath(os.path.join(dest, dbd.profile()))}'.")
+        validation_result, validation_errors = model.validate()
+        if validation_result:
+            click.echo("No errors found. Model is valid.")
+        else:
+            click.echo("Model isn't valid. Please fix the following errors:")
+            __echo_validation_errors(validation_errors)
+    except DbdException as d:
+        click.echo(f"ERROR: '{d}'")
 
 
 def __echo_validation_errors(validation_errors: Dict[str, Any]):

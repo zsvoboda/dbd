@@ -24,6 +24,9 @@ from dbd.utils.text_utils import remove_prefix, relative_path_to_base_dir
 log = logging.getLogger(__name__)
 
 
+class ModelExecutionException(DbdException):
+    pass
+
 class InvalidModelException(DbdException):
     pass
 
@@ -83,18 +86,22 @@ class ModelExecutor:
         SQLAlchemy engine.
         :param sqlalchemy.engine.Engine alchemy_engine: SQLAlchemy engine database connection (both target and source)
         """
-        self.__populate_model_from_directory()
-        self.__build_metadata_cache(alchemy_engine)
+        try:
+            self.__populate_model_from_directory()
+            self.__build_metadata_cache(alchemy_engine)
 
-        ordered_tasks = self.__order_tasks_by_dependencies()
-        self.__drop_tables(ordered_tasks, alchemy_engine)
-        self.reflect_metadata_cache(alchemy_engine)
-        for task in reversed(ordered_tasks):
-            schema = task.target_schema() if task.target_schema() is not None else Task.TOP_LEVEL_SCHEMA_NAME
-            click.echo(f"Executing task: '{task.task_id()}'.")
-            log.debug(f"Executing task: '{task.task_id()}'.")
-            task.create(self.__metadata_cache[schema], alchemy_engine)
-            log.debug(f"Task execution finished: '{task.task_id()}'.")
+            ordered_tasks = self.__order_tasks_by_dependencies()
+            self.__drop_tables(ordered_tasks, alchemy_engine)
+            self.reflect_metadata_cache(alchemy_engine)
+            for task in reversed(ordered_tasks):
+                schema = task.target_schema() if task.target_schema() is not None else Task.TOP_LEVEL_SCHEMA_NAME
+                click.echo(f"Executing task: '{task.task_id()}'.")
+                log.debug(f"Executing task: '{task.task_id()}'.")
+                task.create(self.__metadata_cache[schema], alchemy_engine)
+                log.debug(f"Task execution finished: '{task.task_id()}'.")
+        except sqlalchemy.exc.OperationalError as o:
+            log.error(f"Can't execute model because of: '{o}'.")
+            raise ModelExecutionException(f"Can't execute model because of: '{o}'.")
 
     def __build_metadata_cache(self, alchemy_engine: sqlalchemy.engine.Engine):
         # noinspection GrazieInspection
