@@ -76,9 +76,9 @@ class DbdProfile:
         if connection_name in databases:
             try:
                 return engine_from_config(databases.get(connection_name), prefix=CONFIG_PREFIX)
-            except Exception:
+            except Exception as e:
                 raise DbdProfileConfigException(f"Invalid connection '{connection_name}' config in the profile file "
-                                                f"'{self.__profile_file}'.")
+                                                f"'{self.__profile_file}'. Underlying error: '{e}'.")
         else:
             raise DbdProfileConfigException(f"Connection '{connection_name}' isn't defined in the profile file "
                                             f"'{self.__profile_file}'.")
