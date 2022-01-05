@@ -7,7 +7,7 @@ from typing import List
 import sqlalchemy
 from sql_metadata import Parser
 
-from dbd import DbdException
+from dbd.log.dbd_exception import DbdException
 
 log = logging.getLogger(__name__)
 

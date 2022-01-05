@@ -5,8 +5,8 @@ from typing import Dict, TypeVar, Any
 import sqlalchemy.engine
 import yaml
 
-from dbd import DbdException
 from dbd.config.dbd_profile import DbdProfile
+from dbd.log.dbd_exception import DbdException
 from dbd.utils.jinja_utils import apply_template
 
 ENV_VARS = {key: str(value) for key, value in os.environ.items()}

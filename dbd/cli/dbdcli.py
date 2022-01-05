@@ -7,11 +7,13 @@ from typing import Dict, Any, List
 import click
 from sqlalchemy import text
 
-from dbd import DbdException
+from dbd.log.dbd_exception import DbdException
 from dbd.config.dbd_profile import DbdProfile
 from dbd.config.dbd_project import DbdProject
 from dbd.executors.model_executor import ModelExecutor
+from dbd.log.dbd_logger import setup_logging
 
+setup_logging()
 log = logging.getLogger(__name__)
 
 this_script_dir = os.path.dirname(__file__)

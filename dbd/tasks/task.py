@@ -2,7 +2,7 @@ from typing import Any, List, TypeVar, Tuple, Dict
 
 import sqlalchemy
 
-from dbd import DbdException
+from dbd.log.dbd_exception import DbdException
 from dbd.utils.text_utils import fully_qualified_table_name
 
 TaskType = TypeVar('TaskType', bound='Task')

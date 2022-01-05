@@ -7,7 +7,7 @@ import sqlalchemy.engine
 import yaml
 from sqlalchemy import engine_from_config
 
-from dbd import DbdException
+from dbd.log.dbd_exception import DbdException
 from dbd.utils.jinja_utils import apply_template
 
 ENV_VARS = {key: str(value) for key, value in os.environ.items()}
@@ -44,7 +44,7 @@ class DbdProfile:
         :rtype: DbdProfile
         """
         for profile_file_name in [os.path.join('.', profile_file_name),
-                                          os.path.join(str(Path.home()), 'dbd.profile')]:
+                                  os.path.join(str(Path.home()), 'dbd.profile')]:
             if exists(profile_file_name):
                 processed_yaml = apply_template(profile_file_name, ENV_VARS)
                 return DbdProfile(os.path.normpath(profile_file_name), yaml.safe_load(processed_yaml))
