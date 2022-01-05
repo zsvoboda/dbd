@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dbd"
-version = "0.5.8"
+version = "0.5.9"
 description = "Framework for declarative database creation and management."
 homepage = "https://github.com/zsvoboda/dbd/blob/master/README.md"
 repository = "https://github.com/zsvoboda/dbd"
