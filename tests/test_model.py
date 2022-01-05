@@ -2,6 +2,7 @@ from dbd.config.dbd_profile import DbdProfile
 from dbd.config.dbd_project import DbdProject
 from dbd.db.db_schema import DbSchema
 from dbd.executors.model_executor import ModelExecutor
+from dbd.utils.sql_parser import SQlParserException
 
 
 def test_basic_model():
@@ -80,6 +81,7 @@ def test_basic_model():
         'state_area_sq_mi').alchemy_column().type) == "INTEGER"
     assert not schema.table('us_states').column(
         'state_area_sq_mi').alchemy_column().nullable
+
 
 def test_data_formats_model():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')
@@ -220,7 +222,7 @@ def test_covid_cz():
     project = DbdProject.load(profile, './tests/fixtures/covid_cz/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
-    #model.execute(engine)
+    # model.execute(engine)
 
     schema = DbSchema.from_alchemy_engine('os_covid', engine)
 
@@ -524,3 +526,36 @@ def test_validate_covid():
     model = ModelExecutor(project)
     validation_result, validation_errors = model.validate()
     assert validation_result
+
+
+def test_validate_invalid():
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    project = DbdProject.load(profile, './tests/fixtures/invalid_model/dbd.project')
+    model = ModelExecutor(project)
+    validation_result, validation_errors = model.validate()
+    assert not validation_result
+
+
+def test_validate_screwed():
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    project = DbdProject.load(profile, './tests/fixtures/screwed/dbd.project')
+    model = ModelExecutor(project)
+    try:
+        validation_result, validation_errors = model.validate()
+    except SQlParserException:
+        assert True
+    else:
+        assert False
+
+
+def test_execute_screwed():
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/screwed/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    try:
+        model.execute(engine)
+    except SQlParserException:
+        assert True
+    else:
+        assert False

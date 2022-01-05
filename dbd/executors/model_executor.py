@@ -11,8 +11,8 @@ import yaml
 from jinja2 import Environment, FileSystemLoader
 from sqlalchemy import MetaData
 
+from dbd import DbdException
 from dbd.config.dbd_project import DbdProject
-from dbd.log.dbd_logger import setup_logging
 from dbd.tasks.data_task import DataTask
 from dbd.tasks.db_table_task import DbTableTask
 from dbd.tasks.ddl_task import DdlTask
@@ -21,11 +21,10 @@ from dbd.tasks.task import Task
 from dbd.utils.sql_parser import SqlParser
 from dbd.utils.text_utils import remove_prefix, relative_path_to_base_dir
 
-setup_logging()
 log = logging.getLogger(__name__)
 
 
-class InvalidModelException(Exception):
+class InvalidModelException(DbdException):
     pass
 
 

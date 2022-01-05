@@ -7,10 +7,12 @@ from typing import List
 import sqlalchemy
 from sql_metadata import Parser
 
+from dbd import DbdException
+
 log = logging.getLogger(__name__)
 
 
-class SQlParserException(Exception):
+class SQlParserException(DbdException):
     pass
 
 
@@ -26,7 +28,11 @@ class SqlParser:
         :return: list of tables that the SQL statement depends on
         :rtype: List[str]
         """
-        return Parser(sql).tables
+        try:
+            tables = Parser(sql).tables
+        except ValueError:
+            raise SQlParserException(f"Invalid SQL query '{sql}'")
+        return tables
 
     @classmethod
     def extract_foreign_key_tables(cls, foreign_keys_def: List[str]) -> List[str]:
@@ -50,8 +56,11 @@ class SqlParser:
         :return: compacted SQL text
         :rtype: str
         """
-        parsed_sql = Parser(sql)
-        return parsed_sql.without_comments
+        try:
+            parsed_sql = Parser(sql).without_comments
+        except ValueError:
+            raise SQlParserException(f"Invalid SQL query '{sql}'")
+        return parsed_sql
 
     @classmethod
     def comments(cls, sql: str) -> List[str]:
@@ -61,8 +70,11 @@ class SqlParser:
         :return: comments as array of string
         :rtype: List[str]
         """
-        parsed_sql = Parser(sql)
-        return parsed_sql.comments
+        try:
+            parsed_sql = Parser(sql).comments
+        except ValueError:
+            raise SQlParserException(f"Invalid SQL query '{sql}'")
+        return parsed_sql
 
     @classmethod
     def parse_alchemy_data_type(cls, data_type: str) -> sqlalchemy.types.TypeEngine:

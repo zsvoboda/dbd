@@ -1,5 +1,5 @@
-from dbd import __version__
+import importlib
 
 
 def test_version():
-    assert __version__ == '0.5.0'
+    assert importlib.metadata.version('dbd') == '0.5.8'

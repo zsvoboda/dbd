@@ -1,0 +1,20 @@
+---
+tabulka:
+  sloupce:
+    state_code:
+      nulovatelny: false
+      primarni_key: true
+      typ: CHAR(2)
+    state_name:
+      nulovatelny: false
+      index_je: true
+      type: VARCHAR(50)
+    state_population:
+      nulovatelny: false
+      typ: INTEGER
+    state_area_sq_mi:
+      nulovatelny: false
+      typ: INTEGER
+proces:
+  materializace: table
+  mod: drop

@@ -5,11 +5,12 @@ import pandas as pd
 import sqlalchemy.engine
 from sqlalchemy import Column, TEXT
 
+from dbd import DbdException
 from dbd.db.db_table import DbTable
 from dbd.tasks.db_table_task import DbTableTask
 
 
-class UnsupportedDataFile(Exception):
+class UnsupportedDataFile(DbdException):
     pass
 
 

@@ -6,15 +6,12 @@ from typing import Dict, Any, List
 import click
 from sqlalchemy import text
 
+from dbd import DbdException
 from dbd.config.dbd_profile import DbdProfile
 from dbd.config.dbd_project import DbdProject
 from dbd.executors.model_executor import ModelExecutor
 
 this_script_dir = os.path.dirname(__file__)
-
-
-class DbdException(Exception):
-    pass
 
 
 class Dbd(object):
@@ -111,7 +108,7 @@ def validate(dbd, dest):
     except Exception:
         click.echo(
             f"Can't connect to the target database. Check profile configuration in "
-            f"'{os.path.normpath(os.path.join(dest, profile))}'.")
+            f"'{os.path.normpath(os.path.join(dest, dbd.profile()))}'.")
     validation_result, validation_errors = model.validate()
     if validation_result:
         click.echo("No errors found. Model is valid.")
@@ -129,7 +126,7 @@ def __echo_validation_errors(validation_errors: Dict[str, Any]):
     __echo_validation_level(validation_errors)
 
 
-class InvalidValidationErrorStructure(Exception):
+class InvalidValidationErrorStructure(DbdException):
     pass
 
 
