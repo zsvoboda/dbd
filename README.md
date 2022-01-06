@@ -24,6 +24,10 @@ data types, indexes or constraints (e.g. primary key, foreign key, or check). Se
 
 You can also add an SQL file that performs insert-from-select SQL statement to create database tables with transformed data.
 
+## Examples
+Here are few [examples of models](https://github.com/zsvoboda/dbd/tree/master/examples) tested with Postgres, MySQL, 
+Sqlite, Snowflake, BigQuery, and Redshift.
+
 ## Install DBD
 DBD requires Python 3.7.1 or higher. 
 
