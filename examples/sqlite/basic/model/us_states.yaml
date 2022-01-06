@@ -1,13 +1,18 @@
 ---
 table:
   columns:
-    state_name:
+    state_code:
       nullable: false
       primary_key: true
-      foreign_keys:
-        - state.state_name
+      type: CHAR(2)
+    state_name:
+      nullable: false
+      index: true
       type: VARCHAR(50)
-    area_sq_mi:
+    state_population:
+      nullable: false
+      type: INTEGER
+    state_area_sq_mi:
       nullable: false
       type: INTEGER
 process:

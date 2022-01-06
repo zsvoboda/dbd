@@ -101,8 +101,8 @@ class DataTask(DbTableTask):
         self.set_db_table(db_table)
         db_table.create()
 
-        self.__data_frame.to_sql(self.target(), alchemy_engine, schema=self.target_schema(),
-                                 if_exists='append', index=False)
+        self.__data_frame.to_sql(self.target(), alchemy_engine, chunksize=1024, method = 'multi',
+                                 schema=self.target_schema(), if_exists='append', index=False)
 
     def __read_file_to_dataframe(self):
         """
