@@ -10,7 +10,7 @@ def remove_prefix(text: str, prefix: str) -> str:
     :return: the text with stripped prefix
     :rtype: str
     """
-    if text.startswith(prefix):
+    if len(prefix) > 0 and text.startswith(prefix):
         return text[len(prefix):]
     return text
 
@@ -25,8 +25,20 @@ def relative_path_to_base_dir(base_directory: str, directory: str, file_name: st
     :return: path represented by the directory, file_name, and extension relative to the base_directory
     :rtype: str
     """
-    full_file_name = f"{os.path.join(directory, file_name)}{'' if extension.startswith('.') else '.'}{extension}"
-    return remove_prefix(full_file_name, base_directory).lstrip(os.sep)
+    return relative_path_to_base_dir_no_ext(base_directory, directory, f"{file_name}{'' if extension.startswith('.') else '.'}{extension}")
+
+def relative_path_to_base_dir_no_ext(base_directory: str, directory: str, file_name: str) -> str:
+    """
+    Returns path represented by the directory, file_name, and extension relative to the base_directory
+    :param str base_directory: base directory
+    :param str directory: directory
+    :param str file_name: file name
+    :return: path represented by the directory, file_name, and extension relative to the base_directory
+    :rtype: str
+    """
+    full_file_name = os.path.join(directory, file_name)
+    return remove_prefix(full_file_name, base_directory)
+
 
 
 def strip_table_name(column_name: str) -> str:

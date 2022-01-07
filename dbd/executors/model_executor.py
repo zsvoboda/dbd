@@ -45,7 +45,8 @@ class ModelExecutor:
         :param DbdProject project: DBD project
         """
         self.__project = project
-        self.__model_directory = project.model_directory_from_project()
+        # ensure that there is trailing os.sep
+        self.__model_directory = f"{project.model_directory_from_project()}{os.sep}"
         self.__tasks = {}
         self.__ddl_tasks = {}
         self.__metadata_cache = {}
@@ -136,6 +137,26 @@ class ModelExecutor:
         template = self.__jinja_model_env.get_template(file)
         return template.render(params)
 
+    def __process_reference_file(self, model_root: str, dir_name: str, file_name: str, file_extension: str):
+        """
+        Process file with multiple references to other files (either on a filesystem or URLs). Creates multiple data tasks
+        :param str model_root: model root directory
+        :param str dir_name: schema directory
+        :param str file_name: data file
+        :param str file_extension: data file extension
+        """
+        file_name_absolute = relative_path_to_base_dir(self.__model_directory, model_root, file_name, file_extension)
+        log.debug(f"Processing reference file '{file_name_absolute}'.")
+        template_params = dict(schema=dir_name, table=file_name, session=self)
+        processed_file = self.__apply_template(file_name_absolute, template_params)
+        # do we have corresponding yaml config file?
+        task_def = self.__load_yaml_metadata(model_root, dir_name, file_name, template_params)
+        task = DataTask.from_code(task_def)
+        task.set_task_data(os.path.join(self.__model_directory, file_name_absolute))
+        self.__tasks[task.task_id()] = task
+        log.debug(f"Added reference file task: task_id='{task.task_id()}', task_data='{task.task_data()}'.")
+
+
     def __process_data_file(self, model_root: str, dir_name: str, file_name: str, file_extension: str):
         """
         Process CSV file. Creates EltTask
@@ -219,7 +240,7 @@ class ModelExecutor:
         Crawls the model directory and collects all code files to a directory
         hashed by a target's name (e.g. database table name)
         """
-        for model_root, dirs, files in os.walk(os.path.dirname(f"{self.__model_directory}/"), topdown=True):
+        for model_root, dirs, files in os.walk(self.__model_directory, topdown=True):
             for filename in files:
                 dir_name = f"{remove_prefix(model_root, self.__model_directory)}".split('/')[-1]
                 schema_name = dir_name if len(dir_name) > 0 else None
@@ -229,8 +250,10 @@ class ModelExecutor:
                 if extension.lower() == '.ddl':
                     self.__process_ddl_file(model_root, schema_name, file_name, extension)
                 elif extension.lower() in ['.csv', '.json', '.xls', '.xlsx', '.xlsm', '.xlsb', '.odf', '.ods', '.odt',
-                                           '.parquet', '.url']:
+                                           '.parquet']:
                     self.__process_data_file(model_root, schema_name, file_name, extension)
+                elif extension.lower() in ['.ref', '.url']:
+                    self.__process_reference_file(model_root, schema_name, file_name, extension)
                 elif extension.lower() == '.yaml':
                     pass
 

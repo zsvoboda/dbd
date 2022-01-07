@@ -83,7 +83,7 @@ class DbdProject:
         model_dir = os.path.join(self.__project_directory, self.__config.get(
             'model')) if self.__config is not None and 'model' in self.__config else './model'
         if exists(model_dir):
-            return os.path.normpath(model_dir.rstrip(os.sep))
+            return os.path.normpath(model_dir)
         else:
             raise DbdProjectConfigException(f"Can't find project file '{self.__project_file}' or it doesn't "
                                             f"contain 'model' key and no 'model' dir exists in your current dir.")

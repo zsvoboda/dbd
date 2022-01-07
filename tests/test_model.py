@@ -217,15 +217,141 @@ def test_data_formats_model():
     assert len(schema.table('under18_population_2k').alchemy_table().indexes) == 0
     assert len(schema.table('under18_population_2k').alchemy_table().foreign_keys) == 1
 
-def test_covid():
+def test_covid_urls():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')
-    project = DbdProject.load(profile, './tests/fixtures/covid/dbd.project')
+    project = DbdProject.load(profile, './tests/fixtures/covid_url/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
     model.execute(engine)
 
     schema = DbSchema.from_alchemy_engine(None, engine)
 
+    assert len(schema.tables()) == 1
+    table_names = [t.name() for t in schema.tables()]
+    assert 'covid_url' in table_names
+
+    covid_column_names = [c.name() for c in schema.table('covid_url').columns()]
+
+    assert 'FIPS' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'FIPS').alchemy_column().type) == "CHAR(4)"
+
+    assert 'Admin2' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'Admin2').alchemy_column().type) == "VARCHAR(50)"
+
+    assert 'Province_State' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'Province_State').alchemy_column().type) == "VARCHAR(50)"
+
+    assert 'Country_Region' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'Country_Region').alchemy_column().type) == "VARCHAR(50)"
+
+    assert 'Last_Update' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'Last_Update').alchemy_column().type) == "TIMESTAMP"
+
+    assert 'Lat' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'Lat').alchemy_column().type) == "VARCHAR(10)"
+
+    assert 'Long_' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'Long_').alchemy_column().type) == "VARCHAR(10)"
+
+    assert 'Confirmed' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'Confirmed').alchemy_column().type) == "INTEGER"
+    
+    assert 'Recovered' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'Recovered').alchemy_column().type) == "INTEGER"
+
+    assert 'Active' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'Active').alchemy_column().type) == "INTEGER"
+
+    assert 'Combined_Key' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'Combined_Key').alchemy_column().type) == "VARCHAR(100)"
+
+    assert 'Incident_Rate' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'Incident_Rate').alchemy_column().type) == "FLOAT"
+
+    assert 'Case_Fatality_Ratio' in covid_column_names
+    assert str(schema.table('covid_url').column(
+        'Case_Fatality_Ratio').alchemy_column().type) == "FLOAT"
+
+
+def test_covid_refs():
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    project = DbdProject.load(profile, './tests/fixtures/covid_ref/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+
+    schema = DbSchema.from_alchemy_engine(None, engine)
+
+    assert len(schema.tables()) == 1
+    table_names = [t.name() for t in schema.tables()]
+    assert 'covid_ref' in table_names
+
+    covid_column_names = [c.name() for c in schema.table('covid_ref').columns()]
+
+    assert 'FIPS' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'FIPS').alchemy_column().type) == "CHAR(4)"
+
+    assert 'Admin2' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'Admin2').alchemy_column().type) == "VARCHAR(50)"
+
+    assert 'Province_State' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'Province_State').alchemy_column().type) == "VARCHAR(50)"
+
+    assert 'Country_Region' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'Country_Region').alchemy_column().type) == "VARCHAR(50)"
+
+    assert 'Last_Update' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'Last_Update').alchemy_column().type) == "TIMESTAMP"
+
+    assert 'Lat' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'Lat').alchemy_column().type) == "VARCHAR(10)"
+
+    assert 'Long_' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'Long_').alchemy_column().type) == "VARCHAR(10)"
+
+    assert 'Confirmed' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'Confirmed').alchemy_column().type) == "INTEGER"
+    
+    assert 'Recovered' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'Recovered').alchemy_column().type) == "INTEGER"
+
+    assert 'Active' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'Active').alchemy_column().type) == "INTEGER"
+
+    assert 'Combined_Key' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'Combined_Key').alchemy_column().type) == "VARCHAR(100)"
+
+    assert 'Incident_Rate' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'Incident_Rate').alchemy_column().type) == "FLOAT"
+
+    assert 'Case_Fatality_Ratio' in covid_column_names
+    assert str(schema.table('covid_ref').column(
+        'Case_Fatality_Ratio').alchemy_column().type) == "FLOAT"
+    
 
 def test_covid_cz():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')
