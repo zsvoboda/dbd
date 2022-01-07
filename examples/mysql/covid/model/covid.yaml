@@ -1,0 +1,18 @@
+---
+table:
+  columns:
+    date:
+      type: DATE
+    county:
+      type: VARCHAR(50)
+    state:
+      type: VARCHAR(50)
+    fips:
+      type: CHAR(5)
+    cases:
+      type: INTEGER
+    deaths:
+      type: INTEGER
+process:
+  materialization: table
+  mode: drop
