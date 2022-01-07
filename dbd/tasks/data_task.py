@@ -126,11 +126,11 @@ class DataTask(DbTableTask):
         """
         file_name, file_extension = os.path.splitext(absolute_file_name)
         if file_extension.lower() == '.csv':
-            self.__data_frame = pd.read_csv(absolute_file_name)
+            self.__data_frame = pd.read_csv(absolute_file_name, dtype=str)
         elif file_extension.lower() == '.json':
-            self.__data_frame = pd.read_json(absolute_file_name)
+            self.__data_frame = pd.read_json(absolute_file_name, dtype=False)
         elif file_extension.lower() in ['.xls', '.xlsx', '.xlsm', '.xlsb', '.odf', '.ods', '.odt']:
-            self.__data_frame = pd.read_excel(absolute_file_name)
+            self.__data_frame = pd.read_excel(absolute_file_name, dtype=str)
         elif file_extension.lower() == '.parquet':
             self.__data_frame = pd.read_parquet(absolute_file_name)
         elif file_extension.lower() == '.url':
