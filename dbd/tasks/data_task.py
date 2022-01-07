@@ -100,6 +100,20 @@ class DataTask(DbTableTask):
         :param sqlalchemy.MetaData target_alchemy_metadata: MetaData SQLAlchemy MetaData
         :param sqlalchemy.engine.Engine alchemy_engine:
         """
+        self.__extract_data()
+
+        table_def = self.__override_data_file_column_definitions()
+        db_table = DbTable.from_code(self.target(), table_def, target_alchemy_metadata, self.target_schema())
+        self.set_db_table(db_table)
+        db_table.create()
+
+        self.__data_frame.to_sql(self.target(), alchemy_engine, chunksize=1024, method = 'multi',
+                                 schema=self.target_schema(), if_exists='append', index=False)
+
+    def __extract_data(self):
+        """
+        Extracts data from data files    
+        """
         all_dataframes = []
         for data_file in self.data_files():
             if len(data_file) > 0:   
@@ -112,14 +126,6 @@ class DataTask(DbTableTask):
                     df = self.__read_file_to_dataframe(absolute_file_name)
                     all_dataframes.append(df)                    
         self.__data_frame = pd.concat(all_dataframes, axis=0, ignore_index=True)
-
-        table_def = self.__override_data_file_column_definitions()
-        db_table = DbTable.from_code(self.target(), table_def, target_alchemy_metadata, self.target_schema())
-        self.set_db_table(db_table)
-        db_table.create()
-
-        self.__data_frame.to_sql(self.target(), alchemy_engine, chunksize=1024, method = 'multi',
-                                 schema=self.target_schema(), if_exists='append', index=False)
     
 
     def __read_file_to_dataframe(self, absolute_file_name : str) -> pd.DataFrame:
