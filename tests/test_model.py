@@ -5,6 +5,7 @@ from dbd.executors.model_executor import ModelExecutor
 from dbd.utils.sql_parser import SQlParserException
 
 
+
 def test_basic_model():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')
     project = DbdProject.load(profile, 'tests/fixtures/basic/dbd.project')
@@ -215,6 +216,15 @@ def test_data_formats_model():
     assert len(schema.table('under18_population_2k').alchemy_table().constraints) == 2
     assert len(schema.table('under18_population_2k').alchemy_table().indexes) == 0
     assert len(schema.table('under18_population_2k').alchemy_table().foreign_keys) == 1
+
+def test_covid():
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    project = DbdProject.load(profile, './tests/fixtures/covid/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+
+    schema = DbSchema.from_alchemy_engine(None, engine)
 
 
 def test_covid_cz():

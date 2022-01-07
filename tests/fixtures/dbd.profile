@@ -7,5 +7,7 @@ databases:
     db.url: "sqlite:///tmp/invalid_model.db"
   screwed:
     db.url: "sqlite:///tmp/screwed.db"
+  covid:
+    db.url: "sqlite:///tmp/covid.db"  
   covid_cz:
     db.url: "postgresql://demouser:demopass@localhost/covid_cz"

@@ -152,7 +152,7 @@ class ModelExecutor:
         task = DataTask.from_code(task_def)
         task.set_task_data(os.path.join(self.__model_directory, file_name_absolute))
         self.__tasks[task.task_id()] = task
-        log.debug(f"Added CSV file task: task_id='{task.task_id()}', task_data='{task.task_data()}'.")
+        log.debug(f"Added data file task: task_id='{task.task_id()}', task_data='{task.task_data()}'.")
 
     def __process_sql_file(self, model_root: str, dir_name: str, file_name: str, file_extension: str):
         """
@@ -229,7 +229,7 @@ class ModelExecutor:
                 if extension.lower() == '.ddl':
                     self.__process_ddl_file(model_root, schema_name, file_name, extension)
                 elif extension.lower() in ['.csv', '.json', '.xls', '.xlsx', '.xlsm', '.xlsb', '.odf', '.ods', '.odt',
-                                           '.parquet']:
+                                           '.parquet', '.url']:
                     self.__process_data_file(model_root, schema_name, file_name, extension)
                 elif extension.lower() == '.yaml':
                     pass

@@ -1,9 +1,12 @@
 import os
+import tempfile
 from typing import Dict, List, Any, TypeVar
 
 import pandas as pd
 import sqlalchemy.engine
 from sqlalchemy import Column, TEXT
+
+from dbd.utils.io_utils import download_file, url_to_filename
 
 from dbd.db.db_table import DbTable
 from dbd.log.dbd_exception import DbdException
@@ -94,7 +97,7 @@ class DataTask(DbTableTask):
         :param sqlalchemy.MetaData target_alchemy_metadata: MetaData SQLAlchemy MetaData
         :param sqlalchemy.engine.Engine alchemy_engine:
         """
-        self.__read_file_to_dataframe()
+        self.__read_file_to_dataframe(self.data_file())
 
         table_def = self.__override_data_file_column_definitions()
         db_table = DbTable.from_code(self.target(), table_def, target_alchemy_metadata, self.target_schema())
@@ -104,11 +107,23 @@ class DataTask(DbTableTask):
         self.__data_frame.to_sql(self.target(), alchemy_engine, chunksize=1024, method = 'multi',
                                  schema=self.target_schema(), if_exists='append', index=False)
 
-    def __read_file_to_dataframe(self):
+    def __url_to_dataframe(self, url: str) -> pd.DataFrame:
+        """
+        Downloads a file from a URL to a Pandas dataframe
+        :param str url: url of the file to download
+        :return: None
+        """
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            tmp_file_name = os.path.join(tmpdirname, url_to_filename(url))
+            download_file(url, tmp_file_name)
+            self.__read_file_to_dataframe(tmp_file_name)
+
+    
+    def __read_file_to_dataframe(self, absolute_file_name : str):
         """
         Read the file content to Pandas dataframe
+        :param str absolute_file_name: filename to read the dataframe from
         """
-        absolute_file_name = self.data_file()
         file_name, file_extension = os.path.splitext(absolute_file_name)
         if file_extension.lower() == '.csv':
             self.__data_frame = pd.read_csv(absolute_file_name)
@@ -118,5 +133,9 @@ class DataTask(DbTableTask):
             self.__data_frame = pd.read_excel(absolute_file_name)
         elif file_extension.lower() == '.parquet':
             self.__data_frame = pd.read_parquet(absolute_file_name)
+        elif file_extension.lower() == '.url':
+            with open(absolute_file_name, 'r') as f:
+                url = f.readline()
+                self.__url_to_dataframe(url)
         else:
             raise UnsupportedDataFile(f"Data files with extension '{file_extension}' aren't supported.")

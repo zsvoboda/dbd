@@ -12,8 +12,9 @@ __pycache__/
 # OSX
 .DS_Store
 
-# JetBrains
+# tools
 .idea
+.vscode
 
 # C extensions
 *.so
