@@ -1,0 +1,34 @@
+---
+table:
+  columns:
+    FIPS:
+      type: CHAR(4)
+    Admin2:
+      type: VARCHAR(50)
+    Province_State:
+      type: VARCHAR(50)
+    Country_Region:
+      type: VARCHAR(50)
+    Last_Update:
+      type: TIMESTAMP
+    Lat:
+      type: VARCHAR(10)
+    Long_:
+      type: VARCHAR(10)
+    Confirmed:
+      type: INTEGER
+    Deaths:
+      type: INTEGER
+    Recovered:
+      type: INTEGER
+    Active:
+      type: INTEGER
+    Combined_Key:
+      type: VARCHAR(100)
+    Incident_Rate:
+      type: FLOAT
+    Case_Fatality_Ratio:
+      type: FLOAT
+process:
+  materialization: table
+  mode: drop
