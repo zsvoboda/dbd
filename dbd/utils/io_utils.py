@@ -1,5 +1,14 @@
 from requests import get as get_url
 
+def is_url(url: str) -> bool:
+    """
+    Returns True if the string is a URL
+    :param str url: string to check
+    :return: True if the string is a URL
+    :rtype: bool
+    """
+    return url.startswith('http') or url.startswith('ftp')
+
 def url_to_filename(url: str) -> str:
     """
     Returns the filename from a URL

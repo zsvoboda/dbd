@@ -19,7 +19,8 @@ from dbd.tasks.ddl_task import DdlTask
 from dbd.tasks.elt_task import EltTask
 from dbd.tasks.task import Task
 from dbd.utils.sql_parser import SqlParser
-from dbd.utils.text_utils import remove_prefix, relative_path_to_base_dir
+from dbd.utils.text_utils import relative_path_to_base_dir_no_ext, remove_prefix, relative_path_to_base_dir
+from dbd.utils.io_utils import is_url
 
 log = logging.getLogger(__name__)
 
@@ -137,6 +138,25 @@ class ModelExecutor:
         template = self.__jinja_model_env.get_template(file)
         return template.render(params)
 
+
+    def __read_references(self, processed_file: str, model_root: str) -> List[str]:
+        """
+        Reads references from processed file
+        :param str processed_file: processed file
+        :param str model_root: model root directory
+        :return: list of references URLs or file names
+        :rtype: List[str]
+        """
+        references = []
+        for line in [l.strip() for l in processed_file.splitlines()]:
+                if len(line) > 0:
+                    if is_url(line):
+                        references.append(line)
+                    else:
+                        references.append(relative_path_to_base_dir_no_ext('', self.__model_directory, line))
+        return references
+        
+    
     def __process_reference_file(self, model_root: str, dir_name: str, file_name: str, file_extension: str):
         """
         Process file with multiple references to other files (either on a filesystem or URLs). Creates multiple data tasks
@@ -149,10 +169,11 @@ class ModelExecutor:
         log.debug(f"Processing reference file '{file_name_absolute}'.")
         template_params = dict(schema=dir_name, table=file_name, session=self)
         processed_file = self.__apply_template(file_name_absolute, template_params)
+        refs = self.__read_references(processed_file, model_root)
         # do we have corresponding yaml config file?
         task_def = self.__load_yaml_metadata(model_root, dir_name, file_name, template_params)
         task = DataTask.from_code(task_def)
-        task.set_task_data(os.path.join(self.__model_directory, file_name_absolute))
+        task.set_data_files(refs)
         self.__tasks[task.task_id()] = task
         log.debug(f"Added reference file task: task_id='{task.task_id()}', task_data='{task.task_data()}'.")
 
@@ -171,7 +192,7 @@ class ModelExecutor:
         # do we have corresponding yaml config file?
         task_def = self.__load_yaml_metadata(model_root, dir_name, file_name, template_params)
         task = DataTask.from_code(task_def)
-        task.set_task_data(os.path.join(self.__model_directory, file_name_absolute))
+        task.set_data_files([os.path.join(self.__model_directory, file_name_absolute)])
         self.__tasks[task.task_id()] = task
         log.debug(f"Added data file task: task_id='{task.task_id()}', task_data='{task.task_data()}'.")
 
@@ -252,7 +273,7 @@ class ModelExecutor:
                 elif extension.lower() in ['.csv', '.json', '.xls', '.xlsx', '.xlsm', '.xlsb', '.odf', '.ods', '.odt',
                                            '.parquet']:
                     self.__process_data_file(model_root, schema_name, file_name, extension)
-                elif extension.lower() in ['.ref', '.url']:
+                elif extension.lower() in ['.ref']:
                     self.__process_reference_file(model_root, schema_name, file_name, extension)
                 elif extension.lower() == '.yaml':
                     pass
