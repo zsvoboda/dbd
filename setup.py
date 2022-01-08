@@ -7,7 +7,7 @@ REQUIRES = ["jinja2", "sqlalchemy", "sqlparse", "sql-metadata", "networkx", "psy
 setup(
     name="dbd",
     description="Declarative database",
-    version="0.6.1",
+    version="0.6.2",
     author="Zdenek Svoboda",
     license="BSD",
     install_requires=REQUIRES,
