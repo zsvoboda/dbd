@@ -1,28 +1,31 @@
-# DBD: database loading and transformation tool
-DBD is a data loading and transformation tool that enables data analysts and engineers to load and transform data in SQL databases.
+# dbd: database loading and transformation tool
+dbd is a data loading and transformation tool that enables data analysts and engineers to load and transform data in SQL databases.
 
-DBD helps you with following tasks:
+dbd helps you with following tasks:
 - Loading CSV, JSON, Excel, and Parquet data to database. It supports both local and online files (HTTP URLs). Data can be loaded incrementally or in full. 
 - Transforming data in existing database tables using insert-from-sql statements.
 - Executing DDL (Data Definition Language) SQL scripts (stetements like `CREATE SCHEMA`, etc.).    
 
-## How DBD works
-DBD processes a model directory that contains following elements:
+## How dbd works
+dbd processes a model directory that contains following elements:
 
 - **Directories** create new database schemas.
 - **Files** create new database table or view. The new table's or view's name is the same as the data file name.
   - `.csv`, `.json`, `.xlsx`, and `.parquet` data files are introspected and loaded to database as  tables.   
   - `.sql` files that contain SQL SELECT statements are executed and the result is loaded to database as table or view.
   - `.ref` files contain one or more local paths or URLs pointing to supported data files. The referenced files are loaded to database as tables.  
-  - `.yaml` files contain metadata for the files above. The `.yaml` file has the same name as a data, `.sql`, or `.ref` file and specifies details of target table's columns (data types, constraints, indexes, etc.). `.yaml` files are optional. If not specified, DBD uses defaults (e.g. `TEXT` data types for CSV columns)
+  - `.yaml` files contain metadata for the files above. The `.yaml` file has the same name as a data, `.sql`, or `.ref` file and specifies details of target table's columns (data types, constraints, indexes, etc.). `.yaml` files are optional. If not specified, dbd uses defaults (e.g. `TEXT` data types for CSV columns)
   - `.ddl` files contain multiple SQL statements separated by semicolon that are executed against the database.
 
-DBD currently supports Postgres, MySQL/MariaDB, SQLite, and Snowflake databases. I'm working on support for Redshift, and BigQuery.  
+dbd currently supports Postgres, MySQL/MariaDB, SQLite, and Snowflake databases. I'm working on support for Redshift, and BigQuery.  
 
-![How DBD works](https://raw.githubusercontent.com/zsvoboda/dbd/master/img/dbd.infographic.png)
+![How dbd works](https://raw.githubusercontent.com/zsvoboda/dbd/master/img/dbd.infographic.png)
+
+## Getting started
+A short 5-minute getting started tutorial is available [here](https://zsvoboda.medium.com/analyze-covid-data-in-less-than-5-minutes-9176f440dd1a).
 
 ## Examples
-Check out DBD's [model directory examples](https://github.com/zsvoboda/dbd/tree/master/examples). The easiest way how to execute them is to either clone or download DBD's github repository and start with the SQLite examples.
+Check out dbd's [model directory examples](https://github.com/zsvoboda/dbd/tree/master/examples). The easiest way how to execute them is to either clone or download dbd's github repository and start with the SQLite examples.
 
 ```shell
 pip3 install dbd
@@ -33,8 +36,8 @@ dbd --profile=../dbd.profile run .
 
 These commands should create a new `basic.db` SQLite database with `area`, `population`, and `state` tables that are created and loaded from the corresponding files in the `model` directory.
 
-## Installing DBD
-DBD requires Python 3.7.1 or higher. 
+## Installing dbd
+dbd requires Python 3.7.1 or higher. 
 
 ### PyPI
 
@@ -58,21 +61,21 @@ cd dbd
 pip3 install -e .
 ``` 
 
-## Starting new DBD project
-You can generate DBD project initial layout by executing `init` command:
+## Starting new dbd project
+You can generate dbd project initial layout by executing `init` command:
 
 ```shell
 dbd init <new-project-name>
 ```
 
-The `init` command generates a new DBD project directory with the following content: 
+The `init` command generates a new dbd project directory with the following content: 
 
 - `model` directory that contains the content files.   
-- `dbd.profile` configuration file that defines database connections. The profile file is usually shared by more DBD projects. 
+- `dbd.profile` configuration file that defines database connections. The profile file is usually shared by more dbd projects. 
 - `dbd.project` project configuration file references one of the connections from the profile file and define the `model` directory location.  
 
-## DBD profile configuration file
-DBD stores database connections in the `dbd.profile` configuration file. DBD searches for it in the current directory or in your home directory. You can use `--profile` option to point it to a profile file in different location.   
+## dbd profile configuration file
+dbd stores database connections in the `dbd.profile` configuration file. dbd searches for it in the current directory or in your home directory. You can use `--profile` option to point it to a profile file in different location.   
 
 The profile file is YAML file with the following structure:
 
@@ -88,10 +91,10 @@ databases:
 
 Read [this document](https://docs.sqlalchemy.org/en/14/core/engines.html) for more details about  specific SQLAlchemy database URL formats.  
 
-## DBD project configuration file
-DBD stores project configuration in project configuration file that is usually stored in your DBD project directory. DBD searches for `dbd.project` file in your project's directory root. You can also use the `--project` option of the `dbd` command to specify a custom project configuration file. 
+## dbd project configuration file
+dbd stores project configuration in project configuration file that is usually stored in your dbd project directory. dbd searches for `dbd.project` file in your project's directory root. You can also use the `--project` option of the `dbd` command to specify a custom project configuration file. 
 
-The project configuration file also uses YAML format and references DBD model directory and databse connection from a profile config file. All paths in project file are either absolute or relative to the directory where the profile file is located. 
+The project configuration file also uses YAML format and references dbd model directory and databse connection from a profile config file. All paths in project file are either absolute or relative to the directory where the profile file is located. 
 
 For example:
 
@@ -115,7 +118,7 @@ dbd-project-directory
 
 creates two database schemas: `schema1` and `schema2` and two database tables: `us_states` in `schema1` and `us_counties` in `schema2`. Both tables are populated with the data from the CSV files.  
 
-DBD supports following files located in the `model` directory:
+dbd supports following files located in the `model` directory:
 
 * __DATA files:__ `.csv`, `.json`, `.xls`, `.xlsx`, `.parquet` files are loaded to database as tables
 * __REF files:__ `.ref` files contain one or more absolute or relative paths to local files or URLs of online data files that are loaded to database as tables. All referenced files must have the same structure as they are loaded to the same table.  
@@ -124,7 +127,7 @@ DBD supports following files located in the `model` directory:
 * __YAML files:__ specify additional configuration for the __DATA__, __SQL__, and __REF__ files.
 
 ## REF files
-`.ref` file contains one or more references to files that DBD loads to the database as tables. The references can be URLs, absolute file paths or paths relative to the `.ref` file. All referenced data files must have the same structure as they are loaded to the same database table.
+`.ref` file contains one or more references to files that dbd loads to the database as tables. The references can be URLs, absolute file paths or paths relative to the `.ref` file. All referenced data files must have the same structure as they are loaded to the same database table.
 
 Here is an example of a `.ref` file: 
 
@@ -138,7 +141,7 @@ https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_d
 The paths and URLs can point to data files with different formats (e.g. CSV or JSON) as long as the files have the same structure (number of columns and column types).
 
 ## SQL files 
-`.sql` file performs SQL data transformation in the target database. It contains a SQL SELECT statement that DBD wraps in insert-from-select statement, executes it, and stores the result into a table or view that inherits its name from the SQL file name.
+`.sql` file performs SQL data transformation in the target database. It contains a SQL SELECT statement that dbd wraps in insert-from-select statement, executes it, and stores the result into a table or view that inherits its name from the SQL file name.
 
 Here is an example of `us_states.sql` file that creates a new `us_states` database table:
 
@@ -183,12 +186,12 @@ This `.yaml` file re-types the `state_population` and the `state_area_sq_mi` col
 You don't have to describe all table's columns. The columns that you leave out will have their types
 set to the default TEXT datatype in case of DATA files and is defined by the insert-from-select in case of SQL files.    
 
-The `us_states.sql` table is dropped and data are re-loaded in full everytime the DBD executes this model. 
+The `us_states.sql` table is dropped and data are re-loaded in full everytime the dbd executes this model. 
 
 ### Table section
-`.yaml` file's columns are mapped to a columns of the table that DBD creates from a corresponding __DATA__, __REF__ or __SQL__ file. For example, a CSV header columns or SQL SELECT column `AS` column clauses. 
+`.yaml` file's columns are mapped to a columns of the table that dbd creates from a corresponding __DATA__, __REF__ or __SQL__ file. For example, a CSV header columns or SQL SELECT column `AS` column clauses. 
 
-DBD supports following column's parameters:
+dbd supports following column's parameters:
 
 * __type:__ column's SQL type.
 * __primary_key:__ is the column part of table's primary key (true|false)?
@@ -200,8 +203,8 @@ DBD supports following column's parameters:
 ### Process section
 The `process` section defines following processing options:
 
-* __materialization:__ specifies whether DBD creates a physical `table` or a `view` when processing  SQL file. The __REF__ and __DATA__ files always yield physical table. 
-* __mode:__ specifies what DBD does with table's data. You can specify values `drop`, `truncate`, or `keep`. The  __mode__ option is ignored for views.
+* __materialization:__ specifies whether dbd creates a physical `table` or a `view` when processing  SQL file. The __REF__ and __DATA__ files always yield physical table. 
+* __mode:__ specifies what dbd does with table's data. You can specify values `drop`, `truncate`, or `keep`. The  __mode__ option is ignored for views.
 
 ## Jinja templates
 Most of model files support [Jinja2 templates](https://jinja.palletsprojects.com/en/3.0.x/). For example, this __REF__ file loads 6 CSV files to database (4 online files from a URL and 2 from a local filesystem):
@@ -225,9 +228,10 @@ databases:
 ```
 
 ## License
-DBD code is open-sourced under [BSD 3-clause license](LICENSE). 
+dbd code is open-sourced under [BSD 3-clause license](LICENSE). 
 
 ## Resources and References
-- [DBD github repo](https://github.com/zsvoboda/dbd)
-- [DBD PyPi](https://pypi.org/project/dbd/)
+- [dbd getting started](https://zsvoboda.medium.com/analyze-covid-data-in-less-than-5-minutes-9176f440dd1a)
+- [dbd github repo](https://github.com/zsvoboda/dbd)
+- [dbd PyPi](https://pypi.org/project/dbd/)
 - [Submit issue](https://github.com/zsvoboda/dbd/issues)
