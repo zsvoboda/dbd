@@ -116,8 +116,8 @@ and `us_counties` in `schema2`. Both tables are populated with the data from the
 
 DBD supports following files located in the `model` directory:
 
-* __DATA files:__ `.csv`, `.json`, `.xls`, `.xlsx`, `.parquet` files are loaded to the database as tables
-* __REF files:__ `.ref` files contain one or more absolute or relative references to local data files that are loaded to the database as tables
+* __DATA files:__ `.csv`, `.json`, `.xls`, `.xlsx`, `.parquet` files are loaded to database as tables
+* __REF files:__ `.ref` files contain one or more absolute or relative references to local and online data files that are loaded to database as tables
 * __SQL files:__ with SQL SELECT statements are executed using insert-from-select SQL construct. The INSERT command is generated (the SQL file only contains the SQL SELECT statement)
 * __DDL files:__ contain a sequence of SQL statements separated by semicolon. The DDL files can be named `prolog.ddl` and `epilog.ddl`. The `prolog.ddl` is executed before all other files in a specific schema. The `epilog.ddl` is executed last. The `prolog.ddl` and `epilog.ddl` in the top-level model directory are executed as the very first and tne very last files in the model. 
 * __YAML files:__ specify additional configuration to the __DATA__ and __SQL__ files.
@@ -136,7 +136,7 @@ https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_d
 ../data/01-06-2022.csv
 ```
 
-NOTE: You can use Jinja2 macros in the `.ref` file. The example above loads 6 CV files.
+*NOTE*: You can use Jinja2 macros in the `.ref` file. The example above loads 6 CV files.
 
 ## SQL files 
 SQL file performs SQL transformation within your database. It contains a SQL SELECT statement that DBD wraps in 
