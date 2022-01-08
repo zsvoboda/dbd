@@ -5,7 +5,7 @@ databases:
     db.url: "sqlite:///covid.db"
   covid_ref:
     db.url: "sqlite:///covid_ref.db"
-  covid_url:
-    db.url: "sqlite:///covid_url.db"
+  covid_us:
+    db.url: "sqlite:///covid_us.db"
   data_formats:
     db.url: "sqlite:///data_formats.db"

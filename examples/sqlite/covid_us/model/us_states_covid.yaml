@@ -1,0 +1,8 @@
+table:
+  columns:
+    date:
+      type: DATE
+    state_covid_cases:
+      type: INTEGER
+    state_covid_deaths:
+      type: INTEGER
