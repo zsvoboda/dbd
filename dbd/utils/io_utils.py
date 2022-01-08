@@ -1,5 +1,6 @@
 from requests import get as get_url
 
+
 def is_url(url: str) -> bool:
     """
     Returns True if the string is a URL
@@ -9,6 +10,7 @@ def is_url(url: str) -> bool:
     """
     return url.startswith('http') or url.startswith('ftp')
 
+
 def url_to_filename(url: str) -> str:
     """
     Returns the filename from a URL
@@ -17,7 +19,7 @@ def url_to_filename(url: str) -> str:
     :rtype: str
     """
     return url.split('?')[0].split('/')[-1]
-    
+
 
 def download_file(url, local_filename: str):
     """
@@ -29,5 +31,5 @@ def download_file(url, local_filename: str):
     with get_url(url, stream=True) as r:
         r.raise_for_status()
         with open(local_filename, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=8192): 
+            for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)

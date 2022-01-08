@@ -224,6 +224,7 @@ class DbTable:
             columns.append(DbColumn.from_code(column_name, column_code))
         return columns
 
+    # noinspection PyUnusedLocal
     @classmethod
     def validate_code(cls, table_name: str, table_code: Dict[str, Any]) -> Tuple[bool, Dict[str, Any]]:
         """
@@ -279,6 +280,7 @@ class DbTable:
         :return: True if indexes are valid, False otherwise and Dict of errors
         :rtype: Tuple[bool, Dict[str, Any]]
         """
+        # noinspection PyUnusedLocal
         index_errors = {}
         index_validator = Validator({
             'columns': {

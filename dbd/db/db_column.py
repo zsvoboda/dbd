@@ -88,6 +88,7 @@ class DbColumn:
                                             *foreign_keys
                                             ))
 
+    # noinspection PyUnusedLocal
     @classmethod
     def validate_code(cls, column_name: str, column_code: Dict[str, Any]) -> Tuple[bool, Dict[str, Any]]:
         """

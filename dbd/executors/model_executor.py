@@ -10,6 +10,7 @@ import sqlalchemy.engine
 import yaml
 from jinja2 import Environment, FileSystemLoader
 from sqlalchemy import MetaData
+from sqlalchemy.exc import OperationalError
 
 from dbd.config.dbd_project import DbdProject
 from dbd.log.dbd_exception import DbdException
@@ -18,9 +19,9 @@ from dbd.tasks.db_table_task import DbTableTask
 from dbd.tasks.ddl_task import DdlTask
 from dbd.tasks.elt_task import EltTask
 from dbd.tasks.task import Task
+from dbd.utils.io_utils import is_url
 from dbd.utils.sql_parser import SqlParser
 from dbd.utils.text_utils import relative_path_to_base_dir_no_ext, remove_prefix, relative_path_to_base_dir
-from dbd.utils.io_utils import is_url
 
 log = logging.getLogger(__name__)
 
@@ -102,7 +103,7 @@ class ModelExecutor:
                 log.debug(f"Executing task: '{task.task_id()}'.")
                 task.create(self.__metadata_cache[schema], alchemy_engine)
                 log.debug(f"Task execution finished: '{task.task_id()}'.")
-        except sqlalchemy.exc.OperationalError as o:
+        except OperationalError as o:
             log.error(f"Can't execute model because of: '{o}'.")
             raise ModelExecutionException(f"Can't execute model because of: '{o}'.")
 
@@ -138,7 +139,7 @@ class ModelExecutor:
         template = self.__jinja_model_env.get_template(file)
         return template.render(params)
 
-
+    # noinspection PyUnusedLocal
     def __read_references(self, processed_file: str, model_root: str) -> List[str]:
         """
         Reads references from processed file
@@ -148,18 +149,18 @@ class ModelExecutor:
         :rtype: List[str]
         """
         references = []
-        for line in [l.strip() for l in processed_file.splitlines()]:
-                if len(line) > 0:
-                    if is_url(line):
-                        references.append(line)
-                    else:
-                        references.append(relative_path_to_base_dir_no_ext('', self.__model_directory, line))
+        for line in [ln.strip() for ln in processed_file.splitlines()]:
+            if len(line) > 0:
+                if is_url(line):
+                    references.append(line)
+                else:
+                    references.append(relative_path_to_base_dir_no_ext('', self.__model_directory, line))
         return references
-        
-    
+
     def __process_reference_file(self, model_root: str, dir_name: str, file_name: str, file_extension: str):
         """
-        Process file with multiple references to other files (either on a filesystem or URLs). Creates multiple data tasks
+        Process file with multiple references to other files (either on a filesystem or URLs).
+        Creates multiple data tasks.
         :param str model_root: model root directory
         :param str dir_name: schema directory
         :param str file_name: data file
@@ -176,7 +177,6 @@ class ModelExecutor:
         task.set_data_files(refs)
         self.__tasks[task.task_id()] = task
         log.debug(f"Added reference file task: task_id='{task.task_id()}', task_data='{task.task_data()}'.")
-
 
     def __process_data_file(self, model_root: str, dir_name: str, file_name: str, file_extension: str):
         """
@@ -198,7 +198,7 @@ class ModelExecutor:
 
     def __process_sql_file(self, model_root: str, dir_name: str, file_name: str, file_extension: str):
         """
-        Process SQL (usually INSERTs from SELECTs) file. Creates EltTask
+        Process SQL (usually INSERT from SELECT) file. Creates EltTask
         :param str model_root: model root directory
         :param str dir_name: schema directory
         :param str file_name: SQL file

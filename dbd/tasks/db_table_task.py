@@ -97,6 +97,7 @@ class DbTableTask(Task):
                 self.__target_db_table.drop(alchemy_engine)
         else:
             self.__target_db_table.drop(alchemy_engine)
+        self.__target_db_table = None
 
     def truncate(self, alchemy_metadata: sqlalchemy.MetaData, alchemy_engine: sqlalchemy.engine.Engine):
         """
