@@ -136,7 +136,7 @@ https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_d
 ../data/01-06-2022.csv
 ```
 
-*NOTE*: You can use Jinja2 macros in the `.ref` file. The example above loads 6 CV files.
+*NOTE*: You can use Jinja2 macros in the `.ref` file. The example above loads 6 CSV files.
 
 ## SQL files 
 SQL file performs SQL transformation within your database. It contains a SQL SELECT statement that DBD wraps in 
@@ -183,7 +183,10 @@ process:
 ```
 
 Note that we re-type the `state_population` and the `state_area_sq_mi` columns to INTEGER, disallow
-NULL values in all columns, and specify that the `state_code` column is table's primary key.
+NULL values in all columns, and specify that the `state_code` column is table's primary key. 
+
+You don't have to describe all table's columns. The columns that you leave out will have their types
+set to default TEXT datatype in case of DATA files and defined by the insert-from-select in case of SQL files.    
 
 The table is dropped and data re-loaded in full everytime the dbd executes this model. 
 

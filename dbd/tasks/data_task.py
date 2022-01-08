@@ -33,7 +33,6 @@ class DataTask(DbTableTask):
         :param Dict[str, Any] task_def: Target table definition
         """
         super().__init__(task_def)
-        self.__data_frame = None
 
     def data_files(self) -> List[str]:
         """
@@ -61,26 +60,28 @@ class DataTask(DbTableTask):
 
         return DataTask(task_def)
 
-    def __data_file_columns(self) -> List[sqlalchemy.Column]:
+    def __data_file_columns(self, data_frame: pd.DataFrame) -> List[sqlalchemy.Column]:
         """
         Introspects data file columns
+        :param pd.DataFrame data_frame: Pandas dataframe with populated data
         :return: list of data file columns (SQLAlchemy Column[])
         :rtype: List[sqlalchemy.Column]
         """
-        return [Column(c, TEXT) for c in self.__data_frame.columns]
+        # TODO: Consider introspection of the dataframe columns
+        return [Column(c, TEXT) for c in data_frame.columns]
 
     # noinspection DuplicatedCode
-    def __override_data_file_column_definitions(self) -> Dict[str, Any]:
+    def __override_data_file_column_definitions(self, data_frame: pd.DataFrame) -> Dict[str, Any]:
         """
         Merges the data file column definitions with the column definitions from the task_def.
         The column definitions override the introspected data file types
-
+        :param pd.DataFrame data_frame: Pandas dataframe with populated data
         :return: data file columns overridden with the task's explicit column definitions
         :rtype: Dict[str, Any]
         """
         table_def = self.table_def()
         column_overrides = table_def.get('columns', {})
-        data_file_columns = self.__data_file_columns()
+        data_file_columns = self.__data_file_columns(data_frame)
         ordered_columns = {}
         for c in data_file_columns:
             overridden_column = column_overrides.get(c.name)
@@ -99,22 +100,7 @@ class DataTask(DbTableTask):
         Executes the task. Creates the target table and loads data
         :param sqlalchemy.MetaData target_alchemy_metadata: MetaData SQLAlchemy MetaData
         :param sqlalchemy.engine.Engine alchemy_engine:
-        """
-        self.__extract_data()
-
-        table_def = self.__override_data_file_column_definitions()
-        db_table = DbTable.from_code(self.target(), table_def, target_alchemy_metadata, self.target_schema())
-        self.set_db_table(db_table)
-        db_table.create()
-
-        self.__data_frame.to_sql(self.target(), alchemy_engine, chunksize=1024, method = 'multi',
-                                 schema=self.target_schema(), if_exists='append', index=False)
-
-    def __extract_data(self):
-        """
-        Extracts data from data files    
-        """
-        all_dataframes = []
+        """        
         for data_file in self.data_files():
             if len(data_file) > 0:   
                 with tempfile.TemporaryDirectory() as tmpdirname:             
@@ -124,8 +110,14 @@ class DataTask(DbTableTask):
                     else:
                         absolute_file_name = data_file
                     df = self.__read_file_to_dataframe(absolute_file_name)
-                    all_dataframes.append(df)                    
-        self.__data_frame = pd.concat(all_dataframes, axis=0, ignore_index=True)
+                    if self.db_table() is None:
+                        table_def = self.__override_data_file_column_definitions(df)
+                        db_table = DbTable.from_code(self.target(), table_def, target_alchemy_metadata, self.target_schema())
+                        self.set_db_table(db_table)
+                        db_table.create()
+                    
+                    df.to_sql(self.target(), alchemy_engine, chunksize=1024, method = 'multi',
+                                 schema=self.target_schema(), if_exists='append', index=False)
     
 
     def __read_file_to_dataframe(self, absolute_file_name : str) -> pd.DataFrame:
