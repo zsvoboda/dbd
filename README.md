@@ -109,7 +109,7 @@ Model directory contains directories and files. Directories represent database s
 For example, this `model` directory layout
 
 ```text
-dbd-project-directory
+dbd-model-directory
 +- schema1
  +-- us_states.csv
 +- schema2
