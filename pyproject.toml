@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "dbd"
-version = "0.6.4"
-description = "Framework for declarative database creation and management."
+version = "0.6.5"
+description = "dbd is a data loading and transformation tool that enables data analysts and engineers to load and transform data in SQL databases."
 homepage = "https://github.com/zsvoboda/dbd/blob/master/README.md"
 repository = "https://github.com/zsvoboda/dbd"
 authors = ["zsvoboda <zsvoboda@gmail.com>"]
