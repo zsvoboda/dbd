@@ -17,9 +17,11 @@ dbd processes a model directory that contains following elements:
   - `.yaml` files contain metadata for the files above. The `.yaml` file has the same name as a data, `.sql`, or `.ref` file and specifies details of target table's columns (data types, constraints, indexes, etc.). `.yaml` files are optional. If not specified, dbd uses defaults (e.g. `TEXT` data types for CSV columns)
   - `.ddl` files contain multiple SQL statements separated by semicolon that are executed against the database.
 
-dbd currently supports Postgres, MySQL/MariaDB, SQLite, and Snowflake databases. I'm working on support for Redshift, and BigQuery.  
+dbd knows the correct order in which to process files in the model directory to respect mutual dependencies between created objects.
 
 ![How dbd works](https://raw.githubusercontent.com/zsvoboda/dbd/master/img/dbd.infographic.png)
+
+dbd currently supports Postgres, MySQL/MariaDB, SQLite, and Snowflake databases. I'm working on support for Redshift, and BigQuery.
 
 ## Getting started
 A short 5-minute getting started tutorial is available [here](https://zsvoboda.medium.com/analyze-covid-data-in-less-than-5-minutes-9176f440dd1a).
