@@ -2,8 +2,10 @@ import logging
 import re
 import sys
 # noinspection PyUnresolvedReferences
+from datetime import date, datetime
 import sqlalchemy.dialects.postgresql
 from typing import List
+from dateutil import parser as date_parser
 
 import sqlalchemy
 from sql_metadata import Parser
@@ -99,19 +101,61 @@ class SqlParser:
             try:
                 datatype_class = getattr(sys.modules['sqlalchemy.dialects.postgresql'], core_data_type)
             except AttributeError:
-                log.debug(f"Unsupported data type {core_data_type}.")
-                raise SQlParserException(f"Unsupported data type {core_data_type}.")
+                try:
+                    datatype_class = getattr(sys.modules['sqlalchemy.dialects.bigquery'], core_data_type)
+                except AttributeError:
+                    log.debug(f"Unsupported data type {core_data_type}.")
+                    raise SQlParserException(f"Unsupported data type {core_data_type}.")
 
         if core_data_type in ('CHAR', 'VARCHAR'):
             return datatype_class(length=length)
         elif core_data_type in ('DECIMAL', 'NUMERIC'):
             return datatype_class(precision=length, scale=scale)
-        elif core_data_type in ('TIMESTAMP', 'DATE', 'INTEGER', 'FLOAT', 'DOUBLE', 'TEXT', 'SMALLINT',
-                                'DOUBLE_PRECISION', 'REAL'):
+        elif core_data_type in ('TIMESTAMP', 'DATE', 'DATETIME', 'INTEGER', 'FLOAT', 'DOUBLE', 'TEXT', 'SMALLINT',
+                                'DOUBLE_PRECISION', 'REAL', 'BOOLEAN', 'BOOL'):
             return datatype_class()
         else:
             log.debug(f"Unsupported data type {core_data_type}.")
             raise SQlParserException(f"Unsupported data type {core_data_type}.")
+
+    @classmethod
+    def parse_date(cls, dt: str) -> date:
+        """
+        Parses a date string
+        :param str dt: date string
+        :return: parsed date
+        :rtype: datetime.date
+        """
+        if isinstance(dt, str):
+            return date_parser.parse(dt).date()
+        else:
+            return dt
+
+    @classmethod
+    def parse_datetime(cls, dt: str) -> datetime:
+        """
+        Parses a date string
+        :param str dt: datetime string
+        :return: parsed datetime
+        :rtype: datetime.datetime
+        """
+        if isinstance(dt, str):
+            return date_parser.parse(dt)
+        else:
+            return dt
+
+    @classmethod
+    def parse_bool(cls, b: str) -> bool:
+        """
+        Parses a date string
+        :param str b: bool string
+        :return: parsed bool
+        :rtype: bool
+        """
+        if isinstance(b, str):
+            return b.lower() in ('true', '1', 't', 'y', 'yes')
+        else:
+            return b
 
     @classmethod
     def remove_sql_comments(cls, sql_text: str) -> str:

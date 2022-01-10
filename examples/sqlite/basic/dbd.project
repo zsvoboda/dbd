@@ -1,2 +1,2 @@
 model: ./model
-database: basic
+database: basic_sqlite

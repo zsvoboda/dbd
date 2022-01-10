@@ -1,2 +1,2 @@
 model: ./model
-database: covid_cz
+database: covid_cz_pgsql

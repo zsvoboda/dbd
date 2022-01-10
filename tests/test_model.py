@@ -4,6 +4,46 @@ from dbd.db.db_schema import DbSchema
 from dbd.executors.model_executor import ModelExecutor
 from dbd.utils.sql_parser import SQlParserException
 
+"""
+def test_bigquery():
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/bigquery/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+
+
+def test_snowflake():
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/snowflake/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+"""
+
+
+def test_sqlite():
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/sqlite/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+
+
+def test_postgres():
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/postgres/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+
+
+def test_mysql():
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/mysql/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
 
 
 def test_basic_model():
@@ -217,6 +257,7 @@ def test_data_formats_model():
     assert len(schema.table('under18_population_2k').alchemy_table().indexes) == 0
     assert len(schema.table('under18_population_2k').alchemy_table().foreign_keys) == 1
 
+
 def test_covid_refs():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')
     project = DbdProject.load(profile, './tests/fixtures/covid_ref/dbd.project')
@@ -263,7 +304,7 @@ def test_covid_refs():
     assert 'Confirmed' in covid_column_names
     assert str(schema.table('covid_ref').column(
         'Confirmed').alchemy_column().type) == "INTEGER"
-    
+
     assert 'Recovered' in covid_column_names
     assert str(schema.table('covid_ref').column(
         'Recovered').alchemy_column().type) == "INTEGER"
@@ -283,14 +324,14 @@ def test_covid_refs():
     assert 'Case_Fatality_Ratio' in covid_column_names
     assert str(schema.table('covid_ref').column(
         'Case_Fatality_Ratio').alchemy_column().type) == "FLOAT"
-    
+
 
 def test_covid_cz():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')
     project = DbdProject.load(profile, './tests/fixtures/covid_cz/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
-    #model.execute(engine)
+    # model.execute(engine)
 
     schema = DbSchema.from_alchemy_engine('os_covid', engine)
 

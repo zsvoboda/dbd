@@ -1,5 +1,6 @@
 import os
 import tempfile
+from datetime import datetime, date
 from typing import Dict, List, Any, TypeVar
 
 import pandas as pd
@@ -11,6 +12,7 @@ from dbd.log.dbd_exception import DbdException
 from dbd.tasks.db_table_task import DbTableTask
 from dbd.utils.io_utils import download_file, url_to_filename
 from dbd.utils.io_utils import is_url
+from dbd.utils.sql_parser import SqlParser
 
 
 class UnsupportedDataFile(DbdException):
@@ -69,7 +71,8 @@ class DataTask(DbTableTask):
         # TODO: Consider introspection of the dataframe columns
         return [Column(c, TEXT) for c in data_frame.columns]
 
-    # noinspection DuplicatedCode
+        # noinspection DuplicatedCode
+
     def __override_data_file_column_definitions(self, data_frame: pd.DataFrame) -> Dict[str, Any]:
         """
         Merges the data file column definitions with the column definitions from the task_def.
@@ -108,7 +111,9 @@ class DataTask(DbTableTask):
                         download_file(data_file, absolute_file_name)
                     else:
                         absolute_file_name = data_file
+
                     df = self.__read_file_to_dataframe(absolute_file_name)
+
                     if self.db_table() is None:
                         table_def = self.__override_data_file_column_definitions(df)
                         db_table = DbTable.from_code(self.target(), table_def, target_alchemy_metadata,
@@ -116,8 +121,36 @@ class DataTask(DbTableTask):
                         self.set_db_table(db_table)
                         db_table.create()
 
+                    dtype = self.__adjust_dataframe_datatypes(df)
+
                     df.to_sql(self.target(), alchemy_engine, chunksize=1024, method='multi',
-                              schema=self.target_schema(), if_exists='append', index=False)
+                              schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
+
+    def __adjust_dataframe_datatypes(self, df):
+        """
+        Adjusts the dataframe datatypes to match the target table
+        :param pd.DataFrame df: Pandas dataframe with populated data
+        :return: dtype for to_sql
+        """
+        dtype = {}
+        for c in self.db_table().columns():
+            column_name = c.name()
+            column_type = c.type()
+            python_type = SqlParser.parse_alchemy_data_type(column_type).python_type
+            if isinstance(python_type, type) and issubclass(python_type, datetime):
+                df[column_name] = df[column_name].map(lambda x: SqlParser.parse_datetime(x))
+            elif isinstance(python_type, type) and issubclass(python_type, date):
+                df[column_name] = df[column_name].map(lambda x: SqlParser.parse_date(x))
+            elif isinstance(python_type, type) and issubclass(python_type, bool):
+                df[column_name] = df[column_name].map(lambda x: SqlParser.parse_bool(x))
+            elif isinstance(python_type, type) and issubclass(python_type, int):
+                python_type = 'Int64'
+                # pandas bug workaround
+                df[column_name] = df[column_name].astype('float').astype(python_type)
+            elif isinstance(python_type, type) and issubclass(python_type, float):
+                df[column_name] = df[column_name].astype(python_type)
+            dtype[column_name] = column_type
+        return dtype
 
     # noinspection PyMethodMayBeStatic
     def __read_file_to_dataframe(self, absolute_file_name: str) -> pd.DataFrame:
@@ -134,9 +167,9 @@ class DataTask(DbTableTask):
             return pd.read_csv(absolute_file_name, dtype=str)
         elif file_extension.lower() == '.json':
             # noinspection PyTypeChecker
-            return pd.read_json(absolute_file_name, dtype=False)
+            return pd.read_json(absolute_file_name)
         elif file_extension.lower() in {'.xls', '.xlsx', '.xlsm', '.xlsb', '.odf', '.ods', '.odt'}:
-            return pd.read_excel(absolute_file_name, dtype=str)
+            return pd.read_excel(absolute_file_name)
         elif file_extension.lower() == '.parquet':
             return pd.read_parquet(absolute_file_name)
         else:

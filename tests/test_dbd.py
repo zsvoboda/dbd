@@ -2,4 +2,4 @@ import importlib
 
 
 def test_version():
-    assert importlib.metadata.version('dbd') == '0.6.3'
+    assert importlib.metadata.version('dbd') == '0.6.5'

@@ -38,6 +38,20 @@ class DbColumn:
         """
         return self.__name
 
+    def type_name(self) -> str:
+        """
+        :return: column's type name
+        :rtype: str
+        """
+        return str(self.__alchemy_column.type)
+
+    def type(self) -> sqlalchemy.types.TypeEngine:
+        """
+        :return: column's type
+        :rtype: sqlalchemy.types.TypeEngine
+        """
+        return self.__alchemy_column.type
+
     def code(self) -> str:
         """
         TODO: shall I turn this to JSON and to dict here?

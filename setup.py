@@ -2,7 +2,7 @@ from distutils.core import setup
 
 REQUIRES = ["jinja2", "sqlalchemy", "sqlparse", "sql-metadata", "networkx", "psycopg2", "pyyaml", "pandas",
             "click", "cerberus", "openpyxl", "pyarrow", "PyMySQL", "snowflake-sqlalchemy", "sqlalchemy-redshift", 
-            "requests"]
+            "requests", "google-cloud-storage", "sqlalchemy-bigquery", "google-cloud-bigquery-storage", "greenlet"]
 
 setup(
     name="dbd",

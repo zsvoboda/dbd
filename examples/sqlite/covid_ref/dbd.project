@@ -1,2 +1,2 @@
 model: model
-database: covid_ref
+database: covid_ref_sqlite

@@ -1,11 +1,11 @@
 databases:
-  basic:
+  basic_sqlite:
     db.url: "sqlite:///basic.db"
-  covid:
+  covid_sqlite:
     db.url: "sqlite:///covid.db"
-  covid_ref:
+  covid_ref_sqlite:
     db.url: "sqlite:///covid_ref.db"
-  covid_us:
+  covid_us_sqlite:
     db.url: "sqlite:///covid_us.db"
-  data_formats:
+  data_formats_sqlite:
     db.url: "sqlite:///data_formats.db"
