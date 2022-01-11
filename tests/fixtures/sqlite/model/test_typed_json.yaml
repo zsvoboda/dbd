@@ -1,0 +1,20 @@
+---
+table:
+  columns:
+    test_date:
+      type: DATE
+    test_datetime:
+      type: DATETIME
+    test_bool:
+      type: BOOLEAN
+    test_string:
+      type: VARCHAR(50)
+    test_int:
+      type: INTEGER
+    test_float:
+      type: FLOAT
+process:
+  materialization: table
+  mode: drop
+
+

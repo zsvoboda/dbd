@@ -4,47 +4,6 @@ from dbd.db.db_schema import DbSchema
 from dbd.executors.model_executor import ModelExecutor
 from dbd.utils.sql_parser import SQlParserException
 
-"""
-def test_bigquery():
-    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/bigquery/dbd.project')
-    model = ModelExecutor(project)
-    engine = project.alchemy_engine_from_project()
-    model.execute(engine)
-
-
-def test_snowflake():
-    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/snowflake/dbd.project')
-    model = ModelExecutor(project)
-    engine = project.alchemy_engine_from_project()
-    model.execute(engine)
-"""
-
-
-def test_sqlite():
-    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/sqlite/dbd.project')
-    model = ModelExecutor(project)
-    engine = project.alchemy_engine_from_project()
-    model.execute(engine)
-
-
-def test_postgres():
-    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/postgres/dbd.project')
-    model = ModelExecutor(project)
-    engine = project.alchemy_engine_from_project()
-    model.execute(engine)
-
-
-def test_mysql():
-    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/mysql/dbd.project')
-    model = ModelExecutor(project)
-    engine = project.alchemy_engine_from_project()
-    model.execute(engine)
-
 
 def test_basic_model():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')

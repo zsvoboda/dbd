@@ -3,6 +3,8 @@ import re
 import sys
 # noinspection PyUnresolvedReferences
 from datetime import date, datetime
+
+import numpy as np
 import sqlalchemy.dialects.postgresql
 from typing import List
 from dateutil import parser as date_parser
@@ -126,10 +128,8 @@ class SqlParser:
         :return: parsed date
         :rtype: datetime.date
         """
-        if isinstance(dt, str):
-            return date_parser.parse(dt).date()
-        else:
-            return dt
+        dtt = cls.parse_datetime(dt)
+        return dtt.date() if isinstance(dtt, datetime) else dtt
 
     @classmethod
     def parse_datetime(cls, dt: str) -> datetime:
@@ -140,7 +140,7 @@ class SqlParser:
         :rtype: datetime.datetime
         """
         if isinstance(dt, str):
-            return date_parser.parse(dt)
+            return date_parser.parse(dt) if len(dt) > 0 else np.nan
         else:
             return dt
 
