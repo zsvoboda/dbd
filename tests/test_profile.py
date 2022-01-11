@@ -2,15 +2,17 @@ from dbd.config.dbd_profile import DbdProfile
 
 
 def test_profile_connections():
-    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
     connections = profile.db_connections()
-    assert 'states' in connections
-    assert 'covid_cz' in connections
+    assert 'basic' in connections
+    assert 'data_formats' in connections
+    assert 'invalid_model' in connections
+    assert 'screwed' in connections
 
 
 def test_profile_connection_engines():
-    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
-    states_engine = profile.alchemy_engine_from_profile('states')
-    assert str(states_engine.url) == profile.db_connections().get('states').get('db.url')
-    covid_cz_engine = profile.alchemy_engine_from_profile('covid_cz')
-    assert str(covid_cz_engine.url) == profile.db_connections().get('covid_cz').get('db.url')
+    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
+    basic_engine = profile.alchemy_engine_from_profile('basic')
+    assert str(basic_engine.url) == profile.db_connections().get('basic').get('db.url')
+    data_formats_engine = profile.alchemy_engine_from_profile('data_formats')
+    assert str(data_formats_engine.url) == profile.db_connections().get('data_formats').get('db.url')
