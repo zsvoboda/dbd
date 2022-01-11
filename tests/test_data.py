@@ -31,6 +31,7 @@ def validate_result(engine, table_name='test_typed'):
         assert result.fetchall() == [(1,)], f"ALL NULL row count failed for table {table_name}"
 
 
+"""
 def test_bigquery():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')
     project = DbdProject.load(profile, 'tests/fixtures/bigquery/dbd.project')
@@ -39,6 +40,8 @@ def test_bigquery():
     model.execute(engine)
     validate_result(engine, table_name='test_typed')
     validate_result(engine, table_name='test_typed_json')
+    validate_result(engine, table_name='test_typed_parquet')
+    validate_result(engine, table_name='test_typed_excel')
 
 
 def test_snowflake():
@@ -49,7 +52,9 @@ def test_snowflake():
     model.execute(engine)
     validate_result(engine, table_name='test_typed')
     validate_result(engine, table_name='test_typed_json')
-
+    validate_result(engine, table_name='test_typed_parquet')
+    validate_result(engine, table_name='test_typed_excel')
+"""
 
 def test_sqlite():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')
@@ -59,6 +64,8 @@ def test_sqlite():
     model.execute(engine)
     validate_result(engine, table_name='test_typed')
     validate_result(engine, table_name='test_typed_json')
+    validate_result(engine, table_name='test_typed_parquet')
+    validate_result(engine, table_name='test_typed_excel')
 
 
 def test_postgres():
@@ -69,6 +76,8 @@ def test_postgres():
     model.execute(engine)
     validate_result(engine, table_name='test_typed')
     validate_result(engine, table_name='test_typed_json')
+    validate_result(engine, table_name='test_typed_parquet')
+    validate_result(engine, table_name='test_typed_excel')
 
 
 def test_mysql():
@@ -79,3 +88,5 @@ def test_mysql():
     model.execute(engine)
     validate_result(engine, table_name='test_typed')
     validate_result(engine, table_name='test_typed_json')
+    validate_result(engine, table_name='test_typed_parquet')
+    validate_result(engine, table_name='test_typed_excel')

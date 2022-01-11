@@ -1,15 +1,16 @@
 import logging
+import math
 import re
 import sys
 # noinspection PyUnresolvedReferences
 from datetime import date, datetime
 
-import numpy as np
 import sqlalchemy.dialects.postgresql
 from typing import List
 from dateutil import parser as date_parser
 
 import sqlalchemy
+from math import nan
 from sql_metadata import Parser
 
 from dbd.log.dbd_exception import DbdException
@@ -134,28 +135,51 @@ class SqlParser:
     @classmethod
     def parse_datetime(cls, dt: str) -> datetime:
         """
-        Parses a date string
+        Parses a datetime string
         :param str dt: datetime string
         :return: parsed datetime
         :rtype: datetime.datetime
         """
         if isinstance(dt, str):
-            return date_parser.parse(dt) if len(dt) > 0 else np.nan
+            return date_parser.parse(dt) if len(dt) > 0 else nan
         else:
             return dt
 
     @classmethod
     def parse_bool(cls, b: str) -> bool:
         """
-        Parses a date string
+        Parses a bool string
         :param str b: bool string
         :return: parsed bool
         :rtype: bool
         """
         if isinstance(b, str):
             return b.lower() in ('true', '1', 't', 'y', 'yes')
+        elif isinstance(b, bool):
+            return b
+        elif isinstance(b, int):
+            return b != 0
+        elif isinstance(b, float):
+            return (b != 0.0) if not math.isnan(b) else nan
         else:
             return b
+
+    @classmethod
+    def parse_int(cls, i: str) -> int:
+        """
+        Parses an int string
+        :param str i: int string
+        :return: parsed int
+        :rtype: int
+        """
+        if isinstance(i, str):
+            return int(i) if len(i) > 0 else nan
+        elif isinstance(i, bool):
+            return 1 if i else 0
+        elif isinstance(i, float):
+            return int(i) if not math.isnan(i) else nan
+        else:
+            return i
 
     @classmethod
     def remove_sql_comments(cls, sql_text: str) -> str:
