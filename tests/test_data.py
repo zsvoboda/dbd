@@ -56,6 +56,18 @@ def test_snowflake():
     validate_result(engine, table_name='test_typed_excel')
 """
 
+
+def test_redshift():
+    profile = DbdProfile.load('./tests/fixtures/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/redshift/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+    validate_result(engine, table_name='test_typed')
+    validate_result(engine, table_name='test_typed_json')
+    validate_result(engine, table_name='test_typed_parquet')
+    validate_result(engine, table_name='test_typed_excel')
+
 def test_sqlite():
     profile = DbdProfile.load('./tests/fixtures/dbd.profile')
     project = DbdProject.load(profile, 'tests/fixtures/sqlite/dbd.project')
