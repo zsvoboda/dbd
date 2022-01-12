@@ -1,7 +1,7 @@
 table:
   columns:
     obec_kod:
-      type: CHAR(3)
+      type: CHAR(6)
     okres_kod:
       type: CHAR(6)
     psc:
