@@ -1,0 +1,9 @@
+table:
+  columns:
+    zeme_id:
+      type: CHAR(3)
+    zeme_jmeno:
+      type: VARCHAR(50)
+process:
+  materialization: table
+  mode: drop

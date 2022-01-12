@@ -3,6 +3,7 @@ import tempfile
 from datetime import datetime, date
 from typing import Dict, List, Any, TypeVar
 
+import click
 import pandas as pd
 import sqlalchemy.engine
 from sqlalchemy import Column, TEXT
@@ -108,6 +109,7 @@ class DataTask(DbTableTask):
                 with tempfile.TemporaryDirectory() as tmpdirname:
                     if is_url(data_file):
                         absolute_file_name = os.path.join(tmpdirname, url_to_filename(data_file))
+                        click.echo(f"\tDownloading file: '{absolute_file_name}'.")
                         download_file(data_file, absolute_file_name)
                     else:
                         absolute_file_name = data_file
@@ -122,7 +124,7 @@ class DataTask(DbTableTask):
                         db_table.create()
 
                     dtype = self.__adjust_dataframe_datatypes(df)
-
+                    click.echo(f"\tLoading data to database.")
                     df.to_sql(self.target(), alchemy_engine, chunksize=1024, method='multi',
                               schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
 

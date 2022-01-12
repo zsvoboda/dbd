@@ -1,6 +1,7 @@
 import hashlib
 from typing import Dict, List, Any, TypeVar
 
+import click
 import sqlalchemy.engine
 from sqlalchemy import select, Column
 from sqlalchemy.testing.schema import Table
@@ -142,15 +143,19 @@ class EltTask(DbTableTask):
         if materialization == 'view':
             sql_text = f"CREATE VIEW  {self.fully_qualified_target()} AS {self.sql()}"
             with alchemy_engine.connect() as conn:
+                click.echo(f"\tCreating view '{self.fully_qualified_target()}'.")
                 conn.execute(sql_text)
         else:
             overridden_def = self.__override_sql_column_definitions(target_alchemy_metadata, alchemy_engine)
             db_table = DbTable.from_code(self.target(), overridden_def, target_alchemy_metadata, self.target_schema())
             self.set_db_table(db_table)
+            click.echo(f"\tCreating table '{self.fully_qualified_target()}'.")
             db_table.create()
             columns = [c.name() for c in db_table.columns()]
+            click.echo(f"\tExecuting SQL.")
             sql_text = f"INSERT INTO {self.fully_qualified_target()}({','.join(columns)}) {self.sql()}"
             with alchemy_engine.connect() as conn:
+
                 conn.execute(sql_text)
 
     def depends_on(self) -> List[str]:

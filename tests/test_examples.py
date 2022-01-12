@@ -4,6 +4,14 @@ from dbd.db.db_schema import DbSchema
 from dbd.executors.model_executor import ModelExecutor
 
 
+def test_covid_czech():
+    profile = DbdProfile.load('./tests/fixtures/examples/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/examples/covid_czech/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+
+
 def test_covid_refs():
     profile = DbdProfile.load('./tests/fixtures/examples/dbd.profile')
     project = DbdProject.load(profile, 'tests/fixtures/examples/covid_ref/dbd.project')
