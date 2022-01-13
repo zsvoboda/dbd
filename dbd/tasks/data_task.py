@@ -1,11 +1,14 @@
+import csv
 import os
 import tempfile
 from datetime import datetime, date
+from io import StringIO
 from typing import Dict, List, Any, TypeVar
 
 import click
 import pandas as pd
 import sqlalchemy.engine
+from snowflake.connector.pandas_tools import write_pandas
 from sqlalchemy import Column, TEXT
 
 from dbd.db.db_table import DbTable
@@ -21,6 +24,37 @@ class UnsupportedDataFile(DbdException):
 
 
 DataTaskType = TypeVar('DataTaskType', bound='DataTask')
+
+
+def psql_writer(table, conn, keys, data_iter):
+    """
+    Execute SQL statement inserting data
+
+    Parameters
+    ----------
+    table : pandas.io.sql.SQLTable
+    conn : sqlalchemy.engine.Engine or sqlalchemy.engine.Connection
+    keys : list of str
+        Column names
+    data_iter : Iterable that iterates the values to be inserted
+    """
+    # gets a DBAPI connection that can provide a cursor
+    dbapi_conn = conn.connection
+    with dbapi_conn.cursor() as cur:
+        s_buf = StringIO()
+        writer = csv.writer(s_buf)
+        writer.writerows(data_iter)
+        s_buf.seek(0)
+
+        columns = ', '.join('"{}"'.format(k) for k in keys)
+        if table.schema:
+            table_name = '{}.{}'.format(table.schema, table.name)
+        else:
+            table_name = table.name
+
+        sql = 'COPY {} ({}) FROM STDIN WITH CSV'.format(
+            table_name, columns)
+        cur.copy_expert(sql=sql, file=s_buf)
 
 
 class DataTask(DbTableTask):
@@ -122,16 +156,53 @@ class DataTask(DbTableTask):
                                                      self.target_schema())
                         self.set_db_table(db_table)
                         db_table.create()
-
-                    dtype = self.__adjust_dataframe_datatypes(df)
+                    dtype = self.__adjust_dataframe_datatypes(df, alchemy_engine.dialect.name)
                     click.echo(f"\tLoading data to database.")
-                    df.to_sql(self.target(), alchemy_engine, chunksize=1024, method='multi',
-                              schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
+                    if alchemy_engine.dialect.name == 'snowflake':
+                        self.__bulk_load_snowflake(df, alchemy_engine)
+                    elif alchemy_engine.dialect.name == 'postgresql':
+                        df.to_sql(self.target(), alchemy_engine, chunksize=1024, method=psql_writer,
+                                  schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
+                    elif alchemy_engine.dialect.name == 'bigquery':
+                        self.__bulk_load_bigquery(df, dtype, alchemy_engine)
+                    else:
+                        df.to_sql(self.target(), alchemy_engine, chunksize=1024, method='multi',
+                                  schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
 
-    def __adjust_dataframe_datatypes(self, df):
+    def __bulk_load_bigquery(self, df: pd.DataFrame, dtype: Dict[str, str], alchemy_engine: sqlalchemy.engine.Engine):
+        """
+        Bulk load data to BigQuery
+        :param pd.DataFrame df: pandas dataframe
+        :param Dict[str, str] dtype: Data types for each column
+        :param sqlalchemy.engine.Engine alchemy_engine: SqlAlchemy engine
+        """
+        table_schema = [dict(name=k, type=SqlParser.datatype_to_gbq_datatype(str(v))) for (k, v) in dtype.items()]
+        dataset = alchemy_engine.engine.url.database
+        df.to_gbq(f"{dataset}.{self.target()}", if_exists='append', table_schema=table_schema)
+
+    def __bulk_load_snowflake(self, df: pd.DataFrame, alchemy_engine: sqlalchemy.engine.Engine):
+        """
+        Bulk load data to snowflake
+        :param pandas.DataFrame df: DataFrame
+        :param sqlalchemy.engine.Engine alchemy_engine: SQLAlchemy engine
+        """
+        df.columns = map(str.upper, df.columns)
+        table_name = self.target().upper()
+        schema_name = self.target_schema()
+        schema_name = schema_name.upper() if schema_name else None
+        with alchemy_engine.connect() as conn:
+            write_pandas(
+                conn.connection, df,
+                table_name=table_name,
+                schema=schema_name,
+                quote_identifiers=False)
+            conn.connection.commit()
+
+    def __adjust_dataframe_datatypes(self, df, dialect_name: str):
         """
         Adjusts the dataframe datatypes to match the target table
         :param pd.DataFrame df: Pandas dataframe with populated data
+        :param str dialect_name: SQLAlchemy dialect name
         :return: dtype for to_sql
         """
         dtype = {}
@@ -140,15 +211,26 @@ class DataTask(DbTableTask):
             column_type = c.type()
             python_type = SqlParser.parse_alchemy_data_type(column_type).python_type
             if isinstance(python_type, type) and issubclass(python_type, datetime):
-                df[column_name] = df[column_name].map(lambda x: SqlParser.parse_datetime(x))
+                if dialect_name in ['bigquery']:
+                    df[column_name] = pd.to_datetime(df[column_name], errors='coerce').dt.strftime('%Y-%m-%d %H:%M:%S')
+                    df[column_name] = df[column_name].astype('datetime64[ns]')
+                elif dialect_name in ['snowflake']:
+                    df[column_name] = pd.to_datetime(df[column_name], errors='coerce').dt.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    df[column_name] = pd.to_datetime(df[column_name], errors='coerce')
             elif isinstance(python_type, type) and issubclass(python_type, date):
-                df[column_name] = df[column_name].map(lambda x: SqlParser.parse_date(x))
+                if dialect_name in ['bigquery']:
+                    df[column_name] = pd.to_datetime(df[column_name], errors='coerce').dt.strftime('%Y-%m-%d')
+                    df[column_name] = df[column_name].astype('datetime64[ns]')
+                elif dialect_name in ['snowflake']:
+                    df[column_name] = pd.to_datetime(df[column_name], errors='coerce').dt.strftime('%Y-%m-%d')
+                else:
+                    df[column_name] = pd.to_datetime(df[column_name], errors='coerce')
             elif isinstance(python_type, type) and issubclass(python_type, bool):
                 df[column_name] = df[column_name].map(lambda x: SqlParser.parse_bool(x))
+                df[column_name] = df[column_name].astype('boolean')
             elif isinstance(python_type, type) and issubclass(python_type, int):
-                python_type = 'Int64'
-                # pandas bug workaround
-                df[column_name] = df[column_name].astype('float').astype(python_type)
+                df[column_name] = df[column_name].astype('float').astype('Int64')
             elif isinstance(python_type, type) and issubclass(python_type, float):
                 df[column_name] = df[column_name].astype(python_type)
             dtype[column_name] = column_type
@@ -173,6 +255,6 @@ class DataTask(DbTableTask):
         elif file_extension.lower() in {'.xls', '.xlsx', '.xlsm', '.xlsb', '.odf', '.ods', '.odt'}:
             return pd.read_excel(absolute_file_name)
         elif file_extension.lower() == '.parquet':
-            return pd.read_parquet(absolute_file_name)
+            return pd.read_parquet(absolute_file_name, use_nullable_dtypes=True)
         else:
             raise UnsupportedDataFile(f"Data files with extension '{file_extension}' aren't supported.")

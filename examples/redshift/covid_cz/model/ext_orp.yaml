@@ -1,0 +1,26 @@
+table:
+  columns:
+    datum:
+      type: DATE
+    incidence_7:
+      type: INTEGER
+    incidence_65_7:
+      type: INTEGER
+    incidence_75_7:
+      type: INTEGER
+    prevalence:
+      type: INTEGER
+    prevalence_65:
+      type: INTEGER
+    prevalence_75:
+      type: INTEGER
+    aktualni_pocet_hospitalizovanych_osob:
+      type: INTEGER
+    nove_hosp_7:
+      type: INTEGER
+    testy_7:
+      type: INTEGER
+process:
+  materialization: table
+  mode: drop
+

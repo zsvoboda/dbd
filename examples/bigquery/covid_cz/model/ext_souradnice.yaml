@@ -1,0 +1,23 @@
+table:
+  columns:
+    obec_kod:
+      type: CHAR(6)
+    okres_kod:
+      type: CHAR(6)
+    psc:
+      type: CHAR(5)
+    obec:
+      type: VARCHAR(50)
+    okres:
+      type: VARCHAR(50)
+    kraj:
+      type: VARCHAR(50)
+    kraj_kod:
+      type: CHAR(5)
+    latitude:
+      type: VARCHAR(10)
+    longitude:
+      type: VARCHAR(10)
+process:
+  materialization: table
+  mode: drop

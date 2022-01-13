@@ -1,0 +1,13 @@
+table:
+  columns:
+    datum:
+      type: DATE
+    kumulativni_pocet_nakazenych:
+      type: INTEGER
+    kumulativni_pocet_vylecenych:
+      type: INTEGER
+    kumulativni_pocet_umrti:
+      type: INTEGER
+process:
+  materialization: table
+  mode: drop

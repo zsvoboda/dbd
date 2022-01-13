@@ -29,4 +29,4 @@ cd dbd/examples/postgres/covid_cz
 dbd --profile=../dbd.profile run . 
 ```
 
-Once you run these commands, you can review the newly created tables in the `covid_cz` Postgres database.~~
+Once you run these commands, you can review the newly created tables in the `covid_cz` Postgres database.

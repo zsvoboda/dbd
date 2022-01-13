@@ -1,0 +1,16 @@
+---
+table:
+  columns:
+    city_id:
+      nullable: false
+      primary_key: true
+    city_name:
+      nullable: false
+    district_id:
+      foreign_keys:
+        - district.district_id
+      index: true
+      nullable: false
+process:
+  materialization: table
+  mode: drop

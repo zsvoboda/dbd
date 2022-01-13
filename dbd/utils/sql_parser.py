@@ -1,15 +1,13 @@
 import logging
-import math
 import re
 import sys
 # noinspection PyUnresolvedReferences
 from datetime import date, datetime
-
-import sqlalchemy.dialects.postgresql
 from typing import List
-from dateutil import parser as date_parser
 
+import math
 import sqlalchemy
+from dateutil import parser as date_parser
 from math import nan
 from sql_metadata import Parser
 
@@ -177,7 +175,7 @@ class SqlParser:
         elif isinstance(i, bool):
             return 1 if i else 0
         elif isinstance(i, float):
-            return int(i) if not math.isnan(i) else nan
+            return int(i) if not math.isnan(i) else None
         else:
             return i
 
@@ -205,3 +203,21 @@ class SqlParser:
         no_comments = regex.sub(_replacer, sql_text)
         # replace multiple newlines with one
         return re.sub(r'\n+', '\n', no_comments).strip()
+
+    @classmethod
+    def datatype_to_gbq_datatype(cls, datatype: str) -> str:
+        """
+        Converts SQL datatype to Google BigQuery datatype
+        :param str datatype: SQL datatype
+        :return: BigQuery datatype name
+        :rtype: str
+        """
+        if datatype.lower().startswith(('char', 'varchar', 'text')):
+            return 'STRING'
+        elif datatype.lower().startswith(('decimal', 'numeric')):
+            return 'FLOAT'
+        elif datatype.lower().startswith(('timestamp', 'datetime')):
+            return 'DATETIME'
+        else:
+            return datatype.upper()
+

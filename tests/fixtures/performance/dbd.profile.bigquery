@@ -1,0 +1,3 @@
+databases:
+  covid_czech:
+    db.url: "bigquery://{{BIGQUERY_PROJECT}}/{{BIGQUERY_DATASET}}"

@@ -1,0 +1,25 @@
+table:
+  columns:
+    obec_kod:
+      type: CHAR(6)
+    obec_kod2:
+      type: CHAR(6)
+    obec:
+      type: VARCHAR(50)
+    pocet_obyvatel:
+      type: INTEGER
+    kum_pacient_prvni_zaznam:
+      type: INTEGER
+    pocet_muzi:
+      type: INTEGER
+    pocet_zeny:
+      type: INTEGER
+    vek_prumer:
+      type: FLOAT
+    vek_prumer_zeny:
+      type: FLOAT
+    vek_prumer_muzi:
+      type: FLOAT
+process:
+  materialization: table
+  mode: drop

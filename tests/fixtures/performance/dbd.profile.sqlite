@@ -1,0 +1,3 @@
+databases:
+  covid_czech:
+    db.url: "sqlite:///tmp/covid_czech.db"

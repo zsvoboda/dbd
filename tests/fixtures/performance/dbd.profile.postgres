@@ -1,0 +1,3 @@
+databases:
+  covid_czech:
+    db.url: "postgresql://demouser:demopass@localhost/covid_cz"
