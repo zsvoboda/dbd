@@ -21,7 +21,7 @@ dbd knows the correct order in which to process files in the model directory to 
 
 ![How dbd works](https://raw.githubusercontent.com/zsvoboda/dbd/master/img/dbd.infographic.png)
 
-dbd currently supports Postgres, MySQL/MariaDB, SQLite, and Snowflake databases. I'm working on support for Redshift, and BigQuery.
+dbd currently supports Postgres, MySQL/MariaDB, SQLite, Snowflake, BigQuery, and Redshift databases. Redshift still needs some performance tuning. 
 
 ## Getting started
 A short 5-minute getting started tutorial is available [here](https://zsvoboda.medium.com/analyze-covid-data-in-less-than-5-minutes-9176f440dd1a).

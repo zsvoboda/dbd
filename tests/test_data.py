@@ -43,7 +43,6 @@ def test_bigquery():
     validate_result(engine, table_name='test_typed_parquet')
     validate_result(engine, table_name='test_typed_excel', compensation=1)
 
-"""
 def test_snowflake():
     profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
     project = DbdProject.load(profile, 'tests/fixtures/databases/snowflake/dbd.project')
@@ -102,6 +101,4 @@ def test_mysql():
     validate_result(engine, table_name='test_typed_json')
     validate_result(engine, table_name='test_typed_parquet')
     validate_result(engine, table_name='test_typed_excel', compensation=1)
-    
-"""
 
