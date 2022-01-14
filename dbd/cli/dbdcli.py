@@ -115,12 +115,18 @@ def init(dbd, dest):
 @click.pass_obj
 def run(dbd, dest):
     try:
+        log.debug("Loading configuration.")
         prf = DbdProfile.load(os.path.join('.', dbd.profile()))
         prj = DbdProject.load(prf, os.path.join(dest, dbd.project()))
+        log.debug("Creating model.")
         model = ModelExecutor(prj)
+        log.debug("Connecting database.")
         engine = prj.alchemy_engine_from_project()
 #       engine.execution_options(supports_statement_cache=False)
+        log.debug("Executing model.")
         model.execute(engine)
+        log.debug("Finished.")
+        click.echo("All tasks finished!")
     except DbdException as d:
         click.echo(f"ERROR: '{d}'")
 

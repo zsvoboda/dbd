@@ -4,7 +4,6 @@ table:
     country_id:
       foreign_keys:
         - country.country_id
-      index: true
       type: CHAR(3)
     covid_testing_id:
       nullable: false

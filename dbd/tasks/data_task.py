@@ -177,7 +177,9 @@ class DataTask(DbTableTask):
         :param sqlalchemy.engine.Engine alchemy_engine: SqlAlchemy engine
         """
         table_schema = [dict(name=k, type=SqlParser.datatype_to_gbq_datatype(str(v))) for (k, v) in dtype.items()]
-        dataset = alchemy_engine.engine.url.database
+        target_schema = self.target_schema()
+        dataset = target_schema if target_schema is not None and len(target_schema) > 0 \
+            else alchemy_engine.engine.url.database
         df.to_gbq(f"{dataset}.{self.target()}", if_exists='append', table_schema=table_schema)
 
     def __bulk_load_snowflake(self, df: pd.DataFrame, alchemy_engine: sqlalchemy.engine.Engine):

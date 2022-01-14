@@ -1,4 +1,4 @@
-select (row_number() over ())   as covid_hospitalisation_id,
+select (row_number() over (order by datum))   as covid_hospitalisation_id,
        'CZ'                     as country_id,
        datum                    as covid_hospitalisation_date,
        pacient_prvni_zaznam     as covid_hospitalisation_admissions,

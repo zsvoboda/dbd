@@ -294,10 +294,12 @@ class ModelExecutor:
                 mode = task.process_def().get('mode', 'drop')
                 if mode == 'drop':
                     log.debug(f"Dropping task with task_id='{task.task_id()}'.")
+                    click.echo(f"Dropping tables for task_id='{task.task_id()}'.")
                     task.drop(self.__metadata_cache[schema], alchemy_engine)
                     log.debug(f"Dropped task with task_id='{task.task_id()}'.")
                 elif mode == 'truncate':
                     log.debug(f"Truncating task with task_id='{task.task_id()}'.")
+                    click.echo(f"Truncating tables for task_id='{task.task_id()}'.")
                     task.truncate(self.__metadata_cache[schema], alchemy_engine)
                     log.debug(f"Truncated task with task_id='{task.task_id()}'.")
 

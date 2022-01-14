@@ -1,4 +1,4 @@
-select (row_number() over ())                 as covid_testing_id,
+select (row_number() over (order by datum))                 as covid_testing_id,
        'CZ'                                   as country_id,
        datum                                  as covid_testing_date,
        prirustkovy_pocet_provedenych_ag_testu as covid_testing_type_ag,

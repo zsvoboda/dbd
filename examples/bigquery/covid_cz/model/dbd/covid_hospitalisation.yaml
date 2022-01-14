@@ -4,16 +4,14 @@ table:
     country_id:
       foreign_keys:
         - country.country_id
-      index: true
-      nullable: false
       type: CHAR(3)
-    county_id:
+    covid_hospitalisation_date:
+      nullable: false
+      type: DATE
+    covid_hospitalisation_id:
       nullable: false
       primary_key: true
-    county_name:
-      nullable: false
-      unique: true
+      type: INTEGER
 process:
   materialization: table
   mode: drop
-

@@ -1,2 +1,4 @@
 model: model
 database: covid_cz_redshift
+copy_stage: s3_covid_cz
+

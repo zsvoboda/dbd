@@ -9,7 +9,6 @@ table:
     district_id:
       foreign_keys:
         - district.district_id
-      index: true
       nullable: false
 process:
   materialization: table

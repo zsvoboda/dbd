@@ -4,7 +4,6 @@ table:
     city_id:
       foreign_keys:
         - city.city_id
-      index: true
       nullable: false
     demography_id:
       nullable: false

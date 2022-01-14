@@ -1,3 +1,4 @@
+import logging
 import os
 from os.path import exists
 from pathlib import Path
@@ -9,6 +10,8 @@ from sqlalchemy import engine_from_config
 
 from dbd.log.dbd_exception import DbdException
 from dbd.utils.jinja_utils import apply_template
+
+log = logging.getLogger(__name__)
 
 ENV_VARS = {key: str(value) for key, value in os.environ.items()}
 
@@ -65,6 +68,19 @@ class DbdProfile:
                 raise DbdProfileConfigException(
                     f"Your dbd profile '{self.__profile_file}' doesn't contain 'database' key.")
 
+    def copy_stages(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Return copy stage from the profile
+        :return: copy stage from the profile
+        :rtype: Dict[str, Dict[str, Any]]
+        """
+        if self.__config is not None:
+            if 'copy_stage' in self.__config:
+                return self.__config.get('copy_stage')
+            else:
+                raise DbdProfileConfigException(
+                    f"Your dbd profile '{self.__profile_file}' doesn't contain 'copy_stage' key.")
+
     def alchemy_engine_from_profile(self, connection_name: str) -> sqlalchemy.engine.Engine:
         """
         Returns SQLAlchemy engine initialized from profile
@@ -75,6 +91,7 @@ class DbdProfile:
         databases = self.db_connections()
         if connection_name in databases:
             try:
+                log.debug(f"Connecting to database '{connection_name}'")
                 return engine_from_config(databases.get(connection_name), prefix=CONFIG_PREFIX)
             except Exception as e:
                 raise DbdProfileConfigException(f"Invalid connection '{connection_name}' config in the profile file "

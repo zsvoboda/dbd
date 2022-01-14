@@ -1,15 +1,13 @@
 ---
 table:
   columns:
-    country_id:
+    city_id:
       foreign_keys:
-        - country.country_id
-      index: true
-      type: CHAR(3)
-    covid_testing_id:
+        - city.city_id
+      nullable: false
+    demography_id:
       nullable: false
       primary_key: true
-      type: INTEGER
 process:
   materialization: table
   mode: drop
