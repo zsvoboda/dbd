@@ -67,7 +67,7 @@ class ModelExecutor:
 
     def validate(self):
         """
-        Executes files stored in a model directory.
+        Validates files stored in a model directory.
         The execution is performed in the database connected
         via the SQLAlchemy engine.
         """
@@ -101,7 +101,8 @@ class ModelExecutor:
                 schema = task.target_schema() if task.target_schema() is not None else Task.TOP_LEVEL_SCHEMA_NAME
                 click.echo(f"Executing task: '{task.task_id()}'.")
                 log.debug(f"Executing task: '{task.task_id()}'.")
-                task.create(self.__metadata_cache[schema], alchemy_engine)
+                task.create(self.__metadata_cache[schema], alchemy_engine,
+                            copy_stage_storage=self.__project.copy_stage_from_project())
                 log.debug(f"Task execution finished: '{task.task_id()}'.")
         except OperationalError as o:
             log.error(f"Can't execute model because of: '{o}'.")

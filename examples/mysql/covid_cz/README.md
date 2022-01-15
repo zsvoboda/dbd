@@ -19,6 +19,16 @@ export MYSQL_DB=public
 
 You also need to create a new `covid_cz` MySQL database and `demouser` user that can create new tables in this database.
 
+# Configuring MySQL fast loading mode
+Fast loading mode copies data to MySQL using COPY command that is much faster than the traditional INSERT command. 
+To enable fast loading mode, you need specify `local_infile=1` query parameter in the MySQL connection url.
+You also must enable the LOCAL INFILE mode on your MySQL server. You can for example do this by executing this 
+SQL statement:
+
+```mysql
+SET GLOBAL local_infile = true;
+```
+
 # Running the example
 Use the following commands to run the COVID CZ example:
 

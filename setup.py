@@ -3,12 +3,12 @@ from distutils.core import setup
 REQUIRES = ["jinja2", "sqlalchemy", "sqlparse", "sql-metadata", "networkx", "psycopg2", "pyyaml", "pandas",
             "click", "cerberus", "openpyxl", "pyarrow", "PyMySQL", "snowflake-connector-python", "snowflake-sqlalchemy",
             "sqlalchemy-redshift", "requests", "google-cloud-storage", "pandas-gbq", "sqlalchemy-bigquery",
-            "google-cloud-bigquery-storage", "greenlet"]
+            "google-cloud-bigquery-storage", "greenlet", "fsspec", "s3fs"]
 
 setup(
     name="dbd",
     description="Declarative database",
-    version="0.6.9",
+    version="0.7.0",
     author="Zdenek Svoboda",
     license="BSD",
     install_requires=REQUIRES,

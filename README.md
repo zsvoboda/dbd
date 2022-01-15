@@ -21,7 +21,7 @@ dbd knows the correct order in which to process files in the model directory to 
 
 ![How dbd works](https://raw.githubusercontent.com/zsvoboda/dbd/master/img/dbd.infographic.png)
 
-dbd currently supports Postgres, MySQL/MariaDB, SQLite, Snowflake, BigQuery, and Redshift databases. Redshift still needs some performance tuning. 
+dbd currently supports Postgres, MySQL/MariaDB, SQLite, Snowflake, BigQuery, and Redshift databases. 
 
 ## Getting started
 A short 5-minute getting started tutorial is available [here](https://zsvoboda.medium.com/analyze-covid-data-in-less-than-5-minutes-9176f440dd1a).
@@ -228,6 +228,36 @@ databases:
   covid:
     db.url: "snowflake://{{ SNOWFLAKE_USER }}:{{ SNOWFLAKE_PASSWORD }}@{{ SNOWFLAKE_ACCOUNT_IDENTIFIER }}/{{ SNOWFLAKE_DB }}/{{ SNOWFLAKE_SCHEMA }}?warehouse={{SNOWFLAKE_WAREHOUSE }}"
 ```
+
+## Fast data loading mode
+All supported database engines except SQLite support fast data loading mode. In this mode, data are loaded to a 
+database table using bulk load (SQL COPY) command instead of individual INSERT statements.
+
+MySQL and Redshift require additional configuration to enable fast data loading mode. 
+Without this extra configuration dbd reverts to slow inserting mode via INSERT statements.
+
+### MySQL 
+To enable fast loading mode, you need specify `local_infile=1` query parameter in the MySQL connection url.
+You also must enable the LOCAL INFILE mode on your MySQL server. You can for example do this by executing this 
+SQL statement:
+
+```mysql
+SET GLOBAL local_infile = true;
+```
+
+# Redsift
+To enable fast loading mode, you need specify `copy_stage` parameter in the `dbd.project` configuration file. 
+The `copy_stage` parameter must reference a storage definition in your `dbd.profile` configuration file.
+Check the example configuration files in the `examples/redshift/covid_cz` directory. Here are the example definitions of the 
+environment variables that these configuration files use:
+
+```shell
+export AWS_COVID_STAGE_S3_URL="s3://covid/stage"
+export AWS_COVID_STAGE_S3_ACCESS_KEY="AKIA43SWERQGXMUYFIGMA"
+export AWS_COVID_STAGE_S3_S3_SECRET_KEY="iujI78eDuFFGJF6PSjY/4CIhEJdMNkuS3g4t0BRwX"
+```
+
+
 
 ## License
 dbd code is open-sourced under [BSD 3-clause license](LICENSE). 

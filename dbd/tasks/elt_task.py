@@ -132,7 +132,7 @@ class EltTask(DbTableTask):
 
         return EltTask(task_def)
 
-    def create(self, target_alchemy_metadata: sqlalchemy.MetaData, alchemy_engine: sqlalchemy.engine.Engine):
+    def create(self, target_alchemy_metadata: sqlalchemy.MetaData, alchemy_engine: sqlalchemy.engine.Engine, **kwargs):
         """
         Executes / creates the task
         :param sqlalchemy.MetaData target_alchemy_metadata: MetaData SQLAlchemy MetaData

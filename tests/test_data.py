@@ -32,29 +32,6 @@ def validate_result(engine, table_name='test_typed', compensation=0, ):
             f"test_bool IS NULL AND test_string IS NULL AND test_int IS NULL AND test_float IS NULL")
         assert result.fetchall() == [(1 - compensation,)], f"ALL NULL row count failed for table {table_name}"
 
-def test_bigquery():
-    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/databases/bigquery/dbd.project')
-    model = ModelExecutor(project)
-    engine = project.alchemy_engine_from_project()
-    model.execute(engine)
-    validate_result(engine, table_name='test_typed')
-    validate_result(engine, table_name='test_typed_json')
-    validate_result(engine, table_name='test_typed_parquet')
-    validate_result(engine, table_name='test_typed_excel', compensation=1)
-
-"""
-def test_snowflake():
-    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/databases/snowflake/dbd.project')
-    model = ModelExecutor(project)
-    engine = project.alchemy_engine_from_project()
-    model.execute(engine)
-    validate_result(engine, table_name='test_typed'.upper())
-    validate_result(engine, table_name='test_typed_json'.upper())
-    validate_result(engine, table_name='test_typed_parquet'.upper())
-    validate_result(engine, table_name='test_typed_excel'.upper(), compensation=1)
-
 
 def test_redshift():
     profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
@@ -66,6 +43,30 @@ def test_redshift():
     validate_result(engine, table_name='test_typed_json')
     validate_result(engine, table_name='test_typed_parquet')
     validate_result(engine, table_name='test_typed_excel', compensation=1)
+
+
+def test_bigquery():
+    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/databases/bigquery/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+    validate_result(engine, table_name='test_typed')
+    validate_result(engine, table_name='test_typed_json')
+    validate_result(engine, table_name='test_typed_parquet')
+    validate_result(engine, table_name='test_typed_excel', compensation=1)
+
+
+def test_snowflake():
+    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/databases/snowflake/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+    validate_result(engine, table_name='test_typed'.upper())
+    validate_result(engine, table_name='test_typed_json'.upper())
+    validate_result(engine, table_name='test_typed_parquet'.upper())
+    validate_result(engine, table_name='test_typed_excel'.upper(), compensation=1)
 
 
 def test_sqlite():
@@ -102,5 +103,3 @@ def test_mysql():
     validate_result(engine, table_name='test_typed_json')
     validate_result(engine, table_name='test_typed_parquet')
     validate_result(engine, table_name='test_typed_excel', compensation=1)
-
-"""

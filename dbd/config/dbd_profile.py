@@ -38,6 +38,14 @@ class DbdProfile:
         self.__profile_file = profile_file_full_path
         self.__config = config
 
+    def profile_path(self):
+        """
+        Return path to the profile file
+        :return: path to the profile file
+        :rtype: str
+        """
+        return os.path.normpath(self.__profile_file)
+
     @classmethod
     def load(cls, profile_file_name='dbd.profile') -> DbdProfileType:
         """
@@ -68,18 +76,18 @@ class DbdProfile:
                 raise DbdProfileConfigException(
                     f"Your dbd profile '{self.__profile_file}' doesn't contain 'database' key.")
 
-    def copy_stages(self) -> Dict[str, Dict[str, Any]]:
+    def storages(self) -> Dict[str, Dict[str, Any]]:
         """
         Return copy stage from the profile
         :return: copy stage from the profile
         :rtype: Dict[str, Dict[str, Any]]
         """
         if self.__config is not None:
-            if 'copy_stage' in self.__config:
-                return self.__config.get('copy_stage')
+            if 'storages' in self.__config:
+                return self.__config.get('storages')
             else:
                 raise DbdProfileConfigException(
-                    f"Your dbd profile '{self.__profile_file}' doesn't contain 'copy_stage' key.")
+                    f"Your dbd profile '{self.__profile_file}' doesn't contain 'storages' key.")
 
     def alchemy_engine_from_profile(self, connection_name: str) -> sqlalchemy.engine.Engine:
         """

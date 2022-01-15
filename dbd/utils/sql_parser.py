@@ -163,6 +163,26 @@ class SqlParser:
             return b
 
     @classmethod
+    def parse_bool_int(cls, b: str) -> int:
+        """
+        Parses a bool string
+        :param str b: bool string
+        :return: parsed bool as int (1/0)
+        :rtype: int
+        """
+        if isinstance(b, str):
+            return 1 if b.lower() in ('true', '1', 't', 'y', 'yes') else 0
+        elif isinstance(b, bool):
+            return 1 if b else 0
+        elif isinstance(b, int):
+            return 1 if b != 0 else 0
+        elif isinstance(b, float):
+            r = (1 if b != 0.0 else 0) if not math.isnan(b) else nan
+            return r
+        else:
+            return b
+
+    @classmethod
     def parse_int(cls, i: str) -> int:
         """
         Parses an int string
@@ -220,4 +240,3 @@ class SqlParser:
             return 'DATETIME'
         else:
             return datatype.upper()
-

@@ -21,6 +21,19 @@ export REDSHIFT_DB=dev
 
 You also need to create a new `covid_cz` Redshift database and `demouser` user that can create new tables in this database.
 
+# Configuring Redshift fast loading mode
+Fast loading mode copies data to Redshift using COPY command that is much faster than the traditional INSERT command. 
+To enable fast loading mode, you need specify `copy_stage` parameter in the `dbd.project` configuration file. 
+The `copy_stage` parameter must reference a storage definition in your `dbd.profile` configuration file.
+Check the example configuration files in the `examples/redshift/covid_cz` directory. Here are the example definitions of the 
+environment variables that these configuration files use:
+
+```shell
+export AWS_COVID_STAGE_S3_URL="s3://covid/stage"
+export AWS_COVID_STAGE_S3_ACCESS_KEY="AKIA43SWERQGXMUYFIGMA"
+export AWS_COVID_STAGE_S3_S3_SECRET_KEY="iujI78eDuFFGJF6PSjY/4CIhEJdMNkuS3g4t0BRwX"
+```
+
 # Running the example
 Use the following commands to run the COVID CZ example:
 

@@ -5,8 +5,8 @@ databases:
     db.url: "redshift+psycopg2://{{ REDSHIFT_USER }}:{{ REDSHIFT_PASSWORD }}@{{ REDSHIFT_HOST }}:{{ REDSHIFT_PORT }}/{{ REDSHIFT_DB }}"
   covid_cz_redshift:
     db.url: "redshift+psycopg2://{{ REDSHIFT_USER }}:{{ REDSHIFT_PASSWORD }}@{{ REDSHIFT_HOST }}:{{ REDSHIFT_PORT }}/{{ REDSHIFT_DB }}"
-storage:
+storages:
   s3_covid_cz:
-    url: "s3://{{ S3_BUCKET }}/{{ S3_PATH }}"
-    access_key: "{{ AWS_S3_ACCESS_KEY }}"
-    secret_key: "{{ AWS_S3_SECRET_KEY }}"
+    url: "{{ AWS_COVID_STAGE_S3_URL }}"
+    access_key: "{{ AWS_COVID_STAGE_S3_ACCESS_KEY }}"
+    secret_key: "{{ AWS_COVID_STAGE_S3_S3_SECRET_KEY }}"

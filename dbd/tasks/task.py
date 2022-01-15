@@ -119,11 +119,13 @@ class Task:
         """
         return True, {}
 
-    def create(self, target_alchemy_metadata: sqlalchemy.MetaData, alchemy_engine: sqlalchemy.engine.Engine):
+    def create(self, target_alchemy_metadata: sqlalchemy.MetaData, alchemy_engine: sqlalchemy.engine.Engine,
+               **kwargs) -> None:
         """
         Executes / creates the task
         :param sqlalchemy.MetaData target_alchemy_metadata: MetaData SQLAlchemy MetaData
         :param sqlalchemy.engine.Engine alchemy_engine:
+        :param Dict[str, str] copy_stage_storage: copy stage storage parameters e.g. AWS S3 dict(url, access_key, secret_key)
         """
         pass
 

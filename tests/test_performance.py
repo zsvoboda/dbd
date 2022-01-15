@@ -32,7 +32,6 @@ def download_all_ref_files(project):
                         # always rewrites the file with the last URL in the ref file
                         download_file(line.strip(), csv_file)
 
-# https://docs.snowflake.com/en/user-guide/python-connector-api.html#pd_writer
 def test_all():
     all_profile_files = f'./tests/fixtures/performance/dbd.profile.*'
     for profile_file in glob.glob(all_profile_files):
@@ -44,3 +43,4 @@ def test_all():
         model = ModelExecutor(new_project)
         engine = project.alchemy_engine_from_project()
         profile_method(f"Test for '{profile_file}'", lambda: model.execute(engine))
+    #print("Executing performance test disabled for now.")

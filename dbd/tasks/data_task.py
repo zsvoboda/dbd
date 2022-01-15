@@ -1,4 +1,5 @@
 import csv
+import logging
 import os
 import tempfile
 from datetime import datetime, date
@@ -7,16 +8,20 @@ from typing import Dict, List, Any, TypeVar
 
 import click
 import pandas as pd
+import s3fs
 import sqlalchemy.engine
 from snowflake.connector.pandas_tools import write_pandas
 from sqlalchemy import Column, TEXT
 
+from dbd.config.dbd_project import DbdProjectConfigException
 from dbd.db.db_table import DbTable
 from dbd.log.dbd_exception import DbdException
 from dbd.tasks.db_table_task import DbTableTask
 from dbd.utils.io_utils import download_file, url_to_filename
 from dbd.utils.io_utils import is_url
 from dbd.utils.sql_parser import SqlParser
+
+log = logging.getLogger(__name__)
 
 
 class UnsupportedDataFile(DbdException):
@@ -132,23 +137,28 @@ class DataTask(DbTableTask):
         table_def['columns'] = ordered_columns
         return table_def
 
-    def create(self, target_alchemy_metadata: sqlalchemy.MetaData, alchemy_engine: sqlalchemy.engine.Engine):
+    def create(self, target_alchemy_metadata: sqlalchemy.MetaData, alchemy_engine: sqlalchemy.engine.Engine,
+               **kwargs) -> None:
         """
         Executes the task. Creates the target table and loads data
         :param sqlalchemy.MetaData target_alchemy_metadata: MetaData SQLAlchemy MetaData
+        :param Dict[str, str] copy_stage_storage: copy stage storage parameters e.g. AWS S3 dict(url, access_key, secret_key)
         :param sqlalchemy.engine.Engine alchemy_engine:
         """
+        copy_stage_storage = kwargs.get('copy_stage_storage')
         for data_file in self.data_files():
             if len(data_file) > 0:
                 with tempfile.TemporaryDirectory() as tmpdirname:
                     if is_url(data_file):
                         absolute_file_name = os.path.join(tmpdirname, url_to_filename(data_file))
-                        click.echo(f"\tDownloading file: '{absolute_file_name}'.")
+                        click.echo(f"\tDownloading file: '{data_file}'.")
                         download_file(data_file, absolute_file_name)
                     else:
                         absolute_file_name = data_file
 
                     df = self.__read_file_to_dataframe(absolute_file_name)
+
+                    mysql_bulk_load_config = alchemy_engine.url.query.get('local_infile') == '1'
 
                     if self.db_table() is None:
                         table_def = self.__override_data_file_column_definitions(df)
@@ -161,12 +171,22 @@ class DataTask(DbTableTask):
                     if alchemy_engine.dialect.name == 'snowflake':
                         self.__bulk_load_snowflake(df, alchemy_engine)
                     elif alchemy_engine.dialect.name == 'postgresql':
-                        df.to_sql(self.target(), alchemy_engine, chunksize=1024, method=psql_writer,
+                        df.to_sql(self.target(), alchemy_engine, chunksize=16384, method=psql_writer,
                                   schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
+                    elif alchemy_engine.dialect.name == 'mysql' and mysql_bulk_load_config:
+                        self.__bulk_load_mysql(df, alchemy_engine)
                     elif alchemy_engine.dialect.name == 'bigquery':
                         self.__bulk_load_bigquery(df, dtype, alchemy_engine)
+                    elif alchemy_engine.dialect.name == 'redshift' and copy_stage_storage is not None:
+                        self.__bulk_load_redshift(df, alchemy_engine, copy_stage_storage)
                     else:
-                        df.to_sql(self.target(), alchemy_engine, chunksize=1024, method='multi',
+                        if alchemy_engine.dialect.name == 'redshift':
+                            log.warning("Using default SQLAlchemy writer for Redshift. Specify 'copy_stage' parameter "
+                                        "in your profile configuration file to make loading faster.")
+                        if alchemy_engine.dialect.name == 'mysql':
+                            log.warning("Using default SQLAlchemy writer for MySQL. Specify 'local_infile=1' parameter "
+                                        "in a query parameter of your MySQL connection string to make loading faster.")
+                        df.to_sql(self.target(), alchemy_engine, chunksize=16384, method='multi',
                                   schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
 
     def __bulk_load_bigquery(self, df: pd.DataFrame, dtype: Dict[str, str], alchemy_engine: sqlalchemy.engine.Engine):
@@ -181,6 +201,47 @@ class DataTask(DbTableTask):
         dataset = target_schema if target_schema is not None and len(target_schema) > 0 \
             else alchemy_engine.engine.url.database
         df.to_gbq(f"{dataset}.{self.target()}", if_exists='append', table_schema=table_schema)
+
+    def __bulk_load_redshift(self, df: pd.DataFrame, alchemy_engine: sqlalchemy.engine.Engine,
+                             copy_stage_storage: Dict[str, str]):
+        """
+        Bulk load data to Redshift
+        :param pd.DataFrame df: pandas dataframe
+        :param sqlalchemy.engine.Engine alchemy_engine: SqlAlchemy engine
+        :param Dict[str, str] copy_stage_storage: copy stage storage parameters e.g. AWS S3 dict(url, access_key, secret_key)
+        """
+        if copy_stage_storage is not None:
+            if 'url' in copy_stage_storage:
+                aws_stage_path = copy_stage_storage['url']
+            else:
+                raise DbdProjectConfigException(
+                    "Missing 'url' key in the 'copy_stage' storage definition parameter in your profile file.")
+            if 'access_key' in copy_stage_storage:
+                aws_access_key = copy_stage_storage['access_key']
+            else:
+                raise DbdProjectConfigException(
+                    "Missing 'access_key' key in the 'copy_stage' storage definition parameter in your profile file.")
+            if 'secret_key' in copy_stage_storage:
+                aws_secret_key = copy_stage_storage['secret_key']
+            else:
+                raise DbdProjectConfigException(
+                    "Missing 'secret_key' key in the 'copy_stage' storage definition parameter in your profile file.")
+
+            temp_file_name = f"{aws_stage_path.rstrip('/')}/{self.target_schema()}/{self.target()}" \
+                             f"_{datetime.now().strftime('%y%m%d_%H%M%S')}"
+
+            df.to_csv(f"{temp_file_name}.csv.gz", index=False, compression='gzip',
+                      storage_options={"key": aws_access_key,
+                                       "secret": aws_secret_key})
+            with alchemy_engine.connect() as conn:
+                conn.execute(f"copy {self.target()} from '{temp_file_name}.csv.gz' "
+                             f"CREDENTIALS 'aws_access_key_id={aws_access_key};aws_secret_access_key={aws_secret_key}' "
+                             f" DELIMITER AS ',' DATEFORMAT 'YYYY-MM-DD' EMPTYASNULL IGNOREHEADER 1 GZIP")
+                conn.connection.commit()
+            file = s3fs.S3FileSystem(anon=False, key=aws_access_key, secret=aws_secret_key)
+            file.rm(f"{temp_file_name}.csv.gz")
+        else:
+            raise DbdProjectConfigException("Redshift requires 'copy_stage' parameter in your project file.")
 
     def __bulk_load_snowflake(self, df: pd.DataFrame, alchemy_engine: sqlalchemy.engine.Engine):
         """
@@ -199,6 +260,25 @@ class DataTask(DbTableTask):
                 schema=schema_name,
                 quote_identifiers=False)
             conn.connection.commit()
+
+    def __bulk_load_mysql(self, df: pd.DataFrame, alchemy_engine: sqlalchemy.engine.Engine):
+        """
+        Bulk load data to MySQL
+        :param pandas.DataFrame df: DataFrame
+        :param sqlalchemy.engine.Engine alchemy_engine: SQLAlchemy engine
+        """
+        with tempfile.TemporaryDirectory() as tmp_dir_name:
+            temporary_file_name = f"{tmp_dir_name}/bulk.csv"
+            df.to_csv(temporary_file_name, index=False, na_rep='\\N')
+            target_schema = self.target_schema()
+            target_schema_with_dot = f"{target_schema}." if target_schema else ''
+            with alchemy_engine.connect() as conn:
+                query = f"LOAD DATA LOCAL INFILE '{temporary_file_name}' " \
+                        f"INTO TABLE {target_schema_with_dot}{self.target()} " \
+                        f"FIELDS TERMINATED BY ',' " \
+                        f"OPTIONALLY ENCLOSED BY '\"' ESCAPED BY '\\\\' IGNORE 1 LINES"
+                conn.execute(query)
+                conn.connection.commit()
 
     def __adjust_dataframe_datatypes(self, df, dialect_name: str):
         """
@@ -229,8 +309,12 @@ class DataTask(DbTableTask):
                 else:
                     df[column_name] = pd.to_datetime(df[column_name], errors='coerce')
             elif isinstance(python_type, type) and issubclass(python_type, bool):
-                df[column_name] = df[column_name].map(lambda x: SqlParser.parse_bool(x))
-                df[column_name] = df[column_name].astype('boolean')
+                if dialect_name in ['mysql']:
+                    df[column_name] = df[column_name].map(lambda x: SqlParser.parse_bool_int(x))
+                    df[column_name] = df[column_name].astype('float').astype('Int64')
+                else:
+                    df[column_name] = df[column_name].map(lambda x: SqlParser.parse_bool(x))
+                    df[column_name] = df[column_name].astype('boolean')
             elif isinstance(python_type, type) and issubclass(python_type, int):
                 df[column_name] = df[column_name].astype('float').astype('Int64')
             elif isinstance(python_type, type) and issubclass(python_type, float):

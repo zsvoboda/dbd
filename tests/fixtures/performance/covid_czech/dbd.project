@@ -1,2 +1,3 @@
 model: model
 database: covid_czech
+copy_stage: s3_covid_cz

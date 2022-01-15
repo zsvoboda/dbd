@@ -1,2 +1,3 @@
 model: model
 database: test_redshift
+copy_stage: s3_covid_cz

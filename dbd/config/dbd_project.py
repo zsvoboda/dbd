@@ -66,14 +66,6 @@ class DbdProject:
             raise DbdProjectConfigException(f"Project file '{self.__project_directory}{os.sep}{self.__project_file}' "
                                             f"doesn't contain 'database' key.")
 
-    def profile(self) -> DbdProfile:
-        """
-        Returns associated profile
-        :return: associated profile
-        :rtype: DbdProfile
-        """
-        return self.__profile
-
     def model_directory_from_project(self) -> str:
         """
         Returns model directory initialized from project
@@ -87,3 +79,28 @@ class DbdProject:
         else:
             raise DbdProjectConfigException(f"Can't find project file '{self.__project_file}' or it doesn't "
                                             f"contain 'model' key and no 'model' dir exists in your current dir.")
+
+    def copy_stage_from_project(self) -> Dict[str, str]:
+        """
+        Returns copy_stage storage initialized from project
+        :return: copy stage (e.g. AWS S3) urls and credentials dict(url, access_key, secret_key)
+        :rtype: Dict[str, str]
+        """
+        if 'copy_stage' in self.__config:
+            copy_stage_name = self.__config.get('copy_stage')
+            storages = self.__profile.storages()
+            if copy_stage_name in storages:
+                return storages.get(copy_stage_name)
+            else:
+                raise DbdProjectConfigException(f"Can't find storage '{copy_stage_name}' "
+                                                f"referenced from your project file  '{self.__project_file}' "
+                                                f"in your profile file '{self.__profile.profile_path()}'.")
+        return None
+
+    def profile(self) -> DbdProfile:
+        """
+        Returns associated profile
+        :return: associated profile
+        :rtype: DbdProfile
+        """
+        return self.__profile

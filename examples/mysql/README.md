@@ -5,7 +5,7 @@ or provision a hosted MySQL service (e.g. AWS RDS or GCP CLoudSQL).
 # Configuring MySQL database connection
 The `dbd.profile` configuration file contains the following MySQL connection URL:
 
-`mysql+pymysql://{{ MYSQL_USER }}:{{ MYSQL_PASSWORD }}@{{ MYSQL_HOST }}/{{ MYSQL_DB }}?charset=utf8mb4`
+`mysql+pymysql://{{ MYSQL_USER }}:{{ MYSQL_PASSWORD }}@{{ MYSQL_HOST }}/{{ MYSQL_DB }}?charset=utf8mb4&local_infile=1`
 
 Please make sure that your environment contains the environment variables above. For example:
 
@@ -17,6 +17,16 @@ export MYSQL_DB=public
 ```
 
 You also need to create a new `covid_cz` MySQL database and `demouser` user that can create new tables in this database.
+
+# Configuring MySQL fast loading mode
+Fast loading mode copies data to MySQL using COPY command that is much faster than the traditional INSERT command. 
+To enable fast loading mode, you need specify `local_infile=1` query parameter in the MySQL connection url.
+You also must enable the LOCAL INFILE mode on your MySQL server. You can for example do this by executing this 
+SQL statement:
+
+```mysql
+SET GLOBAL local_infile = true;
+```
 
 # Running MySQL examples
 Use the following commands to run a selected MySQL example:
