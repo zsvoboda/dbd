@@ -32,15 +32,29 @@ def download_all_ref_files(project):
                         # always rewrites the file with the last URL in the ref file
                         download_file(line.strip(), csv_file)
 
+
 def test_all():
+    all_counts = {}
     all_profile_files = f'./tests/fixtures/performance/dbd.profile.*'
     for profile_file in glob.glob(all_profile_files):
-        print(f"Executing performance test for '{profile_file}'")
         profile = DbdProfile.load(profile_file)
         project = DbdProject.load(profile, 'tests/fixtures/performance/covid_czech/dbd.project')
         download_all_ref_files(project)
         new_project = DbdProject.load(profile, './tmp/covid_czech/dbd.project')
         model = ModelExecutor(new_project)
         engine = project.alchemy_engine_from_project()
-        profile_method(f"Test for '{profile_file}'", lambda: model.execute(engine))
-    #print("Executing performance test disabled for now.")
+        print(f"Executing performance test for '{engine.dialect.name}'")
+        profile_method(f"Test for '{engine.dialect.name}'", lambda: model.execute(engine))
+
+        with engine.connect() as conn:
+            counts = {}
+            for table in ['city', 'country', 'county', 'covid_event', 'covid_hospitalisation', 'covid_testing',
+                          'demography', 'district', 'ext_demografie_2021', 'ext_hospitalizace',
+                          'ext_kraj_okres_nakazeni_vyleceni_umrti', 'ext_nakazeni_vyleceni_umrti_testy', 'ext_orp',
+                          'ext_osoby', 'ext_souradnice', 'ext_umrti', 'ext_vyleceni', 'ext_zeme']:
+                result = conn.execute(f"SELECT COUNT(*) FROM {table}")
+                counts[table] = result.fetchall()[0][0]
+            all_counts[engine.dialect.name] = counts
+            print(f"{engine.dialect.name}: {counts}")
+    print(all_counts)
+    # print("Executing performance test disabled for now.")

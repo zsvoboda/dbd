@@ -4,8 +4,6 @@ table:
     covid_event_cnt:
       default: 1
       type: INTEGER
-    covid_event_person_age:
-      type: CHAR(3)
     covid_event_person_age_num:
       type: INTEGER
     covid_event_person_gender:
