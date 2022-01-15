@@ -1,0 +1,28 @@
+---
+table:
+  columns:
+    covid_event_cnt:
+      default: 1
+      type: INTEGER
+    covid_event_person_age:
+      type: CHAR(3)
+    covid_event_person_age_num:
+      type: INTEGER
+    covid_event_person_gender:
+      type: CHAR(1)
+    covid_event_date:
+      nullable: false
+      type: DATE
+    covid_event_id:
+      nullable: false
+      primary_key: true
+      type: INTEGER
+    covid_event_type:
+      nullable: false
+      type: CHAR(1)
+    district_id:
+      foreign_keys:
+        - district.district_id
+process:
+  materialization: table
+  mode: drop

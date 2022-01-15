@@ -1,3 +1,9 @@
 databases:
   covid_czech:
     db.url: "mysql+pymysql://{{ MYSQL_USER }}:{{ MYSQL_PASSWORD }}@{{ MYSQL_HOST }}/{{ MYSQL_DB }}?charset=utf8mb4&local_infile=1"
+storages:
+  s3_covid_cz:
+    url: "{{ AWS_COVID_STAGE_S3_URL }}"
+    access_key: "{{ AWS_COVID_STAGE_S3_ACCESS_KEY }}"
+    secret_key: "{{ AWS_COVID_STAGE_S3_S3_SECRET_KEY }}"
+

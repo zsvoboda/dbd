@@ -38,7 +38,7 @@ def test_all():
         print(f"Executing performance test for '{profile_file}'")
         profile = DbdProfile.load(profile_file)
         project = DbdProject.load(profile, 'tests/fixtures/performance/covid_czech/dbd.project')
-        #download_all_ref_files(project)
+        download_all_ref_files(project)
         new_project = DbdProject.load(profile, './tmp/covid_czech/dbd.project')
         model = ModelExecutor(new_project)
         engine = project.alchemy_engine_from_project()
