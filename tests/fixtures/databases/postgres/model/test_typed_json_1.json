@@ -1,0 +1,114 @@
+[
+ {
+   "test_date": "2020-01-21",
+   "test_datetime": "2020-01-21 11:00:01",
+   "test_bool": true,
+   "test_string": "Washington",
+   "test_int": 1,
+   "test_float": 5.2
+ },
+ {
+   "test_date": "2020-01-22",
+   "test_datetime": "2020-01-22 12:11:00",
+   "test_bool": false,
+   "test_string": "Washington",
+   "test_int": 1,
+   "test_float": 0.3
+ },
+ {
+   "test_date": "2020-01-23",
+   "test_datetime": "2020-01-23 15:00:00",
+   "test_bool": null,
+   "test_string": "Washington",
+   "test_int": 1,
+   "test_float": 7.1
+ },
+ {
+   "test_date": "2020-01-23",
+   "test_datetime": "2020-01-23 17:00:12",
+   "test_bool": true,
+   "test_string": "Washington",
+   "test_int": 1,
+   "test_float": null
+ },
+ {
+   "test_date": "2020-01-23",
+   "test_datetime": "2020-01-23 19:01:00",
+   "test_bool": true,
+   "test_string": "Washington",
+   "test_int": null,
+   "test_float": 6
+ },
+ {
+   "test_date": "2020-01-23",
+   "test_datetime": "2020-01-23 21:00:00",
+   "test_bool": false,
+   "test_string": "Washington",
+   "test_int": null,
+   "test_float": null
+ },
+ {
+   "test_date": "2020-01-23",
+   "test_datetime": "2020-01-23 03:00:22",
+   "test_bool": false,
+   "test_string": "Washington",
+   "test_int": null,
+   "test_float": null
+ },
+ {
+   "test_date": "2020-01-23",
+   "test_datetime": "2020-01-23 2:00:00",
+   "test_bool": true,
+   "test_string": "Washington",
+   "test_int": null,
+   "test_float": 4
+ },
+ {
+   "test_date": "2020-01-23",
+   "test_datetime": "2020-01-23 5:07:31",
+   "test_bool": null,
+   "test_string": null,
+   "test_int": null,
+   "test_float": 4
+ },
+ {
+   "test_date": "2020-01-23",
+   "test_datetime": "2020-01-23 14:00:00",
+   "test_bool": null,
+   "test_string": "Washington",
+   "test_int": null,
+   "test_float": 4
+ },
+ {
+   "test_date": "2020-01-23",
+   "test_datetime": "2020-01-23 14:23:42",
+   "test_bool": null,
+   "test_string": null,
+   "test_int": null,
+   "test_float": 4
+ },
+ {
+   "test_date": "2020-01-21",
+   "test_datetime": "",
+   "test_bool": false,
+   "test_string": "Washington",
+   "test_int": 1,
+   "test_float": 5
+ },
+ {
+   "test_date": null,
+   "test_datetime": null,
+   "test_bool": false,
+   "test_string": "Washington",
+   "test_int": 1,
+   "test_float": 5
+ },
+ {
+   "test_date": null,
+   "test_datetime": null,
+   "test_bool": null,
+   "test_string": null,
+   "test_int": null,
+   "test_float": null
+ }
+]

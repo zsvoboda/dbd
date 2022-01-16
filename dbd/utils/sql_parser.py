@@ -6,6 +6,8 @@ from datetime import date, datetime
 from typing import List
 
 import math
+import numpy as np
+import pandas as pd
 import sqlalchemy
 from dateutil import parser as date_parser
 from math import nan
@@ -195,9 +197,26 @@ class SqlParser:
         elif isinstance(i, bool):
             return 1 if i else 0
         elif isinstance(i, float):
-            return int(i) if not math.isnan(i) else None
+            return int(i) if not math.isnan(i) else nan
         else:
             return i
+
+    @classmethod
+    def parse_string(cls, i: str) -> str:
+        """
+        Resolves string nans
+        :param str i:  string
+        :return: parsed int
+        :rtype: str
+        """
+        if i is None or pd.isna(i):
+            return nan
+        elif isinstance(i, float):
+            return str(i) if not math.isnan(i) else nan
+        elif isinstance(i, str):
+            return i if len(i) > 0 else nan
+        else:
+            return str(i)
 
     @classmethod
     def remove_sql_comments(cls, sql_text: str) -> str:
@@ -236,7 +255,9 @@ class SqlParser:
             return 'STRING'
         elif datatype.lower().startswith(('decimal', 'numeric')):
             return 'FLOAT'
-        elif datatype.lower().startswith(('timestamp', 'datetime')):
+        elif datatype.lower().startswith(('datetime')):
             return 'DATETIME'
+        elif datatype.lower().startswith(('timestamp')):
+            return 'TIMESTAMP'
         else:
             return datatype.upper()

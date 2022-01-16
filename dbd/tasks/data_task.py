@@ -7,11 +7,12 @@ from io import StringIO
 from typing import Dict, List, Any, TypeVar
 
 import click
+import math
 import pandas as pd
 import s3fs
 import sqlalchemy.engine
 from snowflake.connector.pandas_tools import write_pandas
-from sqlalchemy import Column, TEXT
+from sqlalchemy import Column, TEXT, TIMESTAMP, DATE, INT, FLOAT, BOOLEAN
 
 from dbd.config.dbd_project import DbdProjectConfigException
 from dbd.db.db_table import DbTable
@@ -108,8 +109,23 @@ class DataTask(DbTableTask):
         :return: list of data file columns (SQLAlchemy Column[])
         :rtype: List[sqlalchemy.Column]
         """
-        # TODO: Consider introspection of the dataframe columns
-        return [Column(c, TEXT) for c in data_frame.columns]
+        columns = []
+        for column_name, column_type in data_frame.dtypes.iteritems():
+            if column_type.name == 'datetime64[ns]':
+                columns.append(Column(column_name, TIMESTAMP))
+            elif column_type.name == 'datetime64[D]':
+                columns.append(Column(column_name, DATE))
+            elif column_type.name == 'object':
+                columns.append(Column(column_name, TEXT))
+            elif column_type.name == 'int64':
+                columns.append(Column(column_name, INT))
+            elif column_type.name == 'float64':
+                columns.append(Column(column_name, FLOAT))
+            elif column_type.name == 'bool':
+                columns.append(Column(column_name, BOOLEAN))
+            else:
+                columns.append(Column(column_name, TEXT))
+        return columns
 
         # noinspection DuplicatedCode
 
@@ -319,6 +335,10 @@ class DataTask(DbTableTask):
                 df[column_name] = df[column_name].astype('float').astype('Int64')
             elif isinstance(python_type, type) and issubclass(python_type, float):
                 df[column_name] = df[column_name].astype(python_type)
+            else:
+                # consistently interpret "" as NULL
+                df[column_name] = df[column_name].map(lambda x: SqlParser.parse_string(x))
+                df[column_name] = df[column_name].astype('object')
             dtype[column_name] = column_type
         return dtype
 
