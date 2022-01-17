@@ -307,7 +307,11 @@ class DataTask(DbTableTask):
         for c in self.db_table().columns():
             column_name = c.name()
             column_type = c.type()
-            python_type = SqlParser.parse_alchemy_data_type(column_type).python_type
+            # Snowflake fix
+            if str(column_type).upper().startswith('TIMESTAMP_'):
+                python_type = datetime
+            else:
+                python_type = SqlParser.parse_alchemy_data_type(column_type).python_type
             if isinstance(python_type, type) and issubclass(python_type, datetime):
                 if dialect_name in ['bigquery']:
                     df[column_name] = pd.to_datetime(df[column_name], errors='coerce').dt.strftime('%Y-%m-%d %H:%M:%S')

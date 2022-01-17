@@ -35,7 +35,7 @@ def download_all_ref_files(project):
 
 def test_all():
     all_counts = {}
-    all_profile_files = f'./tests/fixtures/performance/dbd.profile.*'
+    all_profile_files = f'./tests/fixtures/performance/dbd.profile.x'
     for profile_file in glob.glob(all_profile_files):
         profile = DbdProfile.load(profile_file)
         project = DbdProject.load(profile, 'tests/fixtures/performance/covid_czech/dbd.project')
@@ -57,4 +57,4 @@ def test_all():
             all_counts[engine.dialect.name] = counts
             print(f"{engine.dialect.name}: {counts}")
     print(all_counts)
-    # print("Executing performance test disabled for now.")
+    print("Executing performance test disabled for now.")

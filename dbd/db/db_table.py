@@ -1,12 +1,16 @@
+from datetime import date, datetime
+from decimal import Decimal
 from typing import List, Dict, TypeVar, Any, Tuple
 
 import sqlalchemy.engine
 from cerberus import Validator
-from sqlalchemy import CheckConstraint, Table, PrimaryKeyConstraint, ForeignKeyConstraint, UniqueConstraint, Index, text
+from sqlalchemy import CheckConstraint, Table, PrimaryKeyConstraint, ForeignKeyConstraint, UniqueConstraint, Index, \
+    text
 from sqlalchemy.exc import ProgrammingError
 
 from dbd.db.db_column import DbColumn
 from dbd.generator.jinja_generator_env import JINJA_GENERATOR_ENV
+from dbd.utils.sql_parser import SqlParser
 from dbd.utils.text_utils import fully_qualified_table_name
 
 DbTableType = TypeVar('DbTableType', bound='DbTable')
@@ -110,7 +114,7 @@ class DbTable:
         """
         self.__alchemy_table.create(checkfirst=True)
 
-    def drop(self, alchemy_engine):
+    def drop(self, alchemy_engine: sqlalchemy.engine.Engine):
         """
         TODO: exception handling
         Drops the table in the target database. Also drops it if its a view.
@@ -125,7 +129,7 @@ class DbTable:
                 # TODO: make sure this works for all DBs
                 conn.execute(text(f"DROP VIEW IF EXISTS {view_name}"))
 
-    def truncate(self, alchemy_engine):
+    def truncate(self, alchemy_engine: sqlalchemy.engine.Engine):
         """
         TODO: exception handling
         Truncates table data
@@ -135,6 +139,78 @@ class DbTable:
             table_name = fully_qualified_table_name(self.__alchemy_table.schema, self.__alchemy_table.name)
             # TODO: make sure this works for all DBs
             conn.execute(text(f"TRUNCATE TABLE {table_name}"))
+
+    def __column_fingerprint(self, column: DbColumn, alchemy_engine: sqlalchemy.engine.Engine) -> Dict[str, Any]:
+        """
+        Computes column fingerprint
+        :param DbColumn column: column to compute fingerprint for
+        :param sqlalchemy.engine.Engine alchemy_engine: Engine SQLAlchemy engine database connection
+        :return: column fingerprint
+        :rtype: Dict[str, Any]
+        """
+        column_fingerprint = {}
+        schema_with_dot = self.__alchemy_table.schema + '.' if self.__alchemy_table.schema else ''
+        table_name_with_schema = schema_with_dot + self.__alchemy_table.name
+        column_type = column.alchemy_column().type
+        # Snowflake fix
+        if str(column_type).upper().startswith('TIMESTAMP_'):
+            column_python_type = datetime
+        else:
+            column_python_type = column_type.python_type
+        with alchemy_engine.connect() as conn:
+            result = conn.execute(
+                text(f"SELECT COUNT(*) FROM {table_name_with_schema} WHERE {column.name()} IS NULL"))
+            data = result.fetchone()
+            column_fingerprint['null_count'] = str(data[0])
+            result = conn.execute(
+                text(f"SELECT COUNT(*) FROM {table_name_with_schema} WHERE {column.name()} IS NOT NULL"))
+            data = result.fetchone()
+            column_fingerprint['not_null_count'] = str(data[0])
+            result = conn.execute(
+                text(f"SELECT COUNT(*) FROM {table_name_with_schema} WHERE {column.name()} IS NOT NULL"))
+            column_fingerprint['not_null_count'] = result.fetchone()[0]
+            if isinstance(column_python_type, type) and issubclass(column_python_type, bool):
+                pass
+            elif isinstance(column_python_type, type) and issubclass(column_python_type, str):
+                result = conn.execute(text(f"SELECT "
+                                           f"SUM(LENGTH ({column.name()})), "
+                                           f"MAX(LENGTH ({column.name()})), "
+                                           f"MIN(LENGTH ({column.name()})) "
+                                           f"FROM {table_name_with_schema}"))
+                data = result.fetchone()
+                column_fingerprint['sum_length'] = str(data[0])
+                column_fingerprint['max_length'] = str(data[1])
+                column_fingerprint['min_length'] = str(data[2])
+            elif isinstance(column_python_type, type) and issubclass(column_python_type, date):
+                result = conn.execute(text(f"SELECT "
+                                           f"MAX({column.name()}), "
+                                           f"MIN({column.name()}) "
+                                           f"FROM {table_name_with_schema}"))
+                data = result.fetchone()
+                column_fingerprint['max'] = SqlParser.format_date(data[0])
+                column_fingerprint['min'] = SqlParser.format_date(data[0])
+            elif isinstance(column_python_type, type) and issubclass(column_python_type, (int, float, Decimal)) and not \
+                str(column_type).upper().startswith(('BOOL', 'TINYINT')):
+                result = conn.execute(text(f"SELECT "
+                                           f"SUM({column.name()}), "
+                                           f"MAX({column.name()}), "
+                                           f"MIN({column.name()}) "
+                                           f"FROM {table_name_with_schema}"))
+                data = result.fetchone()
+                column_fingerprint['sum'] = str(round(data[0], 2)).replace('.00', '')
+                column_fingerprint['max'] = str(round(data[1], 2)).replace('.00', '')
+                column_fingerprint['min'] = str(round(data[2], 2)).replace('.00', '')
+        return column_fingerprint
+
+    def fingerprint(self, alchemy_engine: sqlalchemy.engine.Engine) -> Dict[str, Any]:
+        """
+        Computes table fingerprint that includes various characteristics of the data
+        :param sqlalchemy.engine.Engine alchemy_engine: Engine SQLAlchemy engine database connection
+        """
+        column_fingerprints = {}
+        for column in self.__columns:
+            column_fingerprints[column.name()] = self.__column_fingerprint(column, alchemy_engine)
+        return column_fingerprints
 
     @classmethod
     def from_alchemy_table(cls, alchemy_table: sqlalchemy.Table) -> DbTableType:

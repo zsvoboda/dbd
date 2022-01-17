@@ -261,3 +261,21 @@ class SqlParser:
             return 'TIMESTAMP'
         else:
             return datatype.upper()
+
+    @classmethod
+    def format_date(cls, dt: datetime.date) -> str:
+        """
+        Formats a date to a string
+        :param datetime.datetime dt: date
+        :return: formatted date
+        :rtype: str
+        """
+        if dt and isinstance(dt, datetime):
+            return dt.strftime('%Y-%m-%d %H:%M:%S.%f')
+        if dt and isinstance(dt, date):
+            return dt.strftime('%Y-%m-%d')
+        elif dt and isinstance(dt, str):
+            return dt
+        else:
+            return 'NULL'
+

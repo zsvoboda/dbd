@@ -1,34 +1,26 @@
+import os
+import json
+
+from sqlalchemy import MetaData
+
 from dbd.config.dbd_profile import DbdProfile
 from dbd.config.dbd_project import DbdProject
+from dbd.db.db_table import DbTable
 from dbd.executors.model_executor import ModelExecutor
 
 
-def validate_result(engine, table_name='test_typed', compensation=0, ):
-    with engine.connect() as conn:
-        result = conn.execute(f"SELECT COUNT(*) FROM {table_name}")
-        assert result.fetchall() == [(14 - compensation,)], f"fALL row count failed for table {table_name}"
-        result = conn.execute(f"SELECT COUNT(*) FROM {table_name} WHERE test_date IS NULL")
-        assert result.fetchall() == [(2 - compensation,)], f"test_date IS NULL row count failed for table {table_name}"
-        result = conn.execute(f"SELECT COUNT(*) FROM {table_name} WHERE test_datetime IS NULL")
-        assert result.fetchall() == [
-            (3 - compensation,)], f"test_datetime IS NULL row count failed for table {table_name}"
-        result = conn.execute(f"SELECT COUNT(*) FROM {table_name} WHERE test_bool IS NULL")
-        assert result.fetchall() == [(5 - compensation,)], f"test_bool IS NULL row count failed for table {table_name}"
-        result = conn.execute(f"SELECT COUNT(*) FROM {table_name} WHERE test_string IS NULL")
-        assert result.fetchall() == [
-            (3 - compensation,)], f"test_string IS NULL row count failed for table {table_name}"
-        result = conn.execute(f"SELECT COUNT(*) FROM {table_name} WHERE test_int IS NULL")
-        assert result.fetchall() == [(8 - compensation,)], f"test_int IS NULL row count failed for table {table_name}"
-        result = conn.execute(f"SELECT COUNT(*) FROM {table_name} WHERE test_float IS NULL")
-        assert result.fetchall() == [(4 - compensation,)], f"test_float IS NULL row count failed for table {table_name}"
-        result = conn.execute(f"SELECT SUM(CAST(test_int AS DECIMAL)) FROM {table_name}")
-        assert result.fetchall() == [(6,)], f"SUM(test_int) test failed for table {table_name}"
-        result = conn.execute(f"SELECT COUNT(*) FROM {table_name} WHERE test_datetime >= '2020-01-22'")
-        assert result.fetchall() == [(10,)], f"test_datetime > 2020-01-22 row count failed for table {table_name}"
-        result = conn.execute(
-            f"SELECT COUNT(*) FROM {table_name} WHERE test_date IS NULL AND test_datetime IS NULL AND "
-            f"test_bool IS NULL AND test_string IS NULL AND test_int IS NULL AND test_float IS NULL")
-        assert result.fetchall() == [(1 - compensation,)], f"ALL NULL row count failed for table {table_name}"
+def compute_fingerprint(engine):
+    meta = MetaData()
+    meta.reflect(bind=engine)
+    tables = ['test_typed', 'test_typed_1', 'test_typed_json', 'test_typed_json_1', 'test_typed_parquet',
+              'test_typed_parquet_1', 'test_typed_excel', 'test_typed_excel_1']
+    fingerprint = {}
+    for table_name in tables:
+        db_table = DbTable.from_alchemy_table(meta.tables[table_name])
+        fingerprint[table_name] = db_table.fingerprint(engine)
+
+    return fingerprint
+
 
 def test_postgres():
     profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
@@ -36,29 +28,10 @@ def test_postgres():
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
     model.execute(engine)
-    validate_result(engine, table_name='test_typed')
-    validate_result(engine, table_name='test_typed_1')
-    validate_result(engine, table_name='test_typed_json')
-    validate_result(engine, table_name='test_typed_json_1')
-    validate_result(engine, table_name='test_typed_parquet')
-    validate_result(engine, table_name='test_typed_parquet_1')
-    validate_result(engine, table_name='test_typed_excel', compensation=1)
-    validate_result(engine, table_name='test_typed_excel_1', compensation=1)
+    fingerprint = compute_fingerprint(engine)
+    with open('tmp/pgsql.json', 'w') as fp:
+        json.dump(fingerprint, fp)
 
-def test_sqlite():
-    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/databases/sqlite/dbd.project')
-    model = ModelExecutor(project)
-    engine = project.alchemy_engine_from_project()
-    model.execute(engine)
-    validate_result(engine, table_name='test_typed')
-    validate_result(engine, table_name='test_typed_1')
-    validate_result(engine, table_name='test_typed_json')
-    validate_result(engine, table_name='test_typed_json_1')
-    validate_result(engine, table_name='test_typed_parquet')
-    validate_result(engine, table_name='test_typed_parquet_1')
-    validate_result(engine, table_name='test_typed_excel', compensation=1)
-    validate_result(engine, table_name='test_typed_excel_1', compensation=1)
 
 def test_mysql():
     profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
@@ -66,14 +39,21 @@ def test_mysql():
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
     model.execute(engine)
-    validate_result(engine, table_name='test_typed')
-    validate_result(engine, table_name='test_typed_1')
-    validate_result(engine, table_name='test_typed_json')
-    validate_result(engine, table_name='test_typed_json_1')
-    validate_result(engine, table_name='test_typed_parquet')
-    validate_result(engine, table_name='test_typed_parquet_1')
-    validate_result(engine, table_name='test_typed_excel', compensation=1)
-    validate_result(engine, table_name='test_typed_excel_1', compensation=1)
+    fingerprint = compute_fingerprint(engine)
+    with open('tmp/mysql.json', 'w') as fp:
+        json.dump(fingerprint, fp)
+
+
+def test_sqlite():
+    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/databases/sqlite/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+    fingerprint = compute_fingerprint(engine)
+    with open('tmp/sqlite.json', 'w') as fp:
+        json.dump(fingerprint, fp)
+
 
 def test_snowflake():
     profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
@@ -81,30 +61,9 @@ def test_snowflake():
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
     model.execute(engine)
-    validate_result(engine, table_name='test_typed')
-    validate_result(engine, table_name='test_typed_1')
-    validate_result(engine, table_name='test_typed_json')
-    validate_result(engine, table_name='test_typed_json_1')
-    validate_result(engine, table_name='test_typed_parquet')
-    validate_result(engine, table_name='test_typed_parquet_1')
-    validate_result(engine, table_name='test_typed_excel', compensation=1)
-    validate_result(engine, table_name='test_typed_excel_1', compensation=1)
-
-
-def test_redshift():
-    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/databases/redshift/dbd.project')
-    model = ModelExecutor(project)
-    engine = project.alchemy_engine_from_project()
-    model.execute(engine)
-    validate_result(engine, table_name='test_typed')
-    validate_result(engine, table_name='test_typed_1')
-    validate_result(engine, table_name='test_typed_json')
-    validate_result(engine, table_name='test_typed_json_1')
-    validate_result(engine, table_name='test_typed_parquet')
-    validate_result(engine, table_name='test_typed_parquet_1')
-    validate_result(engine, table_name='test_typed_excel', compensation=1)
-    validate_result(engine, table_name='test_typed_excel_1', compensation=1)
+    fingerprint = compute_fingerprint(engine)
+    with open('tmp/snowflake.json', 'w') as fp:
+        json.dump(fingerprint, fp)
 
 
 def test_bigquery():
@@ -113,12 +72,26 @@ def test_bigquery():
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
     model.execute(engine)
-    validate_result(engine, table_name='test_typed')
-    validate_result(engine, table_name='test_typed_1')
-    validate_result(engine, table_name='test_typed_json')
-    validate_result(engine, table_name='test_typed_json_1')
-    validate_result(engine, table_name='test_typed_parquet')
-    validate_result(engine, table_name='test_typed_parquet_1')
-    validate_result(engine, table_name='test_typed_excel', compensation=1)
-    validate_result(engine, table_name='test_typed_excel_1', compensation=1)
+    fingerprint = compute_fingerprint(engine)
+    with open('tmp/bigquery.json', 'w') as fp:
+        json.dump(fingerprint, fp)
 
+
+def test_redshift():
+    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/databases/redshift/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+    fingerprint = compute_fingerprint(engine)
+    with open('tmp/redshift.json', 'w') as fp:
+        json.dump(fingerprint, fp)
+
+
+def pytest_sessionfinish(session, exitstatus):
+    fingerprints = {}
+    for db in ['pgsql', 'mysql', 'sqlite', 'snowflake', 'bigquery', 'redshift']:
+        fingerprints[db] = json.loads(open(f'tmp/{db}.json').read())
+    for fingerprint in fingerprints.values():
+        for other in fingerprints.values():
+            assert fingerprint == other
