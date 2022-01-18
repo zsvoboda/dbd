@@ -223,36 +223,3 @@ def test_validate_basic():
     model = ModelExecutor(project)
     validation_result, validation_errors = model.validate()
     assert validation_result
-
-
-def test_validate_invalid():
-    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/capabilities/invalid_model/dbd.project')
-    model = ModelExecutor(project)
-    validation_result, validation_errors = model.validate()
-    assert not validation_result
-
-
-def test_validate_screwed():
-    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/capabilities/screwed/dbd.project')
-    model = ModelExecutor(project)
-    try:
-        validation_result, validation_errors = model.validate()
-    except SQlParserException:
-        assert True
-    else:
-        assert False
-
-
-def test_execute_screwed():
-    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/capabilities/screwed/dbd.project')
-    model = ModelExecutor(project)
-    engine = project.alchemy_engine_from_project()
-    try:
-        model.execute(engine)
-    except SQlParserException:
-        assert True
-    else:
-        assert False

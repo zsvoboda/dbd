@@ -10,10 +10,15 @@ from sqlalchemy.exc import ProgrammingError
 
 from dbd.db.db_column import DbColumn
 from dbd.generator.jinja_generator_env import JINJA_GENERATOR_ENV
+from dbd.log.dbd_exception import DbdException
 from dbd.utils.sql_parser import SqlParser
 from dbd.utils.text_utils import fully_qualified_table_name
 
 DbTableType = TypeVar('DbTableType', bound='DbTable')
+
+
+class DbTableCreationException(DbdException):
+    pass
 
 
 class DbTable:
@@ -112,7 +117,11 @@ class DbTable:
         TODO: exception handling
         Generates SQL and creates the table in the target database
         """
-        self.__alchemy_table.create(checkfirst=True)
+        try:
+            self.__alchemy_table.create(checkfirst=True)
+        except sqlalchemy.exc.NoReferencedTableError as e:
+            raise DbTableCreationException(f"Table {self.name()} has foreign key constraint "
+                                   f"referencing non-existent table '{e.table_name}': {e}")
 
     def drop(self, alchemy_engine: sqlalchemy.engine.Engine):
         """

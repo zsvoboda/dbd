@@ -1,0 +1,13 @@
+---
+table:
+  columns:
+    state_name:
+      nullable: false
+      primary_key: true
+      type: VARCHAR(50)
+    area_sq_mi:
+      nullable: false
+      type: INTEGER
+process:
+  materialization: table
+  mode: drop

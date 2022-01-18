@@ -7,10 +7,11 @@ from io import StringIO
 from typing import Dict, List, Any, TypeVar
 
 import click
-import math
 import pandas as pd
 import s3fs
 import sqlalchemy.engine
+from requests import HTTPError
+
 from snowflake.connector.pandas_tools import write_pandas
 from sqlalchemy import Column, TEXT, TIMESTAMP, DATE, INT, FLOAT, BOOLEAN
 
@@ -25,7 +26,19 @@ from dbd.utils.sql_parser import SqlParser
 log = logging.getLogger(__name__)
 
 
-class UnsupportedDataFile(DbdException):
+class DbdUnsupportedDataFile(DbdException):
+    pass
+
+
+class DbdInvalidDataFileFormatException(DbdException):
+    pass
+
+
+class DbdInvalidDataFileReferenceException(DbdException):
+    pass
+
+
+class DbdDataLoadError(DbdException):
     pass
 
 
@@ -161,49 +174,58 @@ class DataTask(DbTableTask):
         :param Dict[str, str] copy_stage_storage: copy stage storage parameters e.g. AWS S3 dict(url, access_key, secret_key)
         :param sqlalchemy.engine.Engine alchemy_engine:
         """
-        copy_stage_storage = kwargs.get('copy_stage_storage')
-        for data_file in self.data_files():
-            if len(data_file) > 0:
-                with tempfile.TemporaryDirectory() as tmpdirname:
-                    if is_url(data_file):
-                        absolute_file_name = os.path.join(tmpdirname, url_to_filename(data_file))
-                        click.echo(f"\tDownloading file: '{data_file}'.")
-                        download_file(data_file, absolute_file_name)
-                    else:
-                        absolute_file_name = data_file
+        try:
+            copy_stage_storage = kwargs.get('copy_stage_storage')
+            for data_file in self.data_files():
+                if len(data_file) > 0:
+                    with tempfile.TemporaryDirectory() as tmpdirname:
+                        if is_url(data_file):
+                            absolute_file_name = os.path.join(tmpdirname, url_to_filename(data_file))
+                            click.echo(f"\tDownloading file: '{data_file}'.")
+                            download_file(data_file, absolute_file_name)
+                        else:
+                            absolute_file_name = data_file
 
-                    df = self.__read_file_to_dataframe(absolute_file_name)
+                        df = self.__read_file_to_dataframe(absolute_file_name)
 
-                    mysql_bulk_load_config = alchemy_engine.url.query.get('local_infile') == '1'
+                        mysql_bulk_load_config = alchemy_engine.url.query.get('local_infile') == '1'
 
-                    if self.db_table() is None:
-                        table_def = self.__override_data_file_column_definitions(df)
-                        db_table = DbTable.from_code(self.target(), table_def, target_alchemy_metadata,
-                                                     self.target_schema())
-                        self.set_db_table(db_table)
-                        db_table.create()
-                    dtype = self.__adjust_dataframe_datatypes(df, alchemy_engine.dialect.name)
-                    click.echo(f"\tLoading data to database.")
-                    if alchemy_engine.dialect.name == 'snowflake':
-                        self.__bulk_load_snowflake(df, alchemy_engine)
-                    elif alchemy_engine.dialect.name == 'postgresql':
-                        df.to_sql(self.target(), alchemy_engine, chunksize=16384, method=psql_writer,
-                                  schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
-                    elif alchemy_engine.dialect.name == 'mysql' and mysql_bulk_load_config:
-                        self.__bulk_load_mysql(df, alchemy_engine)
-                    elif alchemy_engine.dialect.name == 'bigquery':
-                        self.__bulk_load_bigquery(df, dtype, alchemy_engine)
-                    elif alchemy_engine.dialect.name == 'redshift' and copy_stage_storage is not None:
-                        self.__bulk_load_redshift(df, alchemy_engine, copy_stage_storage)
-                    else:
-                        if alchemy_engine.dialect.name == 'redshift':
-                            log.warning("Using default SQLAlchemy writer for Redshift. Specify 'copy_stage' parameter "
-                                        "in your profile configuration file to make loading faster.")
-                        if alchemy_engine.dialect.name == 'mysql':
-                            log.warning("Using default SQLAlchemy writer for MySQL. Specify 'local_infile=1' parameter "
-                                        "in a query parameter of your MySQL connection string to make loading faster.")
-                        df.to_sql(self.target(), alchemy_engine, chunksize=16384, method='multi',
-                                  schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
+                        if self.db_table() is None:
+                            table_def = self.__override_data_file_column_definitions(df)
+                            db_table = DbTable.from_code(self.target(), table_def, target_alchemy_metadata,
+                                                         self.target_schema())
+                            self.set_db_table(db_table)
+                            db_table.create()
+                        dtype = self.__adjust_dataframe_datatypes(df, alchemy_engine.dialect.name)
+                        click.echo(f"\tLoading data to database.")
+                        if alchemy_engine.dialect.name == 'snowflake':
+                            self.__bulk_load_snowflake(df, alchemy_engine)
+                        elif alchemy_engine.dialect.name == 'postgresql':
+                            df.to_sql(self.target(), alchemy_engine, chunksize=16384, method=psql_writer,
+                                      schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
+                        elif alchemy_engine.dialect.name == 'mysql' and mysql_bulk_load_config:
+                            self.__bulk_load_mysql(df, alchemy_engine)
+                        elif alchemy_engine.dialect.name == 'bigquery':
+                            self.__bulk_load_bigquery(df, dtype, alchemy_engine)
+                        elif alchemy_engine.dialect.name == 'redshift' and copy_stage_storage is not None:
+                            self.__bulk_load_redshift(df, alchemy_engine, copy_stage_storage)
+                        else:
+                            if alchemy_engine.dialect.name == 'redshift':
+                                log.warning(
+                                    "Using default SQLAlchemy writer for Redshift. Specify 'copy_stage' parameter "
+                                    "in your profile configuration file to make loading faster.")
+                            if alchemy_engine.dialect.name == 'mysql':
+                                log.warning(
+                                    "Using default SQLAlchemy writer for MySQL. Specify 'local_infile=1' parameter "
+                                    "in a query parameter of your MySQL connection string to make loading faster.")
+                            df.to_sql(self.target(), alchemy_engine, chunksize=16384, method='multi',
+                                      schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
+        except sqlalchemy.exc.IntegrityError as e:
+            raise DbdDataLoadError(f" Referential integrity error: {e}")
+        except ValueError as e:
+            raise DbdInvalidDataFileFormatException(f"Error parsing file '{absolute_file_name}': {e}")
+        except (FileNotFoundError, HTTPError) as e:
+            raise DbdInvalidDataFileReferenceException(f"Referenced file '{absolute_file_name}' doesn't exist: {e}")
 
     def __bulk_load_bigquery(self, df: pd.DataFrame, dtype: Dict[str, str], alchemy_engine: sqlalchemy.engine.Engine):
         """
@@ -314,20 +336,20 @@ class DataTask(DbTableTask):
                 python_type = SqlParser.parse_alchemy_data_type(column_type).python_type
             if isinstance(python_type, type) and issubclass(python_type, datetime):
                 if dialect_name in ['bigquery']:
-                    df[column_name] = pd.to_datetime(df[column_name], errors='coerce').dt.strftime('%Y-%m-%d %H:%M:%S')
+                    df[column_name] = pd.to_datetime(df[column_name]).dt.strftime('%Y-%m-%d %H:%M:%S')
                     df[column_name] = df[column_name].astype('datetime64[ns]')
                 elif dialect_name in ['snowflake']:
-                    df[column_name] = pd.to_datetime(df[column_name], errors='coerce').dt.strftime('%Y-%m-%d %H:%M:%S')
+                    df[column_name] = pd.to_datetime(df[column_name]).dt.strftime('%Y-%m-%d %H:%M:%S')
                 else:
-                    df[column_name] = pd.to_datetime(df[column_name], errors='coerce')
+                    df[column_name] = pd.to_datetime(df[column_name])
             elif isinstance(python_type, type) and issubclass(python_type, date):
                 if dialect_name in ['bigquery']:
-                    df[column_name] = pd.to_datetime(df[column_name], errors='coerce').dt.strftime('%Y-%m-%d')
+                    df[column_name] = pd.to_datetime(df[column_name]).dt.strftime('%Y-%m-%d')
                     df[column_name] = df[column_name].astype('datetime64[ns]')
                 elif dialect_name in ['snowflake']:
-                    df[column_name] = pd.to_datetime(df[column_name], errors='coerce').dt.strftime('%Y-%m-%d')
+                    df[column_name] = pd.to_datetime(df[column_name],).dt.strftime('%Y-%m-%d')
                 else:
-                    df[column_name] = pd.to_datetime(df[column_name], errors='coerce')
+                    df[column_name] = pd.to_datetime(df[column_name])
             elif isinstance(python_type, type) and issubclass(python_type, bool):
                 if dialect_name in ['mysql']:
                     df[column_name] = df[column_name].map(lambda x: SqlParser.parse_bool_int(x))
@@ -354,17 +376,22 @@ class DataTask(DbTableTask):
         :return: Pandas DataFrame
         :rtype: pd.DataFrame
         """
-        if is_url(absolute_file_name):
-            absolute_file_name = download_file(absolute_file_name, absolute_file_name)
-        file_name, file_extension = os.path.splitext(absolute_file_name)
-        if file_extension.lower() == '.csv':
-            return pd.read_csv(absolute_file_name, dtype=str)
-        elif file_extension.lower() == '.json':
-            # noinspection PyTypeChecker
-            return pd.read_json(absolute_file_name)
-        elif file_extension.lower() in {'.xls', '.xlsx', '.xlsm', '.xlsb', '.odf', '.ods', '.odt'}:
-            return pd.read_excel(absolute_file_name)
-        elif file_extension.lower() == '.parquet':
-            return pd.read_parquet(absolute_file_name, use_nullable_dtypes=True)
-        else:
-            raise UnsupportedDataFile(f"Data files with extension '{file_extension}' aren't supported.")
+        try:
+            if is_url(absolute_file_name):
+                absolute_file_name = download_file(absolute_file_name, absolute_file_name)
+            file_name, file_extension = os.path.splitext(absolute_file_name)
+            if file_extension.lower() == '.csv':
+                return pd.read_csv(absolute_file_name, dtype=str)
+            elif file_extension.lower() == '.json':
+                # noinspection PyTypeChecker
+                return pd.read_json(absolute_file_name)
+            elif file_extension.lower() in {'.xls', '.xlsx', '.xlsm', '.xlsb', '.odf', '.ods', '.odt'}:
+                return pd.read_excel(absolute_file_name)
+            elif file_extension.lower() == '.parquet':
+                return pd.read_parquet(absolute_file_name, use_nullable_dtypes=True)
+            else:
+                raise DbdUnsupportedDataFile(f"Data files with extension '{file_extension}' aren't supported.")
+        except ValueError as e:
+            raise DbdInvalidDataFileFormatException(f"Error parsing file '{absolute_file_name}': {e}")
+        except (FileNotFoundError, HTTPError) as e:
+            raise DbdInvalidDataFileReferenceException(f"Referenced file '{absolute_file_name}' doesn't exist: {e}")
