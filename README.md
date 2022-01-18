@@ -39,7 +39,29 @@ dbd --profile=../dbd.profile run .
 These commands should create a new `basic.db` SQLite database with `area`, `population`, and `state` tables that are created and loaded from the corresponding files in the `model` directory.
 
 ## Installing dbd
-dbd requires Python 3.7.1 or higher. 
+dbd requires Python 3.8 or higher. 
+
+### Prerequisites
+Postgres and Snowflake connectors require `psycopg2` and `Rust` packages. 
+
+Here is how you can install these dependencies on Fedora:
+
+```shell
+sudo yum install gcc-c++
+sudo yum install python3-devel
+sudo yum install rustc
+sudo yum install cargo
+```
+
+and on Ubuntu:
+
+```shell
+sudo apt install libpq-dev
+sudo apt install rustc
+sudo apt install cargo
+```
+
+You shouldn't need to install these dependencies on MacOS, and Windows.
 
 ### PyPI
 
@@ -56,75 +78,28 @@ pip3 install .
 ```
 
 ### Running dbd
-Try to execute `dbd` after the installation. If the command cannot be found, try to execute
+`dbd` installs a command line executable that must reside on your path. Sometime Python places the executable 
+(called `dbd`) outside of your `PATH`. Try to execute `dbd` after the installation. If the command cannot be found, 
+try to execute
 
 ```shell
 export PATH=~/.local/bin:$PATH
 ```
 
-and run `dbd` again.
+and run `dbd` again. `pip3` usually complains about the fact that the directory where it is placing the executable is 
+not in `PATH`. You need to take the scripts directory that it suggests and put it on your `PATH`.
 
-dbd installs with SqLite driver only by default. To install dbd with other drivers, use the steps described in the 
-chapters below.
-
-#### Postgres
-First, you'll need to install the Postgres development libraries:
-
-* For Ubuntu/Debian systems: `sudo apt-get install libpq-dev`
-* On Red Hat Linux (RHEL) systems: `yum install postgresql-devel`
-* For Mac Homebrew: `brew install postgresql`
-* For Mac MacPorts: `gem install pg -- --with-pg-config=/opt/local/lib/postgresql[version number]/bin/pg_config`
-* For OpenSuse: `zypper in postgresql-devel`
-* For ArchLinux: `pacman -S postgresql-libs`
-
-Then, you can install the Postgres driver:
-
-```shell
-pip3 install psycopg2
-```
-
-#### MySQL/MariaDB
-
-```shell
-pip3 install greenlet
-pip3 install PyMySQL
-````
-
-#### Snowflake
-Follow the [steps in this document](https://docs.snowflake.com/en/user-guide/python-connector-install.html) 
-to install the Snowflake driver.
-
-Essentially, you need to install the Snowflake Python connector with the following command:
-
-```shell
-pip3 install snowflake-connector-python
-pip3 snowflake-sqlalchemy
-```
-
-The document above install the connector prerequisites.
-
-#### AWS Redshift
-
-`pip3 install sqlalchemy-redshift`
-
-#### Google BigQuery 
-
-```shell
-pip3 install google-cloud-storage
-pip3 install google-cloud-bigquery-storage
-pip3 install sqlalchemy-bigquery
-pip3 install pandas-gbq
-````
-
-### Developers who want to contribute 
+Once you can execute the `dbd` command, clone the dbd repository and start with the SQLite examples:
 
 ```shell
 git clone https://github.com/zsvoboda/dbd.git
-cd dbd
-pip3 install -e .
-``` 
+cd dbd/examples/sqlite/basic
+dbd --profile=../dbd.profile run . 
+```
 
-## Starting new dbd project
+You can also start with [this tutorial](https://zsvoboda.medium.com/analyze-covid-data-in-less-than-5-minutes-9176f440dd1a). 
+
+## Starting a new dbd project
 You can generate dbd project initial layout by executing `init` command:
 
 ```shell
