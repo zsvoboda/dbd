@@ -6,8 +6,6 @@ def test_profile_connections():
     connections = profile.db_connections()
     assert 'basic' in connections
     assert 'data_formats' in connections
-    assert 'invalid_model' in connections
-    assert 'screwed' in connections
 
 
 def test_profile_connection_engines():
