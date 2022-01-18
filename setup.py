@@ -1,14 +1,22 @@
 from distutils.core import setup
 
-REQUIRES = ["jinja2", "sqlalchemy", "sqlparse", "sql-metadata", "networkx", "psycopg2", "pyyaml", "pandas",
-            "click", "cerberus", "openpyxl", "pyarrow", "PyMySQL", "snowflake-connector-python", "snowflake-sqlalchemy",
-            "sqlalchemy-redshift", "requests", "google-cloud-storage", "pandas-gbq", "sqlalchemy-bigquery",
-            "google-cloud-bigquery-storage", "greenlet", "fsspec", "s3fs"]
+REQUIRES = ["jinja2", "sqlalchemy", "sqlparse", "sql-metadata", "networkx", "pyyaml", "pandas", "click", "cerberus",
+            "openpyxl", "pyarrow", "requests", "fsspec", "s3fs",
+            #"psycopg2"
+            #"PyMySQL", "greenlet",
+            #snowflake-connector-python",
+            #"snowflake-sqlalchemy",
+            #"sqlalchemy-redshift",
+            #"google-cloud-storage",
+            #"pandas-gbq",
+            #"sqlalchemy-bigquery",
+            #"google-cloud-bigquery-storage"
+            ]
 
 setup(
     name="dbd",
     description="Declarative database",
-    version="0.7.3",
+    version="0.7.4",
     author="Zdenek Svoboda",
     license="BSD",
     install_requires=REQUIRES,

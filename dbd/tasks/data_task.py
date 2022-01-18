@@ -201,7 +201,7 @@ class DataTask(DbTableTask):
                         if alchemy_engine.dialect.name == 'snowflake':
                             self.__bulk_load_snowflake(df, alchemy_engine)
                         elif alchemy_engine.dialect.name == 'postgresql':
-                            df.to_sql(self.target(), alchemy_engine, chunksize=16384, method=psql_writer,
+                            df.to_sql(self.target(), alchemy_engine, chunksize=4096, method=psql_writer,
                                       schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
                         elif alchemy_engine.dialect.name == 'mysql' and mysql_bulk_load_config:
                             self.__bulk_load_mysql(df, alchemy_engine)
@@ -218,7 +218,7 @@ class DataTask(DbTableTask):
                                 log.warning(
                                     "Using default SQLAlchemy writer for MySQL. Specify 'local_infile=1' parameter "
                                     "in a query parameter of your MySQL connection string to make loading faster.")
-                            df.to_sql(self.target(), alchemy_engine, chunksize=16384, method='multi',
+                            df.to_sql(self.target(), alchemy_engine, chunksize=4096, method='multi',
                                       schema=self.target_schema(), if_exists='append', index=False, dtype=dtype)
         except sqlalchemy.exc.IntegrityError as e:
             raise DbdDataLoadError(f" Referential integrity error: {e}")

@@ -55,6 +55,67 @@ cd dbd
 pip3 install .
 ```
 
+### Running dbd
+Try to execute `dbd` after the installation. If the command cannot be found, try to execute
+
+```shell
+export PATH=~/.local/bin:$PATH
+```
+
+and run `dbd` again.
+
+dbd installs with SqLite driver only by default. To install dbd with other drivers, use the steps described in the 
+chapters below.
+
+#### Postgres
+First, you'll need to install the Postgres development libraries:
+
+* For Ubuntu/Debian systems: `sudo apt-get install libpq-dev`
+* On Red Hat Linux (RHEL) systems: `yum install postgresql-devel`
+* For Mac Homebrew: `brew install postgresql`
+* For Mac MacPorts: `gem install pg -- --with-pg-config=/opt/local/lib/postgresql[version number]/bin/pg_config`
+* For OpenSuse: `zypper in postgresql-devel`
+* For ArchLinux: `pacman -S postgresql-libs`
+
+Then, you can install the Postgres driver:
+
+```shell
+pip3 install psycopg2
+```
+
+#### MySQL/MariaDB
+
+```shell
+pip3 install greenlet
+pip3 install PyMySQL
+````
+
+#### Snowflake
+Follow the [steps in this document](https://docs.snowflake.com/en/user-guide/python-connector-install.html) 
+to install the Snowflake driver.
+
+Essentially, you need to install the Snowflake Python connector with the following command:
+
+```shell
+pip3 install snowflake-connector-python
+pip3 snowflake-sqlalchemy
+```
+
+The document above install the connector prerequisites.
+
+#### AWS Redshift
+
+`pip3 install sqlalchemy-redshift`
+
+#### Google BigQuery 
+
+```shell
+pip3 install google-cloud-storage
+pip3 install google-cloud-bigquery-storage
+pip3 install sqlalchemy-bigquery
+pip3 install pandas-gbq
+````
+
 ### Developers who want to contribute 
 
 ```shell
