@@ -78,7 +78,7 @@ pip3 install .
 ```
 
 ### Running dbd
-`dbd` installs a command line executable that must reside on your path. Sometime Python places the executable 
+`dbd` installs a command line executable that must reside on your path. Sometimes Python places the executable 
 (called `dbd`) outside of your `PATH`. Try to execute `dbd` after the installation. If the command cannot be found, 
 try to execute
 
