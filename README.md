@@ -76,11 +76,22 @@ On Ubuntu run:
 sudo apt install python3-venv
 ```
 
+On Windows just install Python 3.8 or higher from the Store.
+
 Then activate the virtual environment:
+
+On Linux run:
 
 ```shell
 python3 -m venv my-project-env
 source my-project-env/bin/activate
+```
+
+On Windows run:
+
+```shell
+python3 -m venv my-project-env
+call my-project-env\Scripts\activate.bat
 ```
 
 ### PyPI

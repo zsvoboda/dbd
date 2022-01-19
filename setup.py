@@ -13,7 +13,7 @@ REQUIRES = ["jinja2==3.0.3", "sqlalchemy==1.4.25", "sqlparse==0.4.2", "sql-metad
 setup(
     name="dbd",
     description="Declarative database",
-    version="0.7.9",
+    version="0.8.0",
     author="Zdenek Svoboda",
     license="BSD",
     install_requires=REQUIRES,
