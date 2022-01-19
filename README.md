@@ -42,26 +42,46 @@ These commands should create a new `basic.db` SQLite database with `area`, `popu
 dbd requires Python 3.8 or higher. 
 
 ### Prerequisites
-Postgres and Snowflake connectors require `psycopg2` and `Rust` packages. 
-
-Here is how you can install these dependencies on Fedora:
+Check that you have a recent version of Python 3.8 or higher.
 
 ```shell
-sudo yum install gcc-c++
-sudo yum install python3-devel
-sudo yum install rustc
-sudo yum install cargo
+python3 -V
 ```
 
-and on Ubuntu:
+if not use a package manager to install the latest python:
+
+On Fedora run:
 
 ```shell
-sudo apt install libpq-dev
-sudo apt install rustc
-sudo apt install cargo
+sudo yum install python3
 ```
 
-You shouldn't need to install these dependencies on MacOS, and Windows.
+On Ubuntu run:
+
+```shell
+sudo apt install python3
+```
+
+Install Python virtual environment:
+
+On Fedora run:
+
+```shell
+sudo yum install python3-virtualenv
+```
+
+On Ubuntu run:
+
+```shell
+sudo apt install python3-venv
+```
+
+Then activate the virtual environment:
+
+```shell
+python3 -m venv my-project-env
+source my-project-env/bin/activate
+```
 
 ### PyPI
 
