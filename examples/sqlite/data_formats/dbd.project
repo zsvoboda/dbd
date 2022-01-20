@@ -1,2 +1,2 @@
 model: ./model
-database: data_formats_sqlite
+database: data_formats

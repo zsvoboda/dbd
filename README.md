@@ -95,7 +95,7 @@ source dbd-env/bin/activate
 On Windows run:
 
 ```shell
-python3 -m dbd-env
+python3 -m venv dbd-env
 call dbd-env\Scripts\activate.bat
 ```
 
