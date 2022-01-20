@@ -4,7 +4,7 @@ dbd is a data loading and transformation tool that enables data analysts and eng
 dbd helps you with following tasks:
 - Loading CSV, JSON, Excel, and Parquet data to database. It supports both local and online files (HTTP URLs). Data can be loaded incrementally or in full. 
 - Transforming data in existing database tables using insert-from-sql statements.
-- Executing DDL (Data Definition Language) SQL scripts (stetements like `CREATE SCHEMA`, etc.).    
+- Executing DDL (Data Definition Language) SQL scripts (statements like `CREATE SCHEMA`, etc.).    
 
 ## How dbd works
 dbd processes a model directory that contains following elements:
