@@ -4,7 +4,7 @@ The `model/jinja.ref` file is a Jinja2 template file that uses the `{% for %}` m
 from 4 different URLs. Then `dbd` also loads two local files from the `data` directory. The data 
 files are referenced using relative paths to the `.ref` file.
 
-The `model/jinja.yaml` file is used to override the default `jinjs` table column's data types.
+The `model/jinja.yaml` file is used to override the default `jinja` table column's data types.
 
 # Running the demo 
 
