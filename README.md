@@ -38,7 +38,7 @@ source dbd-env/bin/activate
 pip3 install dbd
 git clone https://github.com/zsvoboda/dbd.git
 cd dbd/examples/sqlite/basic
-dbd --profile=../dbd.profile run . 
+dbd run . 
 ```
 
 These commands should create a new `basic.db` SQLite database with `area`, `population`, and `state` tables that are created and loaded from the corresponding files in the `model` directory.
@@ -130,7 +130,7 @@ Once you can execute the `dbd` command, clone the dbd repository and start with 
 ```shell
 git clone https://github.com/zsvoboda/dbd.git
 cd dbd/examples/sqlite/basic
-dbd --profile=../dbd.profile run . 
+dbd run . 
 ```
 
 You can also start with [this tutorial](https://zsvoboda.medium.com/analyze-covid-data-in-less-than-5-minutes-9176f440dd1a). 
