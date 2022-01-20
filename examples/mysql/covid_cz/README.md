@@ -3,40 +3,19 @@ This example downloads the complete COVID-19 tracking data from the [Czech Minis
 
 ![COVID CZ data model](https://raw.githubusercontent.com/zsvoboda/dbd/master/img/covid.cz.datamodel.png)
 
-# Configuring MySQL database connection
-The `dbd.profile` configuration file contains the following MySQL connection URL:
-
-`mysql+pymysql://{{ MYSQL_USER }}:{{ MYSQL_PASSWORD }}@{{ MYSQL_HOST }}/{{ MYSQL_DB }}?charset=utf8mb4`
-
-Please make sure that your environment contains the environment variables above. For example:
-
-```shell
-export MYSQL_USER=demouser
-export MYSQL_PASSWORD=demopass
-export MYSQL_HOST=localhost
-export MYSQL_DB=public
-```
-
-You also need to create a new `covid_cz` MySQL database and `demouser` user that can create new tables in this database.
-
-# Configuring MySQL fast loading mode
-Fast loading mode copies data to MySQL using COPY command that is much faster than the traditional INSERT command. 
-To enable fast loading mode, you need specify `local_infile=1` query parameter in the MySQL connection url.
-You also must enable the LOCAL INFILE mode on your MySQL server. You can for example do this by executing this 
-SQL statement:
-
-```mysql
-SET GLOBAL local_infile = true;
-```
+# Configuring MySQL database and connection
+Check out [the MySQL examples README](../README.md) for more information on MySQL examples setup. 
 
 # Running the example
 Use the following commands to run the COVID CZ example:
 
 ```shell
+python3 -m venv dbd-env
+source dbd-env/bin/activate
 pip3 install dbd
 git clone https://github.com/zsvoboda/dbd.git
 cd dbd/examples/mysql/covid_cz
-dbd --profile=../dbd.profile run . 
+dbd run . 
 ```
 
-Once you run these commands, you can review the newly created tables in the `covid_cz` MySql database.
+Once you run these commands, you can review the newly created tables in the `public` MySQL database.

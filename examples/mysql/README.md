@@ -1,6 +1,6 @@
 # MySQL dbd examples
 The MySQL examples require access to a MySQL database server. You can install MySQL locally 
-or provision a hosted MySQL service (e.g. AWS RDS or GCP CLoudSQL).  
+or provision a hosted MySQL service (e.g. AWS RDS or GCP CloudSQL).  
 
 # Configuring MySQL database connection
 The `dbd.profile` configuration file contains the following MySQL connection URL:
@@ -16,7 +16,7 @@ export MYSQL_HOST=localhost
 export MYSQL_DB=public
 ```
 
-You also need to create a new `covid_cz` MySQL database and `demouser` user that can create new tables in this database.
+You also need to create a new `public` MySQL database and `demouser` user that can create new tables in this database.
 
 # Configuring MySQL fast loading mode
 Fast loading mode copies data to MySQL using COPY command that is much faster than the traditional INSERT command. 
@@ -32,10 +32,21 @@ SET GLOBAL local_infile = true;
 Use the following commands to run a selected MySQL example:
 
 ```shell
+python3 -m venv dbd-env
+source dbd-env/bin/activate
 pip3 install dbd
 git clone https://github.com/zsvoboda/dbd.git
 cd dbd/examples/mysql/covid_cz
-dbd --profile=../dbd.profile run . 
+dbd run . 
 ```
 
-Once you run these commands, you can review the newly created tables in the `covid_cz` MySQL database.
+Once you run these commands, you can review the newly created tables in the `public` MySQL database.
+
+# Examples
+
+This directory contains the following examples:
+
+* [Basic example](basic/README.md) demonstrates simple `dbd` usage. It loads couple CSV files with default datatypes and performs a simple SQL transformation.
+* [COVID](covid/README.md) shows loading of an online `.csv` file.
+* [COVID CZ](covid_cz/README.md) is the most complex example that loads data from online CSV files from the Czech Republic's Ministry of Health and transform them to analytical model with constraints and referential integrity.
+

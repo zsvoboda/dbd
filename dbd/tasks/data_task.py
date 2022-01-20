@@ -184,6 +184,7 @@ class DataTask(DbTableTask):
                             click.echo(f"\tDownloading file: '{data_file}'.")
                             download_file(data_file, absolute_file_name)
                         else:
+                            click.echo(f"\tProcessing local file: '{data_file}'.")
                             absolute_file_name = data_file
 
                         df = self.__read_file_to_dataframe(absolute_file_name)

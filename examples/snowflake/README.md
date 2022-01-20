@@ -25,10 +25,21 @@ You also need to create a new `covid_cz` Snowflake database and `demouser` user 
 Use the following commands to run the COVID CZ example:
 
 ```shell
+python3 -m venv dbd-env
+source dbd-env/bin/activate
 pip3 install dbd
 git clone https://github.com/zsvoboda/dbd.git
 cd dbd/examples/snowflake/covid_cz
-dbd --profile=../dbd.profile run . 
+dbd run . 
 ```
 
 Once you run these commands, you can review the newly created tables in the `covid_cz` Snowflake database.
+
+# Examples
+
+This directory contains the following examples:
+
+* [Basic example](basic/README.md) demonstrates simple `dbd` usage. It loads couple CSV files with default datatypes and performs a simple SQL transformation.
+* [COVID](covid/README.md) shows loading of an online `.csv` file.
+* [COVID CZ](covid_cz/README.md) is the most complex example that loads data from online CSV files from the Czech Republic's Ministry of Health and transform them to analytical model with constraints and referential integrity.
+
