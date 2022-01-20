@@ -1,14 +1,20 @@
 import logging
 import re
 import sys
-# noinspection PyUnresolvedReferences
 from datetime import date, datetime
 from typing import List
 
 import math
-import numpy as np
 import pandas as pd
 import sqlalchemy
+# noinspection PyUnresolvedReferences
+import sqlalchemy.dialects.mysql
+# noinspection PyUnresolvedReferences
+import sqlalchemy.dialects.postgresql
+# noinspection PyUnresolvedReferences
+import sqlalchemy.dialects.sqlite
+# noinspection PyUnresolvedReferences
+import sqlalchemy.sql.sqltypes
 from dateutil import parser as date_parser
 from math import nan
 from sql_metadata import Parser
@@ -91,35 +97,32 @@ class SqlParser:
         :rtype:  sqlalchemy.types.TypeEngine subclass
         """
         parsed_data_type = Parser(f"CREATE TABLE a( c {data_type} )")
-        # parsed_data_type = Parser(data_type)
         core_data_type = parsed_data_type.tokens[5].value
         length = int(parsed_data_type.tokens[7].value) if len(
             parsed_data_type.tokens) > 7 and parsed_data_type.tokens[7].is_integer else None
         scale = int(parsed_data_type.tokens[9].value) if len(
             parsed_data_type.tokens) > 9 and parsed_data_type.tokens[9].is_integer else None
 
-        try:
-            datatype_class = getattr(sys.modules['sqlalchemy.sql.sqltypes'], core_data_type)
-        except AttributeError:
-            try:
-                datatype_class = getattr(sys.modules['sqlalchemy.dialects.postgresql'], core_data_type)
-            except AttributeError:
+        for modules in ['sqlalchemy.sql.sqltypes', 'sqlalchemy.dialects.postgresql', 'sqlalchemy.dialects.sqlite',
+                        'sqlalchemy.dialects.mysql']:
+            if hasattr(sys.modules[modules], core_data_type):
                 try:
-                    datatype_class = getattr(sys.modules['sqlalchemy.dialects.bigquery'], core_data_type)
-                except AttributeError:
-                    log.debug(f"Unsupported data type {core_data_type}.")
-                    raise SQlParserException(f"Unsupported data type {core_data_type}.")
+                    params = dict(scale=scale, length=length) if scale and length \
+                        else dict(scale=scale) if scale else dict(length=length) if length else {}
+                    log.debug(f"Serching for type {core_data_type}({dict}) in {modules}.")
+                    tp = getattr(sys.modules[modules], core_data_type)(**params)
+                except TypeError:
+                    try:
+                        params = dict(scale=scale, precision=length) if scale and length \
+                            else dict(scale=scale) if scale else dict(precision=length) if length else {}
+                        log.debug(f"Serching for type {core_data_type}({dict}) in {modules}.")
+                        tp = getattr(sys.modules[modules], core_data_type)(**params)
+                    except TypeError:
+                        raise SQlParserException(f"Unsupported data type {core_data_type} with parameters {params}.")
+                return tp
+        log.debug(f"Unsupported data type {core_data_type}.")
+        raise SQlParserException(f"Unsupported data type {core_data_type}.")
 
-        if core_data_type in ('CHAR', 'VARCHAR'):
-            return datatype_class(length=length)
-        elif core_data_type in ('DECIMAL', 'NUMERIC'):
-            return datatype_class(precision=length, scale=scale)
-        elif core_data_type in ('TIMESTAMP', 'DATE', 'DATETIME', 'INTEGER', 'FLOAT', 'DOUBLE', 'TEXT', 'SMALLINT',
-                                'DOUBLE_PRECISION', 'REAL', 'BOOLEAN', 'BOOL'):
-            return datatype_class()
-        else:
-            log.debug(f"Unsupported data type {core_data_type}.")
-            raise SQlParserException(f"Unsupported data type {core_data_type}.")
 
     @classmethod
     def parse_date(cls, dt: str) -> date:
@@ -278,4 +281,3 @@ class SqlParser:
             return dt
         else:
             return 'NULL'
-

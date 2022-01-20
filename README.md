@@ -1,5 +1,5 @@
-# dbd: database loading and transformation tool
-dbd is a data loading and transformation tool that enables data analysts and engineers to load and transform data in SQL databases.
+# dbd: database prototyping tool
+dbd is a database prototyping tool that enables data analysts and engineers to quickly load and transform data in SQL databases.
 
 dbd helps you with following tasks:
 - Loading CSV, JSON, Excel, and Parquet data to database. It supports both local and online files (HTTP URLs). Data can be loaded incrementally or in full. 
@@ -7,29 +7,34 @@ dbd helps you with following tasks:
 - Executing DDL (Data Definition Language) SQL scripts (statements like `CREATE SCHEMA`, etc.).    
 
 ## How dbd works
-dbd processes a model directory that contains following elements:
+dbd processes a model directory that contains directories and files:
 
 - **Directories** create new database schemas.
 - **Files** create new database table or view. The new table's or view's name is the same as the data file name.
-  - `.csv`, `.json`, `.xlsx`, and `.parquet` data files are introspected and loaded to database as  tables.   
+  - `.csv`, `.json`, `.xlsx`, and `.parquet` data files are introspected and loaded to database as tables.   
   - `.sql` files that contain SQL SELECT statements are executed and the result is loaded to database as table or view.
   - `.ref` files contain one or more local paths or URLs pointing to supported data files. The referenced files are loaded to database as tables.  
   - `.yaml` files contain metadata for the files above. The `.yaml` file has the same name as a data, `.sql`, or `.ref` file and specifies details of target table's columns (data types, constraints, indexes, etc.). `.yaml` files are optional. If not specified, dbd uses defaults (e.g. `TEXT` data types for CSV columns)
   - `.ddl` files contain multiple SQL statements separated by semicolon that are executed against the database.
 
-dbd knows the correct order in which to process files in the model directory to respect mutual dependencies between created objects.
+dbd knows the correct order in which to process files in the model directory to respect mutual dependencies between 
+created objects.
 
 ![How dbd works](https://raw.githubusercontent.com/zsvoboda/dbd/master/img/dbd.infographic.png)
 
-dbd currently supports Postgres, MySQL/MariaDB, SQLite, Snowflake, BigQuery, and Redshift databases. 
+dbd currently supports Postgres, MySQL/MariaDB, SQLite, Snowflake, BigQuery, and Redshift databases.
 
-## Getting started
-A short 5-minute getting started tutorial is available [here](https://zsvoboda.medium.com/analyze-covid-data-in-less-than-5-minutes-9176f440dd1a).
+## Getting started and Examples
+A short 5-minute getting started tutorial is available 
+[here](https://zsvoboda.medium.com/analyze-covid-data-in-less-than-5-minutes-9176f440dd1a).
 
-## Examples
-Check out dbd's [model directory examples](https://github.com/zsvoboda/dbd/tree/master/examples). The easiest way how to execute them is to either clone or download dbd's github repository and start with the SQLite examples.
+You can also check out dbd's [examples here](https://github.com/zsvoboda/dbd/tree/master/examples). 
+The easiest way how to execute them is to either clone or download dbd's github repository and start with the
+[SQLite examples](https://github.com/zsvoboda/dbd/tree/master/examples/sqlite).
 
 ```shell
+python3 -m venv dbd-env
+source dbd-env/bin/activate
 pip3 install dbd
 git clone https://github.com/zsvoboda/dbd.git
 cd dbd/examples/sqlite/basic
@@ -83,15 +88,15 @@ Then activate the virtual environment:
 On Linux run:
 
 ```shell
-python3 -m venv my-project-env
-source my-project-env/bin/activate
+python3 -m venv dbd-env
+source dbd-env/bin/activate
 ```
 
 On Windows run:
 
 ```shell
-python3 -m venv my-project-env
-call my-project-env\Scripts\activate.bat
+python3 -m dbd-env
+call dbd-env\Scripts\activate.bat
 ```
 
 ### PyPI
@@ -312,7 +317,7 @@ SQL statement:
 SET GLOBAL local_infile = true;
 ```
 
-# Redsift
+# Redshift
 To enable fast loading mode, you need specify `copy_stage` parameter in the `dbd.project` configuration file. 
 The `copy_stage` parameter must reference a storage definition in your `dbd.profile` configuration file.
 Check the example configuration files in the `examples/redshift/covid_cz` directory. Here are the example definitions of the 
@@ -323,8 +328,6 @@ export AWS_COVID_STAGE_S3_URL="s3://covid/stage"
 export AWS_COVID_STAGE_S3_ACCESS_KEY="AKIA43SWERQGXMUYFIGMA"
 export AWS_COVID_STAGE_S3_S3_SECRET_KEY="iujI78eDuFFGJF6PSjY/4CIhEJdMNkuS3g4t0BRwX"
 ```
-
-
 
 ## License
 dbd code is open-sourced under [BSD 3-clause license](LICENSE). 
