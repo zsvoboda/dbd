@@ -1,0 +1,19 @@
+---
+table:
+  columns:
+    country_id:
+      foreign_keys:
+        - country.country_id
+      index: true
+      nullable: false
+      type: CHAR(3)
+    county_id:
+      nullable: false
+      primary_key: true
+    county_name:
+      nullable: false
+      unique: true
+process:
+  materialization: table
+  mode: drop
+

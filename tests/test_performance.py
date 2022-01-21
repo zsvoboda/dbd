@@ -35,7 +35,7 @@ def download_all_ref_files(project):
 
 def test_all():
     all_counts = {}
-    all_profile_files = f'./tests/fixtures/performance/dbd.profile.x'
+    all_profile_files = f'./tests/fixtures/performance/dbd.profile.*'
     for profile_file in glob.glob(all_profile_files):
         profile = DbdProfile.load(profile_file)
         project = DbdProject.load(profile, 'tests/fixtures/performance/covid_czech/dbd.project')

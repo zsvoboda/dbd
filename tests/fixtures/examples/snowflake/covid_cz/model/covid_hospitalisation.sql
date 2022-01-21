@@ -1,0 +1,17 @@
+select (row_number() over (order by datum))   as covid_hospitalisation_id,
+       'CZ'                     as country_id,
+       datum                    as covid_hospitalisation_date,
+       pacient_prvni_zaznam     as covid_hospitalisation_admissions,
+       pocet_hosp               as covid_hospitalisation_current,
+       stav_bez_priznaku        as covid_hospitalisation_no_symptoms,
+       stav_lehky               as covid_hospitalisation_light_symptoms,
+       stav_stredni             as covid_hospitalisation_medium_symptoms,
+       stav_tezky               as covid_hospitalisation_severe_symptoms,
+       jip                      as covid_hospitalisation_intensive_care,
+       kyslik                   as covid_hospitalisation_oxygen,
+       hfno                     as covid_hospitalisation_hfno,
+       upv                      as covid_hospitalisation_ventilation,
+       ecmo                     as covid_hospitalisation_ecmo,
+       tezky_upv_ecmo           as covid_hospitalisation_ecmo_ventilation,
+       umrti                    as covid_hospitalisation_deaths
+from ext_hospitalizace

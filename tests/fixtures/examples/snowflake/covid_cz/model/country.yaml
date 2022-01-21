@@ -1,0 +1,11 @@
+---
+table:
+  columns:
+    country_id:
+      nullable: false
+      primary_key: true
+    country_name:
+      nullable: false
+process:
+  materialization: table
+  mode: drop

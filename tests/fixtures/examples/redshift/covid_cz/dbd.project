@@ -1,0 +1,4 @@
+model: model
+database: covid_cz
+copy_stage: s3_covid_cz
+

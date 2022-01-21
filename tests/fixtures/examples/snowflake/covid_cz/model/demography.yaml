@@ -1,0 +1,13 @@
+---
+table:
+  columns:
+    city_id:
+      foreign_keys:
+        - city.city_id
+      nullable: false
+    demography_id:
+      nullable: false
+      primary_key: true
+process:
+  materialization: table
+  mode: drop

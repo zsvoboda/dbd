@@ -159,7 +159,8 @@ class DbTable:
         """
         column_fingerprint = {}
         schema_with_dot = self.__alchemy_table.schema + '.' if self.__alchemy_table.schema else ''
-        table_name_with_schema = schema_with_dot + self.__alchemy_table.name
+        table_name = self.__alchemy_table.name
+        table_name_with_schema = schema_with_dot + table_name
         column_type = column.alchemy_column().type
         # Snowflake fix
         if str(column_type).upper().startswith('TIMESTAMP_'):
@@ -168,23 +169,30 @@ class DbTable:
             column_python_type = column_type.python_type
         with alchemy_engine.connect() as conn:
             result = conn.execute(
-                text(f"SELECT COUNT(*) FROM {table_name_with_schema} WHERE {column.name()} IS NULL"))
+                text(f"SELECT COUNT(*) FROM {table_name_with_schema} WHERE {table_name}.{column.name()} IS NULL"))
             data = result.fetchone()
             column_fingerprint['null_count'] = str(data[0])
             result = conn.execute(
-                text(f"SELECT COUNT(*) FROM {table_name_with_schema} WHERE {column.name()} IS NOT NULL"))
+                text(f"SELECT COUNT(*) FROM {table_name_with_schema} WHERE {table_name}.{column.name()} IS NOT NULL"))
             data = result.fetchone()
             column_fingerprint['not_null_count'] = str(data[0])
             result = conn.execute(
-                text(f"SELECT COUNT(*) FROM {table_name_with_schema} WHERE {column.name()} IS NOT NULL"))
+                text(f"SELECT COUNT(*) FROM {table_name_with_schema} WHERE {table_name}.{column.name()} IS NOT NULL"))
             column_fingerprint['not_null_count'] = result.fetchone()[0]
             if isinstance(column_python_type, type) and issubclass(column_python_type, bool):
                 pass
             elif isinstance(column_python_type, type) and issubclass(column_python_type, str):
+                if alchemy_engine.dialect.name in ['sqlite', 'snowflake']:
+                    length_function='LENGTH'
+                else:
+                    length_function='CHAR_LENGTH'
+                    result = conn.execute(
+                        text(f"SELECT COUNT(*) FROM {table_name_with_schema} WHERE {table_name}.{column.name()} IS NOT NULL"))
+                    column_fingerprint['not_null_count'] = result.fetchone()[0]
                 result = conn.execute(text(f"SELECT "
-                                           f"SUM(LENGTH ({column.name()})), "
-                                           f"MAX(LENGTH ({column.name()})), "
-                                           f"MIN(LENGTH ({column.name()})) "
+                                           f"SUM({length_function}({table_name}.{column.name()})), "
+                                           f"MAX({length_function} ({table_name}.{column.name()})), "
+                                           f"MIN({length_function} ({table_name}.{column.name()})) "
                                            f"FROM {table_name_with_schema}"))
                 data = result.fetchone()
                 column_fingerprint['sum_length'] = str(data[0])
@@ -192,8 +200,8 @@ class DbTable:
                 column_fingerprint['min_length'] = str(data[2])
             elif isinstance(column_python_type, type) and issubclass(column_python_type, date):
                 result = conn.execute(text(f"SELECT "
-                                           f"MAX({column.name()}), "
-                                           f"MIN({column.name()}) "
+                                           f"MAX({table_name}.{column.name()}), "
+                                           f"MIN({table_name}.{column.name()}) "
                                            f"FROM {table_name_with_schema}"))
                 data = result.fetchone()
                 column_fingerprint['max'] = SqlParser.format_date(data[0])
@@ -201,9 +209,9 @@ class DbTable:
             elif isinstance(column_python_type, type) and issubclass(column_python_type, (int, float, Decimal)) and not \
                 str(column_type).upper().startswith(('BOOL', 'TINYINT')):
                 result = conn.execute(text(f"SELECT "
-                                           f"SUM({column.name()}), "
-                                           f"MAX({column.name()}), "
-                                           f"MIN({column.name()}) "
+                                           f"SUM({table_name}.{column.name()}), "
+                                           f"MAX({table_name}.{column.name()}), "
+                                           f"MIN({table_name}.{column.name()}) "
                                            f"FROM {table_name_with_schema}"))
                 data = result.fetchone()
                 column_fingerprint['sum'] = str(round(data[0], 2)).replace('.00', '')

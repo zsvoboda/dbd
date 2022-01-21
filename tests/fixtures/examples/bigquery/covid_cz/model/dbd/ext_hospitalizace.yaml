@@ -1,0 +1,38 @@
+table:
+  columns:
+    datum:
+      type: DATE
+    pacient_prvni_zaznam:
+      type: INTEGER
+    kum_pacient_prvni_zaznam:
+      type: INTEGER
+    pocet_hosp:
+      type: INTEGER
+    stav_bez_priznaku:
+      type: INTEGER
+    stav_lehky:
+      type: INTEGER
+    stav_stredni:
+      type: INTEGER
+    stav_tezky:
+      type: INTEGER
+    jip:
+      type: INTEGER
+    kyslik:
+      type: INTEGER
+    hfno:
+      type: INTEGER
+    upv:
+      type: INTEGER
+    ecmo:
+      type: INTEGER
+    tezky_upv_ecmo:
+      type: INTEGER
+    umrti:
+      type: INTEGER
+    kum_umrti:
+      type: INTEGER
+process:
+  materialization: table
+  mode: drop
+
