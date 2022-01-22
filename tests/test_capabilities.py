@@ -11,6 +11,33 @@ def __delete_db_file(dbfile='./tmp/basic.db'):
         os.remove(dbfile)
 
 
+def test_kaggle():
+    __delete_db_file('./tmp/kaggle.db')
+    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/capabilities/kaggle/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+
+
+def test_ref_file():
+    __delete_db_file('./tmp/ref_file.db')
+    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/capabilities/ref_file/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+
+
+def test_jinja():
+    __delete_db_file('./tmp/jinja_template.db')
+    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/capabilities/jinja_template/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+
+
 def test_basic_model_selected():
     __delete_db_file()
     profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')

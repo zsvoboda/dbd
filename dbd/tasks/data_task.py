@@ -181,7 +181,7 @@ class DataTask(DbTableTask):
             for data_file in self.data_files():
                 if len(data_file) > 0:
                     with tempfile.TemporaryDirectory() as tmpdirname:
-
+                        zip_locator = None
                         if is_zip(data_file):
                             data_file, zip_locator = zip_to_url_and_locator(data_file)
 
@@ -194,7 +194,7 @@ class DataTask(DbTableTask):
                         if zip_locator is not None and len(zip_locator) > 0:
                             absolute_file_name = os.path.join(tmpdirname, os.path.basename(zip_locator))
                             click.echo(f"\tExtracting file from archive: '{data_file}'.")
-                            extract_zip_file(data_file, zip_locator, absolute_file_name)
+                            extract_zip_file(data_file, zip_locator, tmpdirname)
                             data_file = absolute_file_name
 
                         click.echo(f"\tProcessing local file: '{data_file}'.")
