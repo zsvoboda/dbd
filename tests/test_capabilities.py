@@ -11,10 +11,19 @@ def __delete_db_file(dbfile='./tmp/basic.db'):
         os.remove(dbfile)
 
 
-def test_kaggle():
-    __delete_db_file('./tmp/kaggle.db')
+def test_zip_on_url():
+    __delete_db_file('./tmp/zip_on_url.db')
     profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/capabilities/kaggle/dbd.project')
+    project = DbdProject.load(profile, 'tests/fixtures/capabilities/zip_on_url/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+
+
+def test_zip_local():
+    __delete_db_file('./tmp/zip_local.db')
+    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/capabilities/zip_local/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
     model.execute(engine)
@@ -77,15 +86,6 @@ def test_basic_model_selected_without_deps():
         assert True
     else:
         assert False
-
-
-def test_basic_model_selected_with_deps():
-    __delete_db_file()
-    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/capabilities/basic/dbd.project')
-    model = ModelExecutor(project)
-    engine = project.alchemy_engine_from_project()
-    model.execute(engine, ['us_states'])
 
 
 def test_basic_model():

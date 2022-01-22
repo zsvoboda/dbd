@@ -3,8 +3,10 @@ databases:
     db.url: "sqlite:///tmp/basic.db"
   data_formats:
     db.url: "sqlite:///tmp/data_formats.db"
-  kaggle:
-    db.url: "sqlite:///tmp/kaggle.db"
+  zip_on_url:
+    db.url: "sqlite:///tmp/zip_on_url.db"
+  zip_local:
+    db.url: "sqlite:///tmp/zip_local.db"
   ref_file:
     db.url: "sqlite:///tmp/ref_file.db"
   jinja_template:
