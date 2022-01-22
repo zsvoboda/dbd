@@ -19,7 +19,7 @@ from dbd.config.dbd_project import DbdProjectConfigException
 from dbd.db.db_table import DbTable
 from dbd.log.dbd_exception import DbdException
 from dbd.tasks.db_table_task import DbTableTask
-from dbd.utils.io_utils import download_file, url_to_filename
+from dbd.utils.io_utils import download_file, url_to_filename, is_zip, extract_zip_file, zip_to_url_and_locator
 from dbd.utils.io_utils import is_url
 from dbd.utils.sql_parser import SqlParser
 
@@ -166,6 +166,8 @@ class DataTask(DbTableTask):
         table_def['columns'] = ordered_columns
         return table_def
 
+
+
     def create(self, target_alchemy_metadata: sqlalchemy.MetaData, alchemy_engine: sqlalchemy.engine.Engine,
                **kwargs) -> None:
         """
@@ -179,13 +181,24 @@ class DataTask(DbTableTask):
             for data_file in self.data_files():
                 if len(data_file) > 0:
                     with tempfile.TemporaryDirectory() as tmpdirname:
+
+                        if is_zip(data_file):
+                            data_file, zip_locator = zip_to_url_and_locator(data_file)
+
                         if is_url(data_file):
                             absolute_file_name = os.path.join(tmpdirname, url_to_filename(data_file))
                             click.echo(f"\tDownloading file: '{data_file}'.")
                             download_file(data_file, absolute_file_name)
-                        else:
-                            click.echo(f"\tProcessing local file: '{data_file}'.")
-                            absolute_file_name = data_file
+                            data_file = absolute_file_name
+
+                        if zip_locator is not None and len(zip_locator) > 0:
+                            absolute_file_name = os.path.join(tmpdirname, os.path.basename(zip_locator))
+                            click.echo(f"\tExtracting file from archive: '{data_file}'.")
+                            extract_zip_file(data_file, zip_locator, absolute_file_name)
+                            data_file = absolute_file_name
+
+                        click.echo(f"\tProcessing local file: '{data_file}'.")
+                        absolute_file_name = data_file
 
                         df = self.__read_file_to_dataframe(absolute_file_name)
 
@@ -378,8 +391,8 @@ class DataTask(DbTableTask):
         :rtype: pd.DataFrame
         """
         try:
-            if is_url(absolute_file_name):
-                absolute_file_name = download_file(absolute_file_name, absolute_file_name)
+            #if is_url(absolute_file_name):
+            #    absolute_file_name = download_file(absolute_file_name, absolute_file_name)
             file_name, file_extension = os.path.splitext(absolute_file_name)
             if file_extension.lower() == '.csv':
                 return pd.read_csv(absolute_file_name, dtype=str)
