@@ -84,17 +84,46 @@ class ModelExecutor:
             log.debug(f"Task validation finished: '{task.task_id()}'.")
         return validation_result, task_errors
 
-    def execute(self, alchemy_engine: sqlalchemy.engine.Engine):
+    def __filter_task_list(self, task_list: List[str], deps: bool = True) -> Dict[str, Task]:
+        """
+        Limits the populated tasks to the passed list and its dependencies
+        :param List[str] task_list: list of tasks fully qualified names (schema.task)
+        :param bool deps: if True, dependencies processed for the specific task_list. If False, dependencies are not
+        processed.
+        :return Dict[str, Task]: filtered tasks
+        :rtype Dict[str, Task]:
+        """
+        new_tasks = {}
+        for task_name in task_list:
+            task = self.__find_task_by_fully_qualified_target_name(task_name)
+            task_table_dependencies = []
+            if deps:
+                task_table_dependencies = task_table_dependencies + [self.__find_task_by_fully_qualified_target_name(tn)
+                                                                     for tn in task.depends_on()]
+            task_table_dependencies.append(task)
+            new_tasks.update({task.task_id(): task for task in task_table_dependencies})
+        return new_tasks
+
+    def execute(self, alchemy_engine: sqlalchemy.engine.Engine, task_list: List[str] = None, deps: bool = True):
         """
         Executes files stored in a model directory. The execution is performed in the database connected via
         SQLAlchemy engine.
         :param sqlalchemy.engine.Engine alchemy_engine: SQLAlchemy engine database connection (both target and source)
+        :param List[str] task_list: list of tasks fully qualified names (schema.task) to execute. If None, all tasks
+        are executed.
+        :param bool deps: if True, dependencies processed for the specific task_list. If False, dependencies are not
+        processed.
         """
         try:
             self.__populate_model_from_directory()
+            if task_list is not None and len(task_list) > 0:
+                self.__tasks = self.__filter_task_list(task_list, deps)
+            log.debug(f"Processing tasks: '{self.__tasks}'.")
+            log.debug(f"Building metadata cache.")
             self.__build_metadata_cache(alchemy_engine)
-
+            log.debug(f"Ordering tasks by dependencies.")
             ordered_tasks = self.__order_tasks_by_dependencies()
+            log.debug(f"Ordered tasks: '{ordered_tasks}'.")
             self.__drop_tables(ordered_tasks, alchemy_engine)
             self.reflect_metadata_cache(alchemy_engine)
             for task in reversed(ordered_tasks):
@@ -119,13 +148,19 @@ class ModelExecutor:
         schemas = list(set([s.target_schema() for s in self.__tasks.values() if s.target_schema() is not None]))
         log.debug(f"Processing schemas: '{schemas}'.")
         for s in schemas:
+            log.debug(f"Adding metadata cache for schema {s}.")
             m = MetaData(bind=alchemy_engine, schema=s if s is not None and len(s) > 0 else None)
+            log.debug(f"Metadata created.")
             m.reflect(views=True)
+            log.debug(f"Metadata reflected.")
             self.__metadata_cache[s] = m
             log.debug(f"Metadata cache for schema {s} added.")
         # MetaData for the top-level objects and DDL
+        log.debug(f"Adding metadata cache for top level schema.")
         m = MetaData(bind=alchemy_engine, schema=None)
+        log.debug(f"Metadata created.")
         m.reflect(views=True)
+        log.debug(f"Metadata reflected.")
         self.__metadata_cache[Task.TOP_LEVEL_SCHEMA_NAME] = m
         log.debug(f"Metadata cache for top level schema added.")
 

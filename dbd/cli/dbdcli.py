@@ -10,7 +10,7 @@ from sqlalchemy import text
 from dbd.log.dbd_exception import DbdException
 from dbd.config.dbd_profile import DbdProfile
 from dbd.config.dbd_project import DbdProject
-from dbd.executors.model_executor import ModelExecutor
+from dbd.executors.model_executor import ModelExecutor, InvalidModelException
 from dbd.log.dbd_logger import setup_logging
 
 log = logging.getLogger(__name__)
@@ -111,9 +111,12 @@ def init(dbd, dest):
 
 
 @cli.command(help='Executes project.')
+@click.option('--only', envvar='DBD_ONLY', default=None, help='Comma separated list of fully qualified table names '
+                                                              '(<schema>.<table-name-no suffix>) to execute.')
+@click.option('--deps/--no-deps', envvar='DBD_DEPS', default=True, help='Ignores dependencies for the --only list.')
 @click.argument('dest', required=False, default='.')
 @click.pass_obj
-def run(dbd, dest):
+def run(dbd, only, deps, dest):
     try:
         log.debug("Loading configuration.")
         prf = DbdProfile.load(os.path.join('.', dbd.profile()))
@@ -124,7 +127,18 @@ def run(dbd, dest):
         engine = prj.alchemy_engine_from_project()
 #       engine.execution_options(supports_statement_cache=False)
         log.debug("Executing model.")
-        model.execute(engine)
+        if not deps and only is None:
+            log.error("You must specify --only list for --no-deps.")
+            raise DbdException("You must specify --only list for --no-deps.")
+        if only is not None:
+            only_list = only.split(',')
+            try:
+                model.execute(engine, only_list, deps)
+            except InvalidModelException as e:
+                log.error(f"Can't run {only_list}: {e}")
+                raise DbdException(f"Can't run {only_list}: {e}")
+        else:
+            model.execute(engine)
         log.debug("Finished.")
         click.echo("All tasks finished!")
     except DbdException as d:

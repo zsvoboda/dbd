@@ -70,11 +70,13 @@ class EltTask(DbTableTask):
         view_name = f"{REFLECTION_TMP_VIEW_PREFIX}{tmp_name}"
         fully_qualified_view_name = fully_qualified_table_name(target_db_schema, view_name)
         db_con = alchemy_engine.connect()
-        self.__drop_tmp_reflection_view(fully_qualified_view_name, db_con)
-        self.__create_tmp_reflection_view(fully_qualified_view_name, db_con)
-        # SQLAlchemy reflection / autoload doesn't work with fully qualified view name
-        tmp_reflection_view = Table(view_name, target_alchemy_metadata, autoload=True)
-        self.__drop_tmp_reflection_view(fully_qualified_view_name, db_con)
+        try:
+            self.__drop_tmp_reflection_view(fully_qualified_view_name, db_con)
+            self.__create_tmp_reflection_view(fully_qualified_view_name, db_con)
+            # SQLAlchemy reflection / autoload doesn't work with fully qualified view name
+            tmp_reflection_view = Table(view_name, target_alchemy_metadata, autoload=True)
+        finally:
+            self.__drop_tmp_reflection_view(fully_qualified_view_name, db_con)
         db_con.close()
         temp_view_select_all_columns = select(tmp_reflection_view.columns).select_from(tmp_reflection_view)
         return [Column(c.name, c.type) for c in temp_view_select_all_columns.selected_columns]

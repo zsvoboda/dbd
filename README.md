@@ -280,6 +280,17 @@ The `process` section defines following processing options:
 * __materialization:__ specifies whether dbd creates a physical `table` or a `view` when processing  SQL file. The __REF__ and __DATA__ files always yield physical table. 
 * __mode:__ specifies what dbd does with table's data. You can specify values `drop`, `truncate`, or `keep`. The  __mode__ option is ignored for views.
 
+## Iterative development
+The `dbd` tool's parameter `--only` helps with iterative development process by allowing you to specify a subset of the 
+tables to process. The `--only` parameter accepts a comma-separated list of fully qualified table names (`schema`.`table-name`).
+For example:
+
+`dbd run --only stage.ext_country`
+
+only processes the `ext_country` table in the `stage` schema.
+
+The `--only` parameter also processes all passed table's dependencies. You can skip the dependencies with `--no-deps` option.
+
 ## Jinja templates
 Most of model files support [Jinja2 templates](https://jinja.palletsprojects.com/en/3.0.x/). For example, this __REF__ file loads 6 CSV files to database (4 online files from a URL and 2 from a local filesystem):
 
@@ -317,7 +328,7 @@ SQL statement:
 SET GLOBAL local_infile = true;
 ```
 
-# Redshift
+### Redshift
 To enable fast loading mode, you need specify `copy_stage` parameter in the `dbd.project` configuration file. 
 The `copy_stage` parameter must reference a storage definition in your `dbd.profile` configuration file.
 Check the example configuration files in the `examples/redshift/covid_cz` directory. Here are the example definitions of the 

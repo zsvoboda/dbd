@@ -1,11 +1,68 @@
+import os
+
 from dbd.config.dbd_profile import DbdProfile
 from dbd.config.dbd_project import DbdProject
 from dbd.db.db_schema import DbSchema
-from dbd.executors.model_executor import ModelExecutor
-from dbd.utils.sql_parser import SQlParserException
+from dbd.executors.model_executor import ModelExecutor, ModelExecutionException
+
+
+def __delete_db_file(dbfile='./tmp/basic.db'):
+    if os.path.exists(dbfile):
+        os.remove(dbfile)
+
+
+def test_basic_model_selected():
+    __delete_db_file()
+    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/capabilities/basic/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine, ['state'])
+
+
+def test_basic_model_selected2():
+    __delete_db_file()
+    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/capabilities/basic/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine, ['area', 'state'])
+
+
+def test_basic_model_selected_with_deps():
+    __delete_db_file()
+    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/capabilities/basic/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine, ['us_states'])
+
+
+def test_basic_model_selected_without_deps():
+    __delete_db_file()
+    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/capabilities/basic/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    try:
+        model.execute(engine, ['us_states'], False)
+    except ModelExecutionException as e:
+        assert True
+    else:
+        assert False
+
+
+def test_basic_model_selected_with_deps():
+    __delete_db_file()
+    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/capabilities/basic/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine, ['us_states'])
 
 
 def test_basic_model():
+    __delete_db_file()
     profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
     project = DbdProject.load(profile, 'tests/fixtures/capabilities/basic/dbd.project')
     model = ModelExecutor(project)
@@ -84,6 +141,7 @@ def test_basic_model():
 
 
 def test_data_formats_model():
+    __delete_db_file('./tmp/data_formats.db')
     profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
     project = DbdProject.load(profile, 'tests/fixtures/capabilities/data_formats/dbd.project')
     model = ModelExecutor(project)
