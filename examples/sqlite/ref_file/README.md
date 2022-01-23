@@ -1,6 +1,6 @@
 # REF file example
 This example loads 1 CSV file from `https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv` 
-and writes it to a `covid` table in a SQLite database. The url is defined in the `model/covid.ref` file.
+and writes it to a `covid` table in a SQLite database. The file reference is in the `model/covid.ref` file.
 
 The `model/covid.yaml` file overrides the default `covid` table's columns datatypes.  
 

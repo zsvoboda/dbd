@@ -11,6 +11,15 @@ def __delete_db_file(dbfile='./tmp/basic.db'):
         os.remove(dbfile)
 
 
+def test_zip_on_kaggle():
+    __delete_db_file('./tmp/zip_on_kaggle.db')
+    profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')
+    project = DbdProject.load(profile, 'tests/fixtures/capabilities/zip_on_kaggle/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+
+
 def test_zip_on_url():
     __delete_db_file('./tmp/zip_on_url.db')
     profile = DbdProfile.load('./tests/fixtures/capabilities/dbd.profile')

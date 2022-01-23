@@ -1,11 +1,13 @@
-from typing import List
+from typing import List, Tuple
 from zipfile import ZipFile
 
+from kaggle import KaggleApi
 from requests import get as get_url
 
 
 class DbdInvalidRef(Exception):
     pass
+
 
 ZIP_LOCATOR_SEPARATOR = '>'
 
@@ -28,6 +30,28 @@ def is_zip(url: str) -> bool:
     :rtype: bool
     """
     return ZIP_LOCATOR_SEPARATOR in url.lower()
+
+
+def is_kaggle(url: str) -> bool:
+    """
+    Returns True if the string is a Kaggle dataset URL
+    :param str url: string to check
+    :return: True if the string is a Kaggle dataset URL
+    :rtype: bool
+    """
+    return url.lower().startswith('kaggle://')
+
+
+def extract_kaggle_dataset_id_and_zip_name(url: str) -> Tuple[str, str]:
+    """
+    Returns the Kaggle dataset id from dataset URL
+    :param str url: string to check
+    :return: Returns the Kaggle dataset id
+    :rtype: str
+    """
+    kaggle_dataset_id = url.split('kaggle://')[-1]
+    kaggle_zip_filename = kaggle_dataset_id.split('/')[-1]
+    return kaggle_dataset_id, kaggle_zip_filename
 
 
 def url_to_filename(url: str) -> str:
@@ -53,7 +77,7 @@ def zip_to_url_and_locator(url: str) -> List[str]:
     return components
 
 
-def download_file(url, local_filename: str):
+def download_file(url: str, local_filename: str):
     """
     Downloads a file from a URL to a local file
     :param str url: url of the file to download
@@ -65,6 +89,18 @@ def download_file(url, local_filename: str):
         with open(local_filename, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
+
+
+def download_kaggle(dataset_id: str, tmpdir: str):
+    """
+    Downloads a file from Kaggle to tmpdir
+    :param str dataset_id: Kaggle dataset id
+    :param str tmpdir: dir to save the file to
+    :return: None
+    """
+    api = KaggleApi()
+    api.authenticate()
+    api.dataset_download_files(dataset_id, tmpdir, unzip=False, force=False)
 
 
 def extract_zip_file(zip_file: str, zip_locator: str, local_filename: str):

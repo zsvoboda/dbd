@@ -11,5 +11,8 @@ This directory contains the following examples:
 * [Data formats example](data_formats/README.md) demonstrates loading of local `.json`, `.xlsx`, and `.parquet` files. You can also learn how to setup referential integrity and other table constraints.  
 * [Jinja2 templates example](jinja_template/README.md) shows how to load online and local files. The `.ref` file contains [Jinja2](https://jinja.palletsprojects.com/en/3.0.x/) macro that is expanded before the model execution.
 * [REF file example](ref_file/README.md) shows loading of an online `.csv` file.
+* [Referencing data files in a local ZIP archive](zip_local/README.md) shows loading of a `.csv` file located in a local ZIP archive.
+* [Referencing data files in an online ZIP archive](zip_on_url/README.md) shows loading of a `.csv` file located in an online ZIP archive.
+* [Referencing files in Kaggle datasets](zip_on_kaggle/README.md) shows loading of a `.csv` file located in a Kaggle dataset.
 
 

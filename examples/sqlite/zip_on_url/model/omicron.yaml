@@ -1,0 +1,19 @@
+---
+table:
+  columns:
+    date:
+      type: DATE
+    location:
+      type: VARCHAR(50)
+    variant:
+      type: VARCHAR(50)
+    num_sequences:
+      type: DECIMAL(13,0)
+    num_sequences:
+      type: DECIMAL(8,2)
+    num_sequences_total:
+      type: DECIMAL(13,0)
+process:
+  materialization: table
+  mode: drop
+

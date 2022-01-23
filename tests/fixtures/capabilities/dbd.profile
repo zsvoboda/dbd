@@ -5,6 +5,8 @@ databases:
     db.url: "sqlite:///tmp/data_formats.db"
   zip_on_url:
     db.url: "sqlite:///tmp/zip_on_url.db"
+  zip_on_kaggle:
+    db.url: "sqlite:///tmp/zip_on_kaggle.db"
   zip_local:
     db.url: "sqlite:///tmp/zip_local.db"
   ref_file:

@@ -212,10 +212,50 @@ https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_d
 ../data/01-06-2022.csv
 ```
 
-The paths and URLs can point to data files with different formats (e.g. CSV or JSON) as long as the files have the same structure (number of columns and column types).
+The paths and URLs can point to data files with different formats (e.g. CSV or JSON) as long as the files have the 
+same structure (number of columns and column types).
+
+### Referencing files inside ZIP archives
+REF files support paths that reference files inside ZIP archives using the `>` path separator. For example:
+
+`../data/archive.zip>covid-variants.csv`
+
+OR
+
+`https://raw.githubusercontent.com/zsvoboda/dbd/master/tests/fixtures/capabilities/zip_local/data/archive.zip>covid-variants.csv`
+
+### Kaggle datasets
+You can reference a kaggle dataset using the `kaggle://kaggle-dataset-name>dataset-file` url. 
+
+For example:
+
+`kaggle://kalilurrahman/new-york-times-covid19-dataset>us.csv`
+
+#### Kaggle authentication
+To use the Kaggle API, sign up for a Kaggle account at https://www.kaggle.com. Then go to the 'Account' tab 
+of your user profile (`https://www.kaggle.com/<username>/account`) and select 'Create API Token'. 
+This will trigger the download of kaggle.json, a file containing your API credentials. 
+Place this file in the location `~/.kaggle/kaggle.json` (on Windows in the location 
+`C:\Users\<Windows-username>\.kaggle\kaggle.json` - you can check the exact location, 
+sans drive, with `echo %HOMEPATH%`). 
+You can define a shell environment variable `KAGGLE_CONFIG_DIR` to change this location to `$KAGGLE_CONFIG_DIR/kaggle.json` 
+(on Windows it will be `%KAGGLE_CONFIG_DIR%\kaggle.json`).
+
+For your security, ensure that other users of your computer do not have read access to your credentials. 
+On Unix-based systems you can do this with the following command:
+
+`chmod 600 ~/.kaggle/kaggle.json`
+
+You can also choose to export your Kaggle username and token to the environment:
+
+```shell
+export KAGGLE_USERNAME=datadinosaur
+export KAGGLE_KEY=xxxxxxxxxxxxxx
+```
 
 ## SQL files 
-`.sql` file performs SQL data transformation in the target database. It contains a SQL SELECT statement that dbd wraps in insert-from-select statement, executes it, and stores the result into a table or view that inherits its name from the SQL file name.
+`.sql` file performs SQL data transformation in the target database. It contains a SQL SELECT statement that 
+dbd wraps in insert-from-select statement, executes it, and stores the result into a table or view that inherits its name from the SQL file name.
 
 Here is an example of `us_states.sql` file that creates a new `us_states` database table:
 
@@ -325,7 +365,7 @@ You also must enable the LOCAL INFILE mode on your MySQL server. You can for exa
 SQL statement:
 
 ```mysql
-SET GLOBAL local_infile = true;
+SET GLOBAL local_infile = true
 ```
 
 ### Redshift

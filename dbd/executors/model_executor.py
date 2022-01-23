@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import tempfile
 from os.path import exists
 from typing import List, Dict, Any
 
@@ -19,7 +20,7 @@ from dbd.tasks.db_table_task import DbTableTask
 from dbd.tasks.ddl_task import DdlTask
 from dbd.tasks.elt_task import EltTask
 from dbd.tasks.task import Task
-from dbd.utils.io_utils import is_url
+from dbd.utils.io_utils import is_url, is_kaggle
 from dbd.utils.sql_parser import SqlParser
 from dbd.utils.text_utils import relative_path_to_base_dir_no_ext, remove_prefix, relative_path_to_base_dir
 
@@ -126,13 +127,15 @@ class ModelExecutor:
             log.debug(f"Ordered tasks: '{ordered_tasks}'.")
             self.__drop_tables(ordered_tasks, alchemy_engine)
             self.reflect_metadata_cache(alchemy_engine)
-            for task in reversed(ordered_tasks):
-                schema = task.target_schema() if task.target_schema() is not None else Task.TOP_LEVEL_SCHEMA_NAME
-                click.echo(f"Executing task: '{task.task_id()}'.")
-                log.debug(f"Executing task: '{task.task_id()}'.")
-                task.create(self.__metadata_cache[schema], alchemy_engine,
-                            copy_stage_storage=self.__project.copy_stage_from_project())
-                log.debug(f"Task execution finished: '{task.task_id()}'.")
+            with tempfile.TemporaryDirectory() as tmpdirname_for_all_tasks:
+                for task in reversed(ordered_tasks):
+                    schema = task.target_schema() if task.target_schema() is not None else Task.TOP_LEVEL_SCHEMA_NAME
+                    click.echo(f"Executing task: '{task.task_id()}'.")
+                    log.debug(f"Executing task: '{task.task_id()}'.")
+                    task.create(self.__metadata_cache[schema], alchemy_engine,
+                                copy_stage_storage=self.__project.copy_stage_from_project(),
+                                global_tmpdir=tmpdirname_for_all_tasks)
+                    log.debug(f"Task execution finished: '{task.task_id()}'.")
         except OperationalError as o:
             log.error(f"Can't execute model because of: '{o}'.")
             raise ModelExecutionException(f"Can't execute model because of: '{o}'.")
@@ -187,7 +190,8 @@ class ModelExecutor:
         references = []
         for line in [ln.strip() for ln in processed_file.splitlines()]:
             if len(line) > 0:
-                if is_url(line):
+                # TODO: adding additional schemes require OR here - refactor
+                if is_url(line) or is_kaggle(line):
                     references.append(line)
                 else:
                     references.append(relative_path_to_base_dir_no_ext('', self.__model_directory, line))
