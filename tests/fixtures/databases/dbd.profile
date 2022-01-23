@@ -6,7 +6,7 @@ databases:
   test_sqlite:
     db.url: "sqlite:///tmp/test_sqlite.db"
   test_postgres:
-    db.url: "postgresql://demouser:demopass@localhost/covid_cz"
+    db.url: "postgresql://{{ POSTGRES_USER }}:{{ POSTGRES_PASSWORD }}@{{ POSTGRES_HOST }}/{{ POSTGRES_DB }}"
   test_mysql:
     db.url: "mysql+pymysql://{{ MYSQL_USER }}:{{ MYSQL_PASSWORD }}@{{ MYSQL_HOST }}/{{ MYSQL_DB }}?charset=utf8mb4&local_infile=1"
   test_redshift:

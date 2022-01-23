@@ -9,7 +9,7 @@ table:
       type: VARCHAR(50)
     num_sequences:
       type: DECIMAL(13,0)
-    num_sequences:
+    perc_sequences:
       type: DECIMAL(8,2)
     num_sequences_total:
       type: DECIMAL(13,0)
