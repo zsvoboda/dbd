@@ -15,6 +15,8 @@ import sqlalchemy.dialects.postgresql
 import sqlalchemy.dialects.sqlite
 # noinspection PyUnresolvedReferences
 import sqlalchemy.sql.sqltypes
+# noinspection PyUnresolvedReferences
+import sqlalchemy_bigquery
 from dateutil import parser as date_parser
 from math import nan
 from sql_metadata import Parser
@@ -104,7 +106,7 @@ class SqlParser:
             parsed_data_type.tokens) > 9 and parsed_data_type.tokens[9].is_integer else None
 
         for modules in ['sqlalchemy.sql.sqltypes', 'sqlalchemy.dialects.postgresql', 'sqlalchemy.dialects.sqlite',
-                        'sqlalchemy.dialects.mysql']:
+                        'sqlalchemy.dialects.mysql', 'sqlalchemy_bigquery']:
             if hasattr(sys.modules[modules], core_data_type):
                 try:
                     params = dict(scale=scale, length=length) if scale and length \
@@ -257,7 +259,7 @@ class SqlParser:
         if datatype.lower().startswith(('char', 'varchar', 'text')):
             return 'STRING'
         elif datatype.lower().startswith(('decimal', 'numeric')):
-            return 'FLOAT'
+            return 'NUMERIC'
         elif datatype.lower().startswith(('datetime')):
             return 'DATETIME'
         elif datatype.lower().startswith(('timestamp')):
