@@ -1,8 +1,17 @@
 from typing import List, Tuple
 from zipfile import ZipFile
+import logging
 
-from kaggle import KaggleApi
 from requests import get as get_url
+
+log = logging.getLogger(__name__)
+
+try:
+    from kaggle import KaggleApi
+except ImportError:
+    pass
+except OSError:
+    logging.error("Kaggle API not initialized. Please create ~/.kaggle/kaggle.json.")
 
 
 class DbdInvalidRef(Exception):
