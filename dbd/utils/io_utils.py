@@ -11,7 +11,7 @@ try:
 except ImportError:
     pass
 except OSError:
-    logging.error("Kaggle API not initialized. Please create ~/.kaggle/kaggle.json.")
+    logging.debug("Kaggle API not initialized. Please create ~/.kaggle/kaggle.json.")
 
 
 class DbdInvalidRef(Exception):
