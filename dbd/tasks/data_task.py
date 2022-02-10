@@ -294,7 +294,9 @@ class DataTask(DbTableTask):
                       storage_options={"key": aws_access_key,
                                        "secret": aws_secret_key})
             with alchemy_engine.connect() as conn:
-                conn.execute(f"copy {self.target()} from '{temp_file_name}.csv.gz' "
+                target_schema = self.target_schema()
+                target_schema_with_dot = f"{target_schema}." if target_schema else ''
+                conn.execute(f"copy {target_schema_with_dot}{self.target()} from '{temp_file_name}.csv.gz' "
                              f"CREDENTIALS 'aws_access_key_id={aws_access_key};aws_secret_access_key={aws_secret_key}' "
                              f" DELIMITER AS ',' DATEFORMAT 'YYYY-MM-DD' EMPTYASNULL IGNOREHEADER 1 GZIP")
                 conn.connection.commit()

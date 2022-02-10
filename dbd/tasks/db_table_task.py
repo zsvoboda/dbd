@@ -1,5 +1,7 @@
 from typing import Dict, List, Any, TypeVar, Tuple
 
+import logging
+
 import sqlalchemy.engine
 from cerberus import Validator
 
@@ -10,6 +12,7 @@ from dbd.utils.text_utils import fully_qualified_table_name
 
 DbTableTaskType = TypeVar('DbTableTaskType', bound='DbTableTask')
 
+log = logging.getLogger(__name__)
 
 class DbTableTask(Task):
     """
@@ -120,12 +123,16 @@ class DbTableTask(Task):
         :return: list of tables that the task depends on
         :rtype: List[str]
         """
+        log.debug(f"Process dependencies for schema: '{self.target_schema()}' table: '{self.target()}'.")
         target_db_schema = self.target_schema()
         columns = self.table_def().get('columns', {})
+        log.debug(f"Got columns: '{columns}'.")
         foreign_key_tables = []
         for column in columns.values():
-            column_foreign_keys = column.get('foreign_keys', [])
-            foreign_key_tables += SqlParser.extract_foreign_key_tables(column_foreign_keys)
+            log.debug(f"Process dependencies for column: '{column}'.")
+            if column is not None:
+                column_foreign_keys = column.get('foreign_keys', [])
+                foreign_key_tables += SqlParser.extract_foreign_key_tables(column_foreign_keys)
         return [f"{fully_qualified_table_name(target_db_schema, t)}" if len(t.split('.')) < 2 else t for t in
                 foreign_key_tables]
 
