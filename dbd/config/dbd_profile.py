@@ -4,7 +4,8 @@ from os.path import exists
 from pathlib import Path
 from typing import Dict, Any, TypeVar
 
-import sqlalchemy.engine
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 import yaml
 from sqlalchemy import engine_from_config
 
@@ -89,7 +90,7 @@ class DbdProfile:
                 raise DbdProfileConfigException(
                     f"Your dbd profile '{self.__profile_file}' doesn't contain 'storages' key.")
 
-    def alchemy_engine_from_profile(self, connection_name: str) -> sqlalchemy.engine.Engine:
+    def alchemy_engine_from_profile(self, connection_name: str) -> Engine:
         """
         Returns SQLAlchemy engine initialized from profile
         :param str connection_name: connection name
@@ -100,10 +101,33 @@ class DbdProfile:
         if connection_name in databases:
             try:
                 log.debug(f"Connecting to database '{connection_name}'")
-                return engine_from_config(databases.get(connection_name), prefix=CONFIG_PREFIX)
+                engine = engine_from_config(databases.get(connection_name), prefix=CONFIG_PREFIX)
+
+                if engine.dialect.name == 'mysql':
+                    event.listen(engine, 'connect', self.__connect_listener_mysql, insert=True)
+                if engine.dialect.name == 'snowflake':
+                    event.listen(engine, 'connect', self.__connect_listener_snowflake, insert=True)
+
+                return engine
             except Exception as e:
                 raise DbdProfileConfigException(f"Invalid connection '{connection_name}' config in the profile file "
                                                 f"'{self.__profile_file}'. Underlying error: '{e}'.")
         else:
             raise DbdProfileConfigException(f"Connection '{connection_name}' isn't defined in the profile file "
                                             f"'{self.__profile_file}'.")
+
+    def __connect_listener_mysql(self, dbapi_connection, connection_record):
+        """
+        MySQL connect listener. Sets ANSI mode for MySQL connections
+        """
+        cursor = dbapi_connection.cursor()
+        log.debug("Setting ANSI mode for MySQL connections")
+        cursor.execute("SET sql_mode = 'ANSI_QUOTES'")
+
+    def __connect_listener_snowflake(self, dbapi_connection, connection_record):
+        """
+        Snowflake connect listener. Sets ANSI mode for MySQL connections
+        """
+        cursor = dbapi_connection.cursor()
+        log.debug("Setting 'QUOTED_IDENTIFIERS_IGNORE_CASE = TRUE' for Snowflake connections")
+        cursor.execute("ALTER SESSION SET QUOTED_IDENTIFIERS_IGNORE_CASE = TRUE;")

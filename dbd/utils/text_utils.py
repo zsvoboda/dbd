@@ -51,15 +51,16 @@ def strip_table_name(column_name: str) -> str:
     return ','.split(column_name)[-1]
 
 
-def fully_qualified_table_name(schema: str, table: str) -> str:
+def fully_qualified_table_name(schema: str, table: str, quoted: bool) -> str:
     """
     Returns fully qualified table name
     :param str schema: schema name
     :param str table: table name
+    :param bool quoted: whether to quote the table name
     :return: fully qualified table name
     :rtype: str
     """
     if schema is None or len(schema) < 1:
-        return table
+        return f'"{table}"' if quoted else table
     else:
-        return f"{schema}.{table}"
+        return f'"{schema}"."{table}"' if quoted else f"{schema}.{table}"

@@ -1,3 +1,4 @@
+import os
 import json
 
 from sqlalchemy import MetaData
@@ -11,8 +12,7 @@ from dbd.executors.model_executor import ModelExecutor
 def compute_fingerprint(engine):
     meta = MetaData()
     meta.reflect(bind=engine)
-    tables = ['test_typed', 'test_typed_1', 'test_typed_json', 'test_typed_json_1', 'test_typed_parquet',
-              'test_typed_parquet_1', 'test_typed_excel', 'test_typed_excel_1']
+    tables = ['athlete']
     fingerprint = {}
     for table_name in tables:
         db_table = DbTable.from_alchemy_table(meta.tables[table_name])
@@ -20,31 +20,20 @@ def compute_fingerprint(engine):
 
     return fingerprint
 
-
-def test_snowflake():
-    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/databases/snowflake/dbd.project')
+def test_redshift():
+    profile = DbdProfile.load('./tests/fixtures/examples/redshift/olympics/dbd.profile')
+    project = DbdProject.load(profile, './tests/fixtures/examples/redshift/olympics/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
     model.execute(engine)
     fingerprint = compute_fingerprint(engine)
-    with open('tmp/snowflake.json', 'w') as fp:
+    with open('tmp/redshift.json', 'w') as fp:
         json.dump(fingerprint, fp)
 
-
-def test_mysql():
-    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/databases/mysql/dbd.project')
-    model = ModelExecutor(project)
-    engine = project.alchemy_engine_from_project()
-    model.execute(engine)
-    fingerprint = compute_fingerprint(engine)
-    with open('tmp/mysql.json', 'w') as fp:
-        json.dump(fingerprint, fp)
-
+"""
 def test_postgres():
-    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/databases/postgres/dbd.project')
+    profile = DbdProfile.load('./tests/fixtures/examples/postgres/olympics/dbd.profile')
+    project = DbdProject.load(profile, './tests/fixtures/examples/postgres/olympics/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
     model.execute(engine)
@@ -52,9 +41,21 @@ def test_postgres():
     with open('tmp/pgsql.json', 'w') as fp:
         json.dump(fingerprint, fp)
 
+
+def test_mysql():
+    profile = DbdProfile.load('./tests/fixtures/examples/mysql/olympics/dbd.profile')
+    project = DbdProject.load(profile, './tests/fixtures/examples/mysql/olympics/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+    fingerprint = compute_fingerprint(engine)
+    with open('tmp/mysql.json', 'w') as fp:
+        json.dump(fingerprint, fp)
+
+
 def test_sqlite():
-    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/databases/sqlite/dbd.project')
+    profile = DbdProfile.load('./tests/fixtures/examples/sqlite/olympics/dbd.profile')
+    project = DbdProject.load(profile, './tests/fixtures/examples/sqlite/olympics/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
     model.execute(engine)
@@ -63,9 +64,20 @@ def test_sqlite():
         json.dump(fingerprint, fp)
 
 
+def test_snowflake():
+    profile = DbdProfile.load('./tests/fixtures/examples/snowflake/olympics/dbd.profile')
+    project = DbdProject.load(profile, './tests/fixtures/examples/snowflake/olympics/dbd.project')
+    model = ModelExecutor(project)
+    engine = project.alchemy_engine_from_project()
+    model.execute(engine)
+    fingerprint = compute_fingerprint(engine)
+    with open('tmp/snowflake.json', 'w') as fp:
+        json.dump(fingerprint, fp)
+
+
 def test_bigquery():
-    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/databases/bigquery/dbd.project')
+    profile = DbdProfile.load('./tests/fixtures/examples/bigquery/olympics/dbd.profile')
+    project = DbdProject.load(profile, './tests/fixtures/examples/bigquery/olympics/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
     model.execute(engine)
@@ -75,8 +87,8 @@ def test_bigquery():
 
 
 def test_redshift():
-    profile = DbdProfile.load('./tests/fixtures/databases/dbd.profile')
-    project = DbdProject.load(profile, 'tests/fixtures/databases/redshift/dbd.project')
+    profile = DbdProfile.load('./tests/fixtures/examples/redshift/olympics/dbd.profile')
+    project = DbdProject.load(profile, './tests/fixtures/examples/redshift/olympics/dbd.project')
     model = ModelExecutor(project)
     engine = project.alchemy_engine_from_project()
     model.execute(engine)
@@ -84,12 +96,13 @@ def test_redshift():
     with open('tmp/redshift.json', 'w') as fp:
         json.dump(fingerprint, fp)
 
+"""
 
 def pytest_sessionfinish(session, exitstatus):
+    print("Comparing results.")
     fingerprints = {}
     for db in ['pgsql', 'mysql', 'sqlite', 'snowflake', 'bigquery', 'redshift']:
         fingerprints[db] = json.loads(open(f'tmp/{db}.json').read())
     for fingerprint in fingerprints.values():
         for other in fingerprints.values():
             assert fingerprint == other
-

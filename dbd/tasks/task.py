@@ -69,13 +69,14 @@ class Task:
         """
         return self.__target
 
-    def fully_qualified_target(self) -> str:
+    def fully_qualified_target(self, quoted: bool) -> str:
         """
         Returns fully qualified task target (usually a db table) name
+        :param bool quoted: True if target name should be quoted, False otherwise
         :return: fully qualified task target (usually a db table) name
         :rtype: str
         """
-        return fully_qualified_table_name(self.__target_schema, self.__target)
+        return fully_qualified_table_name(self.__target_schema, self.__target, quoted)
 
     def set_task_data(self, data: Any):
         """

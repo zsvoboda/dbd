@@ -121,7 +121,7 @@ class DbTable:
             self.__alchemy_table.create(checkfirst=True)
         except sqlalchemy.exc.NoReferencedTableError as e:
             raise DbTableCreationException(f"Table {self.name()} has foreign key constraint "
-                                   f"referencing non-existent table '{e.table_name}': {e}")
+                                           f"referencing non-existent table '{e.table_name}': {e}")
 
     def drop(self, alchemy_engine: sqlalchemy.engine.Engine):
         """
@@ -134,7 +134,8 @@ class DbTable:
         except ProgrammingError:
             # it may be view
             with alchemy_engine.connect() as conn:
-                view_name = fully_qualified_table_name(self.__alchemy_table.schema, self.__alchemy_table.name)
+                view_name = fully_qualified_table_name(self.__alchemy_table.schema, self.__alchemy_table.name,
+                                                       quoted=True if alchemy_engine.dialect.name != 'bigquery' else False)
                 # TODO: make sure this works for all DBs
                 conn.execute(text(f"DROP VIEW IF EXISTS {view_name}"))
 
@@ -145,9 +146,11 @@ class DbTable:
         :param sqlalchemy.engine.Engine alchemy_engine: Engine SQLAlchemy engine database connection
         """
         with alchemy_engine.connect() as conn:
-            table_name = fully_qualified_table_name(self.__alchemy_table.schema, self.__alchemy_table.name)
+            table_name = fully_qualified_table_name(self.__alchemy_table.schema, self.__alchemy_table.name,
+                                                    quoted=True if alchemy_engine.dialect.name != 'bigquery' else False)
             # TODO: make sure this works for all DBs
             conn.execute(text(f"TRUNCATE TABLE {table_name}"))
+            conn.commit()
 
     def __column_fingerprint(self, column: DbColumn, alchemy_engine: sqlalchemy.engine.Engine) -> Dict[str, Any]:
         """
@@ -183,11 +186,12 @@ class DbTable:
                 pass
             elif isinstance(column_python_type, type) and issubclass(column_python_type, str):
                 if alchemy_engine.dialect.name in ['sqlite', 'snowflake']:
-                    length_function='LENGTH'
+                    length_function = 'LENGTH'
                 else:
-                    length_function='CHAR_LENGTH'
+                    length_function = 'CHAR_LENGTH'
                     result = conn.execute(
-                        text(f"SELECT COUNT(*) FROM {table_name_with_schema} WHERE {table_name}.{column.name()} IS NOT NULL"))
+                        text(
+                            f"SELECT COUNT(*) FROM {table_name_with_schema} WHERE {table_name}.{column.name()} IS NOT NULL"))
                     column_fingerprint['not_null_count'] = result.fetchone()[0]
                 result = conn.execute(text(f"SELECT "
                                            f"SUM({length_function}({table_name}.{column.name()})), "
@@ -257,7 +261,8 @@ class DbTable:
         indexes = cls.__extract_indexes_from_table_code(name, table_code)
 
         arguments = [c.alchemy_column() for c in columns] + constraints + indexes
-        return DbTable(name, columns, Table(name, alchemy_metadata, schema=schema, extend_existing=True, *arguments))
+        return DbTable(name, columns, Table(name, alchemy_metadata, schema=schema,
+                                            extend_existing=True, *arguments))
 
     @classmethod
     def __extract_indexes_from_table_code(cls, name: str, table_code: Dict[str, Any]) -> List[Index]:

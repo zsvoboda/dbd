@@ -6,7 +6,6 @@ from typing import List
 
 import math
 import pandas as pd
-import sqlalchemy
 # noinspection PyUnresolvedReferences
 import sqlalchemy.dialects.mysql
 # noinspection PyUnresolvedReferences
@@ -70,10 +69,14 @@ class SqlParser:
         :return: compacted SQL text
         :rtype: str
         """
+        log.debug(f"Compacting SQL: {sql}")
         try:
             parsed_sql = Parser(sql).without_comments
+            # TODO: remove this hack
+            parsed_sql = parsed_sql.replace('`', '"')
         except ValueError:
             raise SQlParserException(f"Invalid SQL query '{sql}'")
+        log.debug(f"Compacted SQL: {parsed_sql}")
         return parsed_sql
 
     @classmethod
@@ -124,7 +127,6 @@ class SqlParser:
                 return tp
         log.debug(f"Unsupported data type {core_data_type}.")
         raise SQlParserException(f"Unsupported data type {core_data_type}.")
-
 
     @classmethod
     def parse_date(cls, dt: str) -> date:
@@ -260,9 +262,9 @@ class SqlParser:
             return 'STRING'
         elif datatype.lower().startswith(('decimal', 'numeric')):
             return 'NUMERIC'
-        elif datatype.lower().startswith(('datetime')):
+        elif datatype.lower().startswith('datetime'):
             return 'DATETIME'
-        elif datatype.lower().startswith(('timestamp')):
+        elif datatype.lower().startswith('timestamp'):
             return 'TIMESTAMP'
         else:
             return datatype.upper()

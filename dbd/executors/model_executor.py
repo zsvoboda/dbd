@@ -152,17 +152,17 @@ class ModelExecutor:
         log.debug(f"Processing schemas: '{schemas}'.")
         for s in schemas:
             log.debug(f"Adding metadata cache for schema {s}.")
-            m = MetaData(bind=alchemy_engine, schema=s if s is not None and len(s) > 0 else None)
+            m = MetaData(bind=alchemy_engine, schema=s if s is not None and len(s) > 0 else None, quote_schema=True)
             log.debug(f"Metadata created.")
-            m.reflect(views=True)
+            m.reflect(views=True, quote=True)
             log.debug(f"Metadata reflected.")
             self.__metadata_cache[s] = m
             log.debug(f"Metadata cache for schema {s} added.")
         # MetaData for the top-level objects and DDL
         log.debug(f"Adding metadata cache for top level schema.")
-        m = MetaData(bind=alchemy_engine, schema=None)
+        m = MetaData(bind=alchemy_engine, schema=None, quote_schema=True)
         log.debug(f"Metadata created.")
-        m.reflect(views=True)
+        m.reflect(views=True, quote=True)
         log.debug(f"Metadata reflected.")
         self.__metadata_cache[Task.TOP_LEVEL_SCHEMA_NAME] = m
         log.debug(f"Metadata cache for top level schema added.")
@@ -349,7 +349,8 @@ class ModelExecutor:
         :param fully_qualified_target_name: fully qualified target name
         :return: task with the target with matching name
         """
-        found = [t for t in self.__tasks.values() if t.fully_qualified_target() == fully_qualified_target_name]
+        found = [t for t in self.__tasks.values()
+                 if t.fully_qualified_target(quoted=False) == fully_qualified_target_name]
         if len(found) < 1:
             raise InvalidModelException(
                 f"Invalid model: task with fully qualified name '{fully_qualified_target_name}' "

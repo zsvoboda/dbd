@@ -290,7 +290,7 @@ class DataTask(DbTableTask):
             temp_file_name = f"{aws_stage_path.rstrip('/')}/{self.target_schema()}/{self.target()}" \
                              f"_{datetime.now().strftime('%y%m%d_%H%M%S')}"
 
-            df.to_csv(f"{temp_file_name}.csv.gz", index=False, compression='gzip',
+            df.to_csv(f"{temp_file_name}.csv.gz", index=False, quoting=csv.QUOTE_NONNUMERIC, compression='gzip',
                       storage_options={"key": aws_access_key,
                                        "secret": aws_secret_key})
             with alchemy_engine.connect() as conn:
@@ -298,7 +298,7 @@ class DataTask(DbTableTask):
                 target_schema_with_dot = f"{target_schema}." if target_schema else ''
                 conn.execute(f"copy {target_schema_with_dot}{self.target()} from '{temp_file_name}.csv.gz' "
                              f"CREDENTIALS 'aws_access_key_id={aws_access_key};aws_secret_access_key={aws_secret_key}' "
-                             f" DELIMITER AS ',' DATEFORMAT 'YYYY-MM-DD' EMPTYASNULL IGNOREHEADER 1 GZIP")
+                             f"FORMAT CSV DELIMITER AS ',' DATEFORMAT 'YYYY-MM-DD' EMPTYASNULL IGNOREHEADER 1 GZIP")
                 conn.connection.commit()
             file = s3fs.S3FileSystem(anon=False, key=aws_access_key, secret=aws_secret_key)
             file.rm(f"{temp_file_name}.csv.gz")
@@ -311,16 +311,17 @@ class DataTask(DbTableTask):
         :param pandas.DataFrame df: DataFrame
         :param sqlalchemy.engine.Engine alchemy_engine: SQLAlchemy engine
         """
-        df.columns = map(str.upper, df.columns)
-        table_name = self.target().upper()
+        #df.columns = map(str.upper, df.columns)
+        #table_name = self.target().upper()
+        table_name = self.target()
         schema_name = self.target_schema()
-        schema_name = schema_name.upper() if schema_name else None
+        #schema_name = schema_name.upper() if schema_name else None
         with alchemy_engine.connect() as conn:
             write_pandas(
                 conn.connection, df,
                 table_name=table_name,
                 schema=schema_name,
-                quote_identifiers=False)
+                quote_identifiers=True)
             conn.connection.commit()
 
     def __bulk_load_mysql(self, df: pd.DataFrame, alchemy_engine: sqlalchemy.engine.Engine):

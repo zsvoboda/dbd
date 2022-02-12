@@ -1,4 +1,5 @@
 import hashlib
+import logging
 from typing import Dict, List, Any, TypeVar
 
 import click
@@ -10,6 +11,8 @@ from dbd.db.db_table import DbTable
 from dbd.tasks.db_table_task import DbTableTask
 from dbd.utils.sql_parser import SqlParser
 from dbd.utils.text_utils import fully_qualified_table_name
+
+log = logging.getLogger(__name__)
 
 REFLECTION_TMP_VIEW_PREFIX = "tmp_view_"
 
@@ -39,6 +42,7 @@ class EltTask(DbTableTask):
         :param sqlalchemy.engine.Engine alchemy_engine: Engine SQLAlchemy Engine
         """
         view_sql_create = f"CREATE VIEW {fully_qualified_view_name} AS {self.sql()}"
+        log.debug(f"Creating temporary view sql='{view_sql_create}'")
         with alchemy_engine.connect() as conn:
             conn.execute(view_sql_create)
 
@@ -68,7 +72,9 @@ class EltTask(DbTableTask):
 
         tmp_name = hashlib.md5(self.sql().encode('utf-8')).hexdigest()
         view_name = f"{REFLECTION_TMP_VIEW_PREFIX}{tmp_name}"
-        fully_qualified_view_name = fully_qualified_table_name(target_db_schema, view_name)
+        fully_qualified_view_name = fully_qualified_table_name(target_db_schema, view_name,
+                                                               quoted=True if alchemy_engine.dialect.name != 'bigquery'
+                                                               else False)
         db_con = alchemy_engine.connect()
         try:
             self.__drop_tmp_reflection_view(fully_qualified_view_name, db_con)
@@ -142,22 +148,22 @@ class EltTask(DbTableTask):
         """
         process_def = self.process_def()
         materialization = process_def.get('materialization', 'table')
+        quoted = True if alchemy_engine.dialect.name != 'bigquery' else False
         if materialization == 'view':
-            sql_text = f"CREATE VIEW  {self.fully_qualified_target()} AS {self.sql()}"
+            sql_text = f"CREATE VIEW  {self.fully_qualified_target(quoted=quoted)} AS {self.sql()}"
             with alchemy_engine.connect() as conn:
-                click.echo(f"\tCreating view '{self.fully_qualified_target()}'.")
+                click.echo(f"\tCreating view '{self.fully_qualified_target(quoted=False)}'.")
                 conn.execute(sql_text)
         else:
             overridden_def = self.__override_sql_column_definitions(target_alchemy_metadata, alchemy_engine)
             db_table = DbTable.from_code(self.target(), overridden_def, target_alchemy_metadata, self.target_schema())
             self.set_db_table(db_table)
-            click.echo(f"\tCreating table '{self.fully_qualified_target()}'.")
+            click.echo(f"\tCreating table '{self.fully_qualified_target(quoted=False)}'.")
             db_table.create()
-            columns = [c.name() for c in db_table.columns()]
+            columns = [f'{c.name()}' for c in db_table.columns()]
             click.echo(f"\tExecuting SQL.")
-            sql_text = f"INSERT INTO {self.fully_qualified_target()}({','.join(columns)}) {self.sql()}"
+            sql_text = f"INSERT INTO {self.fully_qualified_target(quoted=quoted)}({','.join(columns)}) {self.sql()}"
             with alchemy_engine.connect() as conn:
-
                 conn.execute(sql_text)
 
     def depends_on(self) -> List[str]:
@@ -170,4 +176,5 @@ class EltTask(DbTableTask):
         foreign_key_tables = super(EltTask, self).depends_on()
         sql_tables = SqlParser.extract_tables(self.sql())
         return foreign_key_tables + [
-            f"{fully_qualified_table_name(target_db_schema, t)}" if len(t.split('.')) < 2 else t for t in sql_tables]
+            f"{fully_qualified_table_name(target_db_schema, t, quoted=False)}" if len(t.split('.')) < 2 else t for t in
+            sql_tables]

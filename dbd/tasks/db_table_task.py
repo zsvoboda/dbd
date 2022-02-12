@@ -94,7 +94,7 @@ class DbTableTask(Task):
         :param sqlalchemy.engine.Engine alchemy_engine: Engine SQLAlchemy engine database connection
         """
         if self.__target_db_table is None:
-            alchemy_table = alchemy_metadata.tables.get(self.fully_qualified_target())
+            alchemy_table = alchemy_metadata.tables.get(self.fully_qualified_target(quoted=False))
             if alchemy_table is not None:
                 self.__target_db_table = DbTable.from_alchemy_table(alchemy_table)
                 self.__target_db_table.drop(alchemy_engine)
@@ -110,7 +110,7 @@ class DbTableTask(Task):
         """
         if self.__target_db_table is None:
             # TODO: fix the SQL statement to work for all DBs
-            alchemy_table = alchemy_metadata.tables.get(self.fully_qualified_target())
+            alchemy_table = alchemy_metadata.tables.get(self.fully_qualified_target(quoted=False))
             if alchemy_table is not None:
                 self.__target_db_table = DbTable.from_alchemy_table(alchemy_table)
                 self.__target_db_table.truncate(alchemy_engine)
@@ -133,7 +133,7 @@ class DbTableTask(Task):
             if column is not None:
                 column_foreign_keys = column.get('foreign_keys', [])
                 foreign_key_tables += SqlParser.extract_foreign_key_tables(column_foreign_keys)
-        return [f"{fully_qualified_table_name(target_db_schema, t)}" if len(t.split('.')) < 2 else t for t in
+        return [f"{fully_qualified_table_name(target_db_schema, t, quoted=False)}" if len(t.split('.')) < 2 else t for t in
                 foreign_key_tables]
 
     def validate(self) -> Tuple[bool, Dict[str, Any]]:
@@ -153,7 +153,7 @@ class DbTableTask(Task):
         validation_result = task_validator.validate(self.__task_def)
         if not validation_result:
             task_errors['structure'] = task_validator.errors
-        table_name = fully_qualified_table_name(self.target_schema(), self.target())
+        table_name = fully_qualified_table_name(self.target_schema(), self.target(), quoted=False)
         table_validation_result, table_validation_errors = DbTable.validate_code(table_name, self.table_def())
         if not table_validation_result:
             task_errors['table'] = table_validation_errors
