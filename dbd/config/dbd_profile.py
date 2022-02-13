@@ -120,14 +120,25 @@ class DbdProfile:
         """
         MySQL connect listener. Sets ANSI mode for MySQL connections
         """
-        cursor = dbapi_connection.cursor()
-        log.debug("Setting ANSI mode for MySQL connections")
-        cursor.execute("SET sql_mode = 'ANSI_QUOTES'")
+        DbdProfile.set_connection_params("mysql", dbapi_connection.cursor())
 
     def __connect_listener_snowflake(self, dbapi_connection, connection_record):
         """
         Snowflake connect listener. Sets ANSI mode for MySQL connections
         """
-        cursor = dbapi_connection.cursor()
-        log.debug("Setting 'QUOTED_IDENTIFIERS_IGNORE_CASE = TRUE' for Snowflake connections")
-        cursor.execute("ALTER SESSION SET QUOTED_IDENTIFIERS_IGNORE_CASE = TRUE;")
+        DbdProfile.set_connection_params("snowflake", dbapi_connection.cursor())
+
+    @classmethod
+    def set_connection_params(cls, dialect: str, cursor):
+        """
+        Sets connection parameters for the given dialect
+        :param str dialect: dialect name
+        :param cursor: DBAPI cursor
+        """
+        if dialect == 'mysql':
+            log.debug("Setting ANSI mode for MySQL connections")
+            cursor.execute("SET sql_mode = 'ANSI_QUOTES'")
+        elif dialect == 'snowflake':
+            log.debug("Setting 'QUOTED_IDENTIFIERS_IGNORE_CASE = TRUE' for Snowflake connections")
+            cursor.execute("ALTER SESSION SET QUOTED_IDENTIFIERS_IGNORE_CASE = TRUE;")
+

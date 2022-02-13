@@ -1,0 +1,13 @@
+---
+table:
+  columns:
+    NOC:
+      type: CHAR(3)
+      primary_key: true
+    region:
+      type: TEXT
+    notes:
+      type: TEXT
+process:
+  materialization: table
+  mode: drop

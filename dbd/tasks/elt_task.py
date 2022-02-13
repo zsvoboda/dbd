@@ -72,18 +72,26 @@ class EltTask(DbTableTask):
 
         tmp_name = hashlib.md5(self.sql().encode('utf-8')).hexdigest()
         view_name = f"{REFLECTION_TMP_VIEW_PREFIX}{tmp_name}"
-        fully_qualified_view_name = fully_qualified_table_name(target_db_schema, view_name,
-                                                               quoted=True if alchemy_engine.dialect.name != 'bigquery'
-                                                               else False)
-        db_con = alchemy_engine.connect()
+        if alchemy_engine.dialect.name == 'bigquery':
+            fully_qualified_view_name = fully_qualified_table_name(target_db_schema, view_name, quoted=False)
+        else:
+            fully_qualified_view_name = fully_qualified_table_name(target_db_schema, view_name, quoted=True)
         try:
-            self.__drop_tmp_reflection_view(fully_qualified_view_name, db_con)
-            self.__create_tmp_reflection_view(fully_qualified_view_name, db_con)
+            self.__drop_tmp_reflection_view(fully_qualified_view_name, alchemy_engine)
+            self.__create_tmp_reflection_view(fully_qualified_view_name, alchemy_engine)
             # SQLAlchemy reflection / autoload doesn't work with fully qualified view name
-            tmp_reflection_view = Table(view_name, target_alchemy_metadata, autoload=True)
+            try:
+                tmp_reflection_view = Table(view_name, target_alchemy_metadata, autoload=True, quote=True)
+            except KeyError:
+                # Snowflake case sensitivity fix
+                try:
+                    tmp_reflection_view = Table(view_name.upper(), target_alchemy_metadata, autoload=True, quote=True,
+                                                schema=target_db_schema.upper())
+                except KeyError:
+                    tmp_reflection_view = Table(view_name.lower(), target_alchemy_metadata, autoload=True, quote=True,
+                                                schema=target_db_schema.lower())
         finally:
-            self.__drop_tmp_reflection_view(fully_qualified_view_name, db_con)
-        db_con.close()
+            self.__drop_tmp_reflection_view(fully_qualified_view_name, alchemy_engine)
         temp_view_select_all_columns = select(tmp_reflection_view.columns).select_from(tmp_reflection_view)
         return [Column(c.name, c.type) for c in temp_view_select_all_columns.selected_columns]
 

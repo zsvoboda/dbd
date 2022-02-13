@@ -1,0 +1,36 @@
+---
+table:
+  columns:
+    ID:
+      type: INTEGER
+    Name:
+      type: TEXT
+    Sex:
+      type: CHAR(1)
+    Age:
+      type: INTEGER
+    Height:
+      type: INTEGER
+    Weight:
+      type: FLOAT
+    Team:
+      type: TEXT
+    NOC:
+      type: CHAR(3)
+    Games:
+      type: TEXT
+    Year:
+      type: INTEGER
+    Season:
+      type: TEXT
+    City:
+      type: TEXT
+    Sport:
+      type: TEXT
+    Event:
+      type: TEXT
+    Medal:
+      type: TEXT
+process:
+  materialization: table
+  mode: drop

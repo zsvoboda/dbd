@@ -154,7 +154,7 @@ class ModelExecutor:
             log.debug(f"Adding metadata cache for schema {s}.")
             m = MetaData(bind=alchemy_engine, schema=s if s is not None and len(s) > 0 else None, quote_schema=True)
             log.debug(f"Metadata created.")
-            m.reflect(views=True, quote=True)
+            m.reflect(views=True, quote=True, schema=s if s is not None and len(s) > 0 else None)
             log.debug(f"Metadata reflected.")
             self.__metadata_cache[s] = m
             log.debug(f"Metadata cache for schema {s} added.")
